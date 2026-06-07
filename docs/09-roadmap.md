@@ -115,6 +115,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 4 — Audit + outbox + Dev Control Plane v1
 
+**Status:** ✅ Complete (2026-06-07) — see [sprint-reviews/sprint-04.md](sprint-reviews/sprint-04.md). Partitioned audit + transactional outbox, platform identity track, hardened `/dev` (404 for non-platform), and audit/outbox/isolation suites (22 integration tests) gate merge.
+
 **Goal:** Nothing changes without an audit trail. Tenant isolation proven. Dev Control Plane operational for inspection.
 
 **Deliverables:**

@@ -13,6 +13,12 @@ import type { users } from './schemas/identity/users';
 import type { workshopDepartments } from './schemas/identity/workshop-departments';
 import type { workshops } from './schemas/identity/workshops';
 import type { insuranceCompanies } from './schemas/platform/insurance-companies';
+import type { outboxEvents } from './schemas/audit/outbox-events';
+import type { failedEvents } from './schemas/audit/failed-events';
+import type { auditEvents } from './schemas/audit/audit-events';
+import type { platformUsers } from './schemas/platform/platform-users';
+import type { platformRoleAssignments } from './schemas/platform/platform-role-assignments';
+import type { platformAuditEvents } from './schemas/platform/platform-audit-events';
 
 /**
  * Inferred row types for the schema. Exposed from here so application and
@@ -62,3 +68,27 @@ export type NewVehicle = InferInsertModel<typeof vehicles>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;
+
+export type OutboxEvent = InferSelectModel<typeof outboxEvents>;
+export type NewOutboxEvent = InferInsertModel<typeof outboxEvents>;
+
+export type FailedEvent = InferSelectModel<typeof failedEvents>;
+export type NewFailedEvent = InferInsertModel<typeof failedEvents>;
+
+export type AuditEvent = InferSelectModel<typeof auditEvents>;
+export type NewAuditEvent = InferInsertModel<typeof auditEvents>;
+
+export type PlatformUser = InferSelectModel<typeof platformUsers>;
+export type NewPlatformUser = InferInsertModel<typeof platformUsers>;
+
+export type PlatformRoleAssignment = InferSelectModel<
+  typeof platformRoleAssignments
+>;
+export type NewPlatformRoleAssignment = InferInsertModel<
+  typeof platformRoleAssignments
+>;
+
+export type PlatformAuditEvent = InferSelectModel<typeof platformAuditEvents>;
+export type NewPlatformAuditEvent = InferInsertModel<
+  typeof platformAuditEvents
+>;

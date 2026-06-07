@@ -27,5 +27,20 @@ export { vehicles } from './customer/vehicles';
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 
+// Audit & Events
+export { outboxEvents } from './audit/outbox-events';
+export { failedEvents } from './audit/failed-events';
+
+// Platform / Developer Control Plane
+export { platformUsers } from './platform/platform-users';
+export { platformRoleAssignments } from './platform/platform-role-assignments';
+export { platformPermissions } from './platform/platform-permissions';
+export { platformRolePermissions } from './platform/platform-role-permissions';
+
+// NOTE: audit_events and platform_audit_events are partitioned tables created by
+// hand-authored migrations; they are intentionally NOT exported here so
+// drizzle-kit does not generate plain CREATE TABLE for them. Query them via the
+// table objects in ./audit/audit-events and ./platform/platform-audit-events.
+
 // Relations (centralized)
 export * from '../relations';

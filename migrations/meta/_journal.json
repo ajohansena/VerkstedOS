@@ -15,6 +15,13 @@
       "when": 1780863361752,
       "tag": "0002_rbac_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780864661990,
+      "tag": "0004_audit_outbox_platform_tables",
+      "breakpoints": true
     }
   ]
 }

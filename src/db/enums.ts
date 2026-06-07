@@ -50,3 +50,33 @@ export const ownershipType = pgEnum('ownership_type', [
 // --- RBAC --------------------------------------------------------------------
 
 export const grantKind = pgEnum('grant_kind', ['grant', 'deny']);
+
+// --- Audit & Events ----------------------------------------------------------
+
+export const actorKind = pgEnum('actor_kind', [
+  'user',
+  'system',
+  'integration',
+  'job',
+  'platform',
+  'platform_impersonation',
+]);
+
+export const outboxStatus = pgEnum('outbox_status', [
+  'pending',
+  'published',
+  'failed',
+]);
+
+// --- Platform / Developer Control Plane -------------------------------------
+
+export const platformUserStatus = pgEnum('platform_user_status', [
+  'active',
+  'disabled',
+]);
+
+export const platformRole = pgEnum('platform_role', [
+  'PlatformOwner',
+  'PlatformDeveloper',
+  'PlatformSupport',
+]);
