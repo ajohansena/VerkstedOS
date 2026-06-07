@@ -150,6 +150,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 5 — Customer & Vehicle
 
+**Status:** ✅ Complete (2026-06-07) — see [sprint-reviews/sprint-05.md](sprint-reviews/sprint-05.md). Customer/vehicle CRUD with audit+outbox, Norwegian checksum validation, owner/user split + ownership history, cached Vegvesen/1881 adapters, and search. Integration suite 31 tests (9 new); validators 9 unit tests.
+
 **Goal:** Workshop can manage customers and vehicles fluently.
 
 **Deliverables:**

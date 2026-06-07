@@ -2,6 +2,9 @@ import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 
 import type { customers } from './schemas/customer/customers';
 import type { vehicles } from './schemas/customer/vehicles';
+import type { vegvesenLookups } from './schemas/customer/vegvesen-lookups';
+import type { phoneLookups1881 } from './schemas/customer/phone-lookups-1881';
+import type { vehicleOwnershipHistory } from './schemas/customer/vehicle-ownership-history';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -65,6 +68,19 @@ export type NewCustomer = InferInsertModel<typeof customers>;
 
 export type Vehicle = InferSelectModel<typeof vehicles>;
 export type NewVehicle = InferInsertModel<typeof vehicles>;
+
+export type VegvesenLookup = InferSelectModel<typeof vegvesenLookups>;
+export type NewVegvesenLookup = InferInsertModel<typeof vegvesenLookups>;
+
+export type PhoneLookup1881 = InferSelectModel<typeof phoneLookups1881>;
+export type NewPhoneLookup1881 = InferInsertModel<typeof phoneLookups1881>;
+
+export type VehicleOwnershipHistory = InferSelectModel<
+  typeof vehicleOwnershipHistory
+>;
+export type NewVehicleOwnershipHistory = InferInsertModel<
+  typeof vehicleOwnershipHistory
+>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

@@ -24,6 +24,9 @@ declare namespace NodeJS {
     SENTRY_PROJECT: string | undefined;
     // --- App ---
     NEXT_PUBLIC_SITE_URL: string | undefined;
+    // --- External lookups (Sprint 5) ---
+    VEGVESEN_API_KEY: string | undefined;
+    SVEVE_1881_API_KEY: string | undefined;
     // --- Dev Control Plane ---
     PLATFORM_ALLOWED_IPS: string | undefined;
     // --- Set by Next.js / CI ---

@@ -23,6 +23,9 @@ export { effectivePermissionsCache } from './identity/effective-permissions-cach
 // Customer & Vehicle
 export { customers } from './customer/customers';
 export { vehicles } from './customer/vehicles';
+export { vegvesenLookups } from './customer/vegvesen-lookups';
+export { phoneLookups1881 } from './customer/phone-lookups-1881';
+export { vehicleOwnershipHistory } from './customer/vehicle-ownership-history';
 
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';

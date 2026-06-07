@@ -76,22 +76,30 @@ export default async function HomePage() {
             </p>
           )}
         </CardContent>
-        <CardFooter className="gap-2">
+        <CardFooter className="flex-wrap gap-2">
           {session ? (
-            <Link href="/admin" className={cn(buttonVariants())}>
-              Admin
-            </Link>
+            <>
+              <Link href="/customers" className={cn(buttonVariants())}>
+                Customers
+              </Link>
+              <Link
+                href="/vehicles"
+                className={cn(buttonVariants({ variant: 'outline' }))}
+              >
+                Vehicles
+              </Link>
+              <Link
+                href="/admin"
+                className={cn(buttonVariants({ variant: 'outline' }))}
+              >
+                Admin
+              </Link>
+            </>
           ) : (
             <Link href="/login" className={cn(buttonVariants())}>
               Sign in
             </Link>
           )}
-          <Link
-            href="/dev/health"
-            className={cn(buttonVariants({ variant: 'outline' }))}
-          >
-            Dev health
-          </Link>
         </CardFooter>
       </Card>
     </main>
