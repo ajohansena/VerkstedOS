@@ -1,0 +1,21 @@
+/**
+ * Single Source of Truth — metric registry (CLAUDE.md § 4.5).
+ *
+ * Maps each metric name to the module + calculation function that owns it.
+ * Dashboards, reports, APIs, server actions, and the Dev Control Plane all call
+ * the same calculation. There is exactly one authoritative owner per metric.
+ *
+ * Empty until calculations arrive (e.g. workforce productivity in Sprint 9+).
+ * `pnpm check:metrics` enforces one-owner-per-calculation.
+ */
+
+export interface MetricEntry {
+  /** Owning bounded context, e.g. 'workforce'. */
+  readonly module: string;
+  /** Pure calculation function name, e.g. 'calculateSoldHours'. */
+  readonly calc: string;
+}
+
+export const metricRegistry = {} as const satisfies Record<string, MetricEntry>;
+
+export type MetricName = keyof typeof metricRegistry;
