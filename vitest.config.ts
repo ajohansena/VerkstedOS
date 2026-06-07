@@ -6,10 +6,9 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'node',
-    include: [
-      'src/**/*.{test,spec}.{ts,tsx}',
-      'tests/**/*.{test,spec}.{ts,tsx}',
-    ],
+    // Unit tests only. Integration / tenant-isolation suites (which require
+    // Docker) run via `pnpm test:integration` with vitest.integration.config.ts.
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
   resolve: {
     alias: {

@@ -65,6 +65,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 2 — Identity & multi-tenancy core
 
+**Status:** ✅ Complete (2026-06-07) — see [sprint-reviews/sprint-02.md](sprint-reviews/sprint-02.md). Tenant-isolation suite (8 tests) passes against real Postgres as a non-superuser role and gates merge from this sprint onward.
+
 **Goal:** Organizations, workshops, departments, users, memberships work. Tenant context propagates correctly.
 
 **Deliverables:**

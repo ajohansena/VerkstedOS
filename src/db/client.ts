@@ -1,27 +1,98 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { sql } from 'drizzle-orm';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
+
+import { requireContext, type RequestContext } from '@/lib/tenancy/context';
 
 import * as schema from './schemas';
 
 /**
- * Sprint 1: raw, non-tenant-aware Drizzle client.
+ * Tenant-aware Drizzle client (docs/03-data-model.md, docs/05-multi-tenant-and-rbac.md).
  *
- * Service code does not exist yet, so there is nothing to enforce against.
+ * Service code never constructs a raw client. The only ways to query are:
+ *   - `withTransaction(ctx, fn)` — runs inside a transaction that first sets
+ *     `app.current_org_id` / `app.current_user_id` / `app.current_workshop_id`
+ *     session vars (transaction-scoped), which RLS policies read.
+ *   - `getRawClient({ as })` — an explicit, grep-able escape hatch for admin /
+ *     integration / platform-inspector code paths that legitimately run without
+ *     (or across) org context.
  *
- * Sprint 2 replaces this with a tenant-aware factory that REQUIRES a
- * RequestContext and runs `SET LOCAL app.current_org_id = …` (and friends)
- * per transaction. Obtaining a raw client will then require an explicit
- * `as: 'admin' | 'integration' | 'platform-inspector'` argument so it is
- * grep-able. See docs/05-multi-tenant-and-rbac.md.
- *
- * The connection is created lazily by `postgres-js`; no socket is opened until
- * the first query runs, so importing this module is safe before DATABASE_URL
- * is configured.
+ * SECURITY NOTE: RLS only constrains a connection whose role is NOT a superuser
+ * and does NOT have BYPASSRLS. In production the app must connect as a dedicated
+ * non-superuser role. Repositories ALSO filter by `organization_id` explicitly
+ * (the primary, always-effective defense); RLS is defense-in-depth.
  */
+
 const connectionString = process.env.DATABASE_URL ?? '';
 
-const queryClient = postgres(connectionString, {
-  max: 10,
-});
+const queryClient = postgres(connectionString, { max: 10 });
 
-export const db = drizzle(queryClient, { schema });
+const baseDb = drizzle(queryClient, { schema });
+
+export type Database = PostgresJsDatabase<typeof schema>;
+export type TenantTransaction = Parameters<
+  Parameters<Database['transaction']>[0]
+>[0];
+
+/** Set transaction-scoped tenant session vars that RLS policies read. */
+async function setTenantVars(
+  tx: TenantTransaction,
+  ctx: RequestContext,
+): Promise<void> {
+  await tx.execute(
+    sql`select set_config('app.current_org_id', ${ctx.organizationId}, true)`,
+  );
+  await tx.execute(
+    sql`select set_config('app.current_user_id', ${ctx.userId}, true)`,
+  );
+  await tx.execute(
+    sql`select set_config('app.current_workshop_id', ${ctx.workshopId ?? ''}, true)`,
+  );
+}
+
+/**
+ * Run `fn` inside a transaction with tenant context applied. If `ctx` is
+ * omitted it is read from AsyncLocalStorage (and throws if absent), so no query
+ * can run without an organization context.
+ */
+export async function withTransaction<T>(
+  ctx: RequestContext | undefined,
+  fn: (tx: TenantTransaction) => Promise<T>,
+): Promise<T> {
+  const context = ctx ?? requireContext();
+  return baseDb.transaction(async (tx) => {
+    await setTenantVars(tx, context);
+    return fn(tx);
+  });
+}
+
+export type RawAccessMode = 'admin' | 'integration' | 'platform-inspector';
+
+/**
+ * Explicit escape hatch for code that runs without org context (seeds,
+ * onboarding that creates the first org, integration inbox) or across orgs
+ * (platform inspector). Grep `getRawClient` to audit every such call site.
+ */
+export function getRawClient(_opts: { as: RawAccessMode }): Database {
+  return baseDb;
+}
+
+/**
+ * Run `fn` in platform-inspector mode against a target org: read-only access
+ * across the org boundary (RLS recognizes `app.is_platform_inspector`). Writes
+ * are NOT granted by this flag (see docs/06-developer-control-plane.md).
+ */
+export async function withPlatformInspector<T>(
+  targetOrgId: string,
+  fn: (tx: TenantTransaction) => Promise<T>,
+): Promise<T> {
+  return baseDb.transaction(async (tx) => {
+    await tx.execute(
+      sql`select set_config('app.is_platform_inspector', 'true', true)`,
+    );
+    await tx.execute(
+      sql`select set_config('app.current_org_id', ${targetOrgId}, true)`,
+    );
+    return fn(tx);
+  });
+}
