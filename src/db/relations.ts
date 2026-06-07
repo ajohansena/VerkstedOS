@@ -4,6 +4,10 @@ import { customers } from './schemas/customer/customers';
 import { vehicles } from './schemas/customer/vehicles';
 import { memberships } from './schemas/identity/memberships';
 import { organizations } from './schemas/identity/organizations';
+import { roleAssignments } from './schemas/identity/role-assignments';
+import { rolePermissions } from './schemas/identity/role-permissions';
+import { roles } from './schemas/identity/roles';
+import { userPermissionGrants } from './schemas/identity/user-permission-grants';
 import { users } from './schemas/identity/users';
 import { workshopDepartments } from './schemas/identity/workshop-departments';
 import { workshops } from './schemas/identity/workshops';
@@ -46,7 +50,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(memberships),
 }));
 
-export const membershipsRelations = relations(memberships, ({ one }) => ({
+export const membershipsRelations = relations(memberships, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [memberships.organizationId],
     references: [organizations.id],
@@ -59,7 +63,72 @@ export const membershipsRelations = relations(memberships, ({ one }) => ({
     fields: [memberships.defaultWorkshopId],
     references: [workshops.id],
   }),
+  roleAssignments: many(roleAssignments),
+  permissionGrants: many(userPermissionGrants),
 }));
+
+export const rolesRelations = relations(roles, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [roles.organizationId],
+    references: [organizations.id],
+  }),
+  permissions: many(rolePermissions),
+  assignments: many(roleAssignments),
+}));
+
+export const rolePermissionsRelations = relations(
+  rolePermissions,
+  ({ one }) => ({
+    organization: one(organizations, {
+      fields: [rolePermissions.organizationId],
+      references: [organizations.id],
+    }),
+    role: one(roles, {
+      fields: [rolePermissions.roleId],
+      references: [roles.id],
+    }),
+  }),
+);
+
+export const roleAssignmentsRelations = relations(
+  roleAssignments,
+  ({ one }) => ({
+    organization: one(organizations, {
+      fields: [roleAssignments.organizationId],
+      references: [organizations.id],
+    }),
+    membership: one(memberships, {
+      fields: [roleAssignments.membershipId],
+      references: [memberships.id],
+    }),
+    role: one(roles, {
+      fields: [roleAssignments.roleId],
+      references: [roles.id],
+    }),
+    workshop: one(workshops, {
+      fields: [roleAssignments.workshopId],
+      references: [workshops.id],
+    }),
+    department: one(workshopDepartments, {
+      fields: [roleAssignments.departmentId],
+      references: [workshopDepartments.id],
+    }),
+  }),
+);
+
+export const userPermissionGrantsRelations = relations(
+  userPermissionGrants,
+  ({ one }) => ({
+    organization: one(organizations, {
+      fields: [userPermissionGrants.organizationId],
+      references: [organizations.id],
+    }),
+    membership: one(memberships, {
+      fields: [userPermissionGrants.membershipId],
+      references: [memberships.id],
+    }),
+  }),
+);
 
 export const customersRelations = relations(customers, ({ one }) => ({
   organization: one(organizations, {

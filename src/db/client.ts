@@ -19,15 +19,27 @@ import * as schema from './schemas';
  *
  * SECURITY NOTE: RLS only constrains a connection whose role is NOT a superuser
  * and does NOT have BYPASSRLS. In production the app must connect as a dedicated
- * non-superuser role. Repositories ALSO filter by `organization_id` explicitly
- * (the primary, always-effective defense); RLS is defense-in-depth.
+ * non-superuser role (DATABASE_URL). Admin/bootstrap/platform operations use a
+ * SEPARATE service-role connection (DATABASE_URL_ADMIN) that bypasses RLS — this
+ * is how pre-org-context work (membership resolution, first-org onboarding,
+ * integration inbox) runs. Repositories ALSO filter by `organization_id`
+ * explicitly (the primary, always-effective defense); RLS is defense-in-depth.
  */
 
 const connectionString = process.env.DATABASE_URL ?? '';
+/** Service-role connection for admin/bootstrap/platform reads & writes. Falls
+ * back to the tenant connection in local dev where a single superuser is used. */
+const adminConnectionString =
+  process.env.DATABASE_URL_ADMIN ?? process.env.DATABASE_URL ?? '';
 
 const queryClient = postgres(connectionString, { max: 10 });
+const adminQueryClient =
+  adminConnectionString === connectionString
+    ? queryClient
+    : postgres(adminConnectionString, { max: 5 });
 
 const baseDb = drizzle(queryClient, { schema });
+const adminDb = drizzle(adminQueryClient, { schema });
 
 export type Database = PostgresJsDatabase<typeof schema>;
 export type TenantTransaction = Parameters<
@@ -71,10 +83,11 @@ export type RawAccessMode = 'admin' | 'integration' | 'platform-inspector';
 /**
  * Explicit escape hatch for code that runs without org context (seeds,
  * onboarding that creates the first org, integration inbox) or across orgs
- * (platform inspector). Grep `getRawClient` to audit every such call site.
+ * (platform inspector). Returns the service-role connection that bypasses RLS.
+ * Grep `getRawClient` to audit every such call site.
  */
 export function getRawClient(_opts: { as: RawAccessMode }): Database {
-  return baseDb;
+  return adminDb;
 }
 
 /**

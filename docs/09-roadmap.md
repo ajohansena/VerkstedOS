@@ -90,6 +90,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 3 — RBAC
 
+**Status:** ✅ Complete (2026-06-07) — see [sprint-reviews/sprint-03.md](sprint-reviews/sprint-03.md). 24-permission catalog, 6 seeded roles, scope-aware resolver + `app_has_permission()` cache function with trigger refresh; RBAC integration suite (9 tests) proves Technician-vs-Owner and deny-wins.
+
 **Goal:** Permission system in place; standard roles ship.
 
 **Deliverables:**

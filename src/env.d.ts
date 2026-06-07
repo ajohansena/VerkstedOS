@@ -13,6 +13,7 @@ declare namespace NodeJS {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: string | undefined;
     SUPABASE_SERVICE_ROLE_KEY: string | undefined;
     DATABASE_URL: string | undefined;
+    DATABASE_URL_ADMIN: string | undefined;
     // --- Inngest ---
     INNGEST_EVENT_KEY: string | undefined;
     INNGEST_SIGNING_KEY: string | undefined;

@@ -8,6 +8,13 @@
       "when": 1780861425403,
       "tag": "0000_identity_tenancy_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780863361752,
+      "tag": "0002_rbac_tables",
+      "breakpoints": true
     }
   ]
 }

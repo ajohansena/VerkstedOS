@@ -27,3 +27,42 @@ export {
   ensureUser,
   findUserById,
 } from '../infrastructure/repositories/user-repository';
+
+// --- RBAC ---
+
+export {
+  hasPermission,
+  type PermissionScope,
+} from '../application/policies/permission-resolver';
+
+export {
+  requirePermission,
+  PermissionDeniedError,
+} from '../application/policies/require-permission';
+
+export {
+  createOrganizationWithOwner,
+  addMembershipWithRole,
+} from '../application/services/organization-onboarding';
+
+export { seedStandardRoles } from '../application/services/seed-standard-roles';
+
+export {
+  assignRole,
+  grantPermission,
+} from '../application/services/manage-access';
+
+export {
+  listRoles,
+  listOrgMembers,
+  getEffectivePermissionCodes,
+  type RoleListItem,
+  type OrgMember,
+} from '../infrastructure/repositories/rbac-repository';
+
+export type { Role, RoleAssignment, UserPermissionGrant } from '@/db/types';
+
+export {
+  type PermissionCode,
+  PERMISSION_CATALOG,
+} from '@/lib/permissions/catalog';

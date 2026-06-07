@@ -14,6 +14,11 @@ export { workshops } from './identity/workshops';
 export { workshopDepartments } from './identity/workshop-departments';
 export { users } from './identity/users';
 export { memberships } from './identity/memberships';
+export { roles } from './identity/roles';
+export { rolePermissions } from './identity/role-permissions';
+export { roleAssignments } from './identity/role-assignments';
+export { userPermissionGrants } from './identity/user-permission-grants';
+export { effectivePermissionsCache } from './identity/effective-permissions-cache';
 
 // Customer & Vehicle
 export { customers } from './customer/customers';

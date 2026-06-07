@@ -46,3 +46,7 @@ export const ownershipType = pgEnum('ownership_type', [
   'rental',
   'unknown',
 ]);
+
+// --- RBAC --------------------------------------------------------------------
+
+export const grantKind = pgEnum('grant_kind', ['grant', 'deny']);

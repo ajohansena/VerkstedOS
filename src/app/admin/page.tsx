@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getSessionContext } from '@/lib/auth/session';
+import { getAuthorizedSession } from '@/lib/auth/authorize';
 import {
   getCurrentOrganization,
   listWorkshops,
@@ -19,14 +19,16 @@ import { cn } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 /**
- * Admin shell (Admin surface) — minimal in Sprint 2: the active organization
- * and its workshops. User/role management arrives with RBAC in Sprint 3.
+ * Admin shell (Admin surface) — the active organization, its workshops, and
+ * (for users with `admin:users`) entry points to user and role management.
  */
 export default async function AdminPage() {
-  const session = await getSessionContext();
-  if (!session) {
+  const auth = await getAuthorizedSession();
+  if (!auth) {
     redirect('/login');
   }
+  const session = auth.session;
+  const canManageUsers = await auth.can('admin:users');
 
   const [organization, workshops] = await Promise.all([
     getCurrentOrganization(session.context),
@@ -44,6 +46,23 @@ export default async function AdminPage() {
           Back
         </Link>
       </div>
+
+      {canManageUsers ? (
+        <div className="flex gap-2">
+          <Link
+            href="/admin/users"
+            className={cn(buttonVariants({ size: 'sm' }))}
+          >
+            Users
+          </Link>
+          <Link
+            href="/admin/roles"
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+          >
+            Roles
+          </Link>
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader>
