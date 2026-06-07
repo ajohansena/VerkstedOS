@@ -1,6 +1,9 @@
 import { eq, ilike, or } from 'drizzle-orm';
 
 import { getRawClient } from '@/db/client';
+import { caseFundingSources } from '@/db/schemas/case/case-funding-sources';
+import { cases } from '@/db/schemas/case/cases';
+import { insuranceClaims } from '@/db/schemas/case/insurance-claims';
 import { customers } from '@/db/schemas/customer/customers';
 import { vehicles } from '@/db/schemas/customer/vehicles';
 import { organizations } from '@/db/schemas/identity/organizations';
@@ -9,10 +12,11 @@ import { users } from '@/db/schemas/identity/users';
 /**
  * Universal entity search (Dev surface, `/dev/inspect`). Cross-org by nature →
  * service-role connection. Searches the entities that exist at this point in the
- * build (vehicles, customers, orgs, users); cases/claims/invoices join as those
+ * build (cases, vehicles, customers, orgs, users); invoices join as those
  * modules ship.
  */
 export type InspectResultKind =
+  | 'case'
   | 'vehicle'
   | 'customer'
   | 'organization'
@@ -36,6 +40,37 @@ export async function inspectSearch(query: string): Promise<InspectResult[]> {
   const db = getRawClient({ as: 'platform-inspector' });
   const like = `%${q}%`;
   const results: InspectResult[] = [];
+
+  // Cases by case number or linked claim number.
+  const caseRows = await db
+    .selectDistinctOn([cases.id], {
+      id: cases.id,
+      caseNumber: cases.caseNumber,
+      status: cases.status,
+      organizationId: cases.organizationId,
+    })
+    .from(cases)
+    .leftJoin(caseFundingSources, eq(caseFundingSources.caseId, cases.id))
+    .leftJoin(
+      insuranceClaims,
+      eq(insuranceClaims.id, caseFundingSources.insuranceClaimId),
+    )
+    .where(
+      or(
+        ilike(cases.caseNumber, like),
+        ilike(insuranceClaims.claimNumber, like),
+      ),
+    )
+    .limit(20);
+  for (const c of caseRows) {
+    results.push({
+      kind: 'case',
+      id: c.id,
+      label: c.caseNumber,
+      sublabel: c.status,
+      organizationId: c.organizationId,
+    });
+  }
 
   // Vehicles by reg or VIN.
   const vRows = await db

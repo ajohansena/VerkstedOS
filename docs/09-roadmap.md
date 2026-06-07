@@ -175,6 +175,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 6 — Case core with funding sources
 
+**Status:** ✅ Complete (2026-06-07) — see [sprint-reviews/sprint-06.md](sprint-reviews/sprint-06.md). Cases + the five-kind funding-source model + insurance claims + parties; per-org case numbers, multi-funding validation, intake + detail + search. Integration 36 tests (5 new, incl. the Fremtind+Gjensidige+self-pay demoable); funding validators 8 unit tests.
+
 **Goal:** Cases work with the full multi-funding model from day one.
 
 **Deliverables:**

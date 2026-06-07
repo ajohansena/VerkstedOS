@@ -79,7 +79,13 @@ export default async function HomePage() {
         <CardFooter className="flex-wrap gap-2">
           {session ? (
             <>
-              <Link href="/customers" className={cn(buttonVariants())}>
+              <Link href="/cases" className={cn(buttonVariants())}>
+                Cases
+              </Link>
+              <Link
+                href="/customers"
+                className={cn(buttonVariants({ variant: 'outline' }))}
+              >
                 Customers
               </Link>
               <Link

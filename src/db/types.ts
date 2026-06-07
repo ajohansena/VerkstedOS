@@ -5,6 +5,11 @@ import type { vehicles } from './schemas/customer/vehicles';
 import type { vegvesenLookups } from './schemas/customer/vegvesen-lookups';
 import type { phoneLookups1881 } from './schemas/customer/phone-lookups-1881';
 import type { vehicleOwnershipHistory } from './schemas/customer/vehicle-ownership-history';
+import type { cases } from './schemas/case/cases';
+import type { insuranceClaims } from './schemas/case/insurance-claims';
+import type { caseFundingSources } from './schemas/case/case-funding-sources';
+import type { caseParties } from './schemas/case/case-parties';
+import type { caseNotes } from './schemas/case/case-notes';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -81,6 +86,21 @@ export type VehicleOwnershipHistory = InferSelectModel<
 export type NewVehicleOwnershipHistory = InferInsertModel<
   typeof vehicleOwnershipHistory
 >;
+
+export type Case = InferSelectModel<typeof cases>;
+export type NewCase = InferInsertModel<typeof cases>;
+
+export type InsuranceClaim = InferSelectModel<typeof insuranceClaims>;
+export type NewInsuranceClaim = InferInsertModel<typeof insuranceClaims>;
+
+export type CaseFundingSource = InferSelectModel<typeof caseFundingSources>;
+export type NewCaseFundingSource = InferInsertModel<typeof caseFundingSources>;
+
+export type CaseParty = InferSelectModel<typeof caseParties>;
+export type NewCaseParty = InferInsertModel<typeof caseParties>;
+
+export type CaseNote = InferSelectModel<typeof caseNotes>;
+export type NewCaseNote = InferInsertModel<typeof caseNotes>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

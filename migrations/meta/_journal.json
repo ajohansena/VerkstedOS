@@ -29,6 +29,13 @@
       "when": 1780866458580,
       "tag": "0007_customer_lookup_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780867260403,
+      "tag": "0009_case_funding_tables",
+      "breakpoints": true
     }
   ]
 }

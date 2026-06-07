@@ -80,3 +80,46 @@ export const platformRole = pgEnum('platform_role', [
   'PlatformDeveloper',
   'PlatformSupport',
 ]);
+
+// --- Customer & Case ---------------------------------------------------------
+
+export const caseStatus = pgEnum('case_status', [
+  'intake',
+  'active',
+  'on_hold',
+  'delivered',
+  'closed',
+  'cancelled',
+]);
+
+export const fundingSourceKind = pgEnum('funding_source_kind', [
+  'insurance',
+  'private_pay',
+  'warranty',
+  'goodwill',
+  'internal_rework',
+]);
+
+export const fundingSourceStatus = pgEnum('funding_source_status', [
+  'draft',
+  'active',
+  'invoiced',
+  'settled',
+  'cancelled',
+]);
+
+export const insuranceClaimStatus = pgEnum('insurance_claim_status', [
+  'open',
+  'approved',
+  'rejected',
+  'settled',
+  'cancelled',
+]);
+
+export const casePartyRole = pgEnum('case_party_role', [
+  'counterparty',
+  'witness',
+  'guarantor',
+  'third_party_payer',
+  'other',
+]);

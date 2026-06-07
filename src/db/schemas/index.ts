@@ -27,6 +27,13 @@ export { vegvesenLookups } from './customer/vegvesen-lookups';
 export { phoneLookups1881 } from './customer/phone-lookups-1881';
 export { vehicleOwnershipHistory } from './customer/vehicle-ownership-history';
 
+// Case & Funding
+export { cases } from './case/cases';
+export { insuranceClaims } from './case/insurance-claims';
+export { caseFundingSources } from './case/case-funding-sources';
+export { caseParties } from './case/case-parties';
+export { caseNotes } from './case/case-notes';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 
