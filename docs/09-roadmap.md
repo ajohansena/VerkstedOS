@@ -34,6 +34,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 1 — Project skeleton
 
+**Status:** ✅ Complete (2026-06-07) — see [sprint-reviews/sprint-01.md](sprint-reviews/sprint-01.md). External-service provisioning (Supabase / Vercel / Inngest / Sentry projects) is a project-owner action tracked in the sprint review.
+
 **Goal:** Codebase exists, deploys to Vercel, connects to Supabase, has all CI gates.
 
 **Deliverables:**
