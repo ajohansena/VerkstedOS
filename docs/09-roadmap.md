@@ -310,6 +310,8 @@ Sprint 1 ─ Foundation ─ 4
 
 **Goal:** Parts flow through full lifecycle. PartRequirement spine in place.
 
+**Status:** ✅ Complete (2026-06-08) — see [sprint-reviews/sprint-11.md](sprint-reviews/sprint-11.md). The PartRequirement spine drives a full lifecycle: flag → order (one PO spans many cases) → receive → withdraw-from-stock → return, with an append-only lifecycle-events timeline and a canonical reconciliation calculation (SSoT: estimated vs ordered vs received vs returned). 13 tables (suppliers, supplier_agreements, part_requirements, purchase_orders/lines, part_receipts/lines, part_returns/lines, inventory_items, inventory_stock_movements [append-only ledger], inventory_withdrawals, part_lifecycle_events [append-only projection]). Parts tagged `funding_source_id` throughout (TakstKontroll case-traceability preserved). Three Surfaces: case parts panel + `/parts` coordinator queue (User), `/admin/suppliers` (Admin), `/dev/parts` requirement inspection + lifecycle timeline + status-rebuild repair (Dev). No new permissions (reused `parts:view`/`parts:order`/`parts:reconcile`). Integration 71 tests (7 new). Supplier-invoice reconciliation (the financial close) is Sprint 13 finance; this sprint delivers the operational + quantity-reconciliation layer.
+
 **Deliverables:**
 - `suppliers`, `supplier_agreements` (master data)
 - `part_requirements` (the spine, per case)

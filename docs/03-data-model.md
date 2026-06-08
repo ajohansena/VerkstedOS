@@ -391,6 +391,8 @@ part_reconciliation_status (projection — estimated vs ordered vs received vs i
 
 The reconciliation projection answers: for this PartRequirement, what was estimated, what did we order, what arrived, what came back, what got invoiced, what was credited — and is the net financial position closed?
 
+> **Implementation status (Sprint 11):** the operational spine shipped — `suppliers`, `supplier_agreements`, `part_requirements`, `purchase_orders`/`_lines`, `part_receipts`/`_lines`, `part_returns`/`_lines`, `inventory_items`, `inventory_stock_movements` (append-only ledger), `inventory_withdrawals`, and `part_lifecycle_events` (append-only timeline). `part_reconciliation_status` is implemented as the canonical `reconcilePartRequirement` calculation (SSoT, `src/modules/parts/application/calculations/`) covering estimated → ordered → received → returned, **not** a stored table. The `supplier_invoices` / `supplier_credit_notes` family (the financial close, including the invoiced/credited dimensions) lands with the finance module in Sprint 13; `part_requirements`, `purchase_order_lines`, and `inventory_withdrawals` already carry `funding_source_id` so that reconciliation is non-breaking.
+
 ## ERD spine (case at the center)
 
 ```

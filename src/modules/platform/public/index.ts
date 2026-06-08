@@ -56,3 +56,12 @@ export {
   type SegmentRow,
   type RecomputeResult,
 } from '../infrastructure/repositories/platform-planning-repository';
+
+export {
+  listRequirementsForOrg,
+  listLifecycleForRequirement,
+  rebuildRequirementStatus,
+  type PartRequirementRow,
+  type LifecycleRow,
+  type RebuildResult,
+} from '../infrastructure/repositories/platform-parts-repository';

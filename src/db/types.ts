@@ -37,6 +37,19 @@ import type { clockSessions } from './schemas/workforce/clock-sessions';
 import type { timeEntries } from './schemas/workforce/time-entries';
 import type { absenceTypes } from './schemas/workforce/absence-types';
 import type { absenceEntries } from './schemas/workforce/absence-entries';
+import type { suppliers } from './schemas/parts/suppliers';
+import type { supplierAgreements } from './schemas/parts/supplier-agreements';
+import type { partRequirements } from './schemas/parts/part-requirements';
+import type { purchaseOrders } from './schemas/parts/purchase-orders';
+import type { purchaseOrderLines } from './schemas/parts/purchase-order-lines';
+import type { partReceipts } from './schemas/parts/part-receipts';
+import type { partReceiptLines } from './schemas/parts/part-receipt-lines';
+import type { partReturns } from './schemas/parts/part-returns';
+import type { partReturnLines } from './schemas/parts/part-return-lines';
+import type { inventoryItems } from './schemas/parts/inventory-items';
+import type { inventoryStockMovements } from './schemas/parts/inventory-stock-movements';
+import type { inventoryWithdrawals } from './schemas/parts/inventory-withdrawals';
+import type { partLifecycleEvents } from './schemas/parts/part-lifecycle-events';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -227,6 +240,53 @@ export type NewAbsenceType = InferInsertModel<typeof absenceTypes>;
 
 export type AbsenceEntry = InferSelectModel<typeof absenceEntries>;
 export type NewAbsenceEntry = InferInsertModel<typeof absenceEntries>;
+
+export type Supplier = InferSelectModel<typeof suppliers>;
+export type NewSupplier = InferInsertModel<typeof suppliers>;
+
+export type SupplierAgreement = InferSelectModel<typeof supplierAgreements>;
+export type NewSupplierAgreement = InferInsertModel<typeof supplierAgreements>;
+
+export type PartRequirement = InferSelectModel<typeof partRequirements>;
+export type NewPartRequirement = InferInsertModel<typeof partRequirements>;
+
+export type PurchaseOrder = InferSelectModel<typeof purchaseOrders>;
+export type NewPurchaseOrder = InferInsertModel<typeof purchaseOrders>;
+
+export type PurchaseOrderLine = InferSelectModel<typeof purchaseOrderLines>;
+export type NewPurchaseOrderLine = InferInsertModel<typeof purchaseOrderLines>;
+
+export type PartReceipt = InferSelectModel<typeof partReceipts>;
+export type NewPartReceipt = InferInsertModel<typeof partReceipts>;
+
+export type PartReceiptLine = InferSelectModel<typeof partReceiptLines>;
+export type NewPartReceiptLine = InferInsertModel<typeof partReceiptLines>;
+
+export type PartReturn = InferSelectModel<typeof partReturns>;
+export type NewPartReturn = InferInsertModel<typeof partReturns>;
+
+export type PartReturnLine = InferSelectModel<typeof partReturnLines>;
+export type NewPartReturnLine = InferInsertModel<typeof partReturnLines>;
+
+export type InventoryItem = InferSelectModel<typeof inventoryItems>;
+export type NewInventoryItem = InferInsertModel<typeof inventoryItems>;
+
+export type InventoryStockMovement = InferSelectModel<
+  typeof inventoryStockMovements
+>;
+export type NewInventoryStockMovement = InferInsertModel<
+  typeof inventoryStockMovements
+>;
+
+export type InventoryWithdrawal = InferSelectModel<typeof inventoryWithdrawals>;
+export type NewInventoryWithdrawal = InferInsertModel<
+  typeof inventoryWithdrawals
+>;
+
+export type PartLifecycleEvent = InferSelectModel<typeof partLifecycleEvents>;
+export type NewPartLifecycleEvent = InferInsertModel<
+  typeof partLifecycleEvents
+>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

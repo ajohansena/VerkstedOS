@@ -268,3 +268,82 @@ export const resourceAssignmentStatus = pgEnum('resource_assignment_status', [
   'completed',
   'cancelled',
 ]);
+
+// --- Parts & Procurement -----------------------------------------------------
+
+export const supplierStatus = pgEnum('supplier_status', ['active', 'inactive']);
+
+export const partRequirementStatus = pgEnum('part_requirement_status', [
+  'needed', // flagged, not yet sourced
+  'sourcing', // being quoted / decided
+  'ordered', // on a purchase order
+  'partially_received',
+  'received', // arrived, awaiting withdrawal
+  'fulfilled', // withdrawn / fitted to the vehicle
+  'returned', // sent back, needs re-sourcing or cancelled
+  'cancelled',
+]);
+
+export const partRequirementSource = pgEnum('part_requirement_source', [
+  'estimate', // derived from a DBS estimate part line
+  'manual', // a technician flagged a missing part
+  'supplement', // added via a supplement
+]);
+
+export const partCondition = pgEnum('part_condition', [
+  'new',
+  'used',
+  'aftermarket',
+  'reconditioned',
+]);
+
+export const purchaseOrderStatus = pgEnum('purchase_order_status', [
+  'draft',
+  'sent',
+  'confirmed',
+  'partially_received',
+  'received',
+  'closed',
+  'cancelled',
+]);
+
+export const purchaseOrderLineStatus = pgEnum('purchase_order_line_status', [
+  'open',
+  'partially_received',
+  'received',
+  'cancelled',
+]);
+
+export const partReturnReason = pgEnum('part_return_reason', [
+  'wrong_part',
+  'damaged',
+  'defective',
+  'surplus',
+  'no_longer_needed',
+]);
+
+export const partReturnStatus = pgEnum('part_return_status', [
+  'requested',
+  'shipped',
+  'credited',
+  'rejected',
+]);
+
+export const inventoryMovementKind = pgEnum('inventory_movement_kind', [
+  'receipt', // stock in (from a part receipt)
+  'withdrawal', // stock out (to a case)
+  'return', // stock back in (unused)
+  'adjustment', // manual correction
+]);
+
+export const partLifecycleEventKind = pgEnum('part_lifecycle_event_kind', [
+  'requirement_created',
+  'requirement_updated',
+  'ordered',
+  'po_sent',
+  'received',
+  'withdrawn',
+  'returned',
+  'cancelled',
+  'fulfilled',
+]);

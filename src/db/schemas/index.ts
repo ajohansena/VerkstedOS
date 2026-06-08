@@ -67,6 +67,21 @@ export { timeEntries } from './workforce/time-entries';
 export { absenceTypes } from './workforce/absence-types';
 export { absenceEntries } from './workforce/absence-entries';
 
+// Parts & Procurement
+export { suppliers } from './parts/suppliers';
+export { supplierAgreements } from './parts/supplier-agreements';
+export { partRequirements } from './parts/part-requirements';
+export { purchaseOrders } from './parts/purchase-orders';
+export { purchaseOrderLines } from './parts/purchase-order-lines';
+export { partReceipts } from './parts/part-receipts';
+export { partReceiptLines } from './parts/part-receipt-lines';
+export { partReturns } from './parts/part-returns';
+export { partReturnLines } from './parts/part-return-lines';
+export { inventoryItems } from './parts/inventory-items';
+export { inventoryStockMovements } from './parts/inventory-stock-movements';
+export { inventoryWithdrawals } from './parts/inventory-withdrawals';
+export { partLifecycleEvents } from './parts/part-lifecycle-events';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 

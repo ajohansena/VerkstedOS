@@ -28,6 +28,10 @@ export const metricRegistry = {
     module: 'production',
     calc: 'classifyFeasibility',
   },
+  part_reconciliation: {
+    module: 'parts',
+    calc: 'reconcilePartRequirement',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

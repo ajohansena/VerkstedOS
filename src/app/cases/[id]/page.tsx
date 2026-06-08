@@ -29,6 +29,8 @@ import {
   listWorkSegments,
   remainingWorkMinutes,
 } from '@/modules/production/public';
+import { reconcileCaseParts, listCaseLifecycle } from '@/modules/parts/public';
+import { flagPartAction } from '@/app/actions/parts';
 import { WORK_SEGMENT_CATALOG } from '@/lib/seed/work-segment-catalog';
 import { cn } from '@/lib/utils';
 
@@ -66,6 +68,11 @@ export default async function CaseDetailPage({
     ? await listWorkSegments(session.context, id)
     : [];
   const remainingMinutes = remainingWorkMinutes(segments);
+
+  const [reconciledParts, partsTimeline] = await Promise.all([
+    reconcileCaseParts(session.context, id),
+    listCaseLifecycle(session.context, id),
+  ]);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -206,6 +213,84 @@ export default async function CaseDetailPage({
           </CardContent>
         </Card>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            Parts ({reconciledParts.length})
+          </CardTitle>
+          <CardDescription>
+            Flag missing parts; the coordinator orders, receives, and withdraws.
+            Status reconciles estimated vs ordered vs received.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {reconciledParts.length > 0 ? (
+            <ul className="divide-y rounded-md border">
+              {reconciledParts.map(({ requirement, reconciliation }) => (
+                <li
+                  key={requirement.id}
+                  className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+                >
+                  <span className="font-medium">
+                    {requirement.description}
+                    {requirement.partNumber ? (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {requirement.partNumber}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {requirement.status} · {reconciliation.state}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No parts flagged yet.
+            </p>
+          )}
+
+          <form
+            action={flagPartAction}
+            className="space-y-2 rounded-md border p-3"
+          >
+            <input type="hidden" name="caseId" value={case_.id} />
+            <p className="text-sm font-medium">Flag a missing part</p>
+            <Input
+              name="description"
+              placeholder="Description (e.g. Frontlykt H)"
+            />
+            <Input name="partNumber" placeholder="Part number (optional)" />
+            <Input
+              name="quantity"
+              type="number"
+              min="1"
+              step="1"
+              defaultValue="1"
+              placeholder="Quantity"
+            />
+            <Button type="submit" size="sm">
+              Flag part
+            </Button>
+          </form>
+
+          {partsTimeline.length > 0 ? (
+            <div className="rounded-md border p-3">
+              <p className="mb-2 text-sm font-medium">Lifecycle timeline</p>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                {partsTimeline.slice(0, 12).map((e) => (
+                  <li key={e.id} className="flex items-center justify-between">
+                    <span>{e.kind}</span>
+                    <span>{e.occurredAt.toISOString().slice(0, 16)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
