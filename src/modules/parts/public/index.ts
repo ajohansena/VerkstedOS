@@ -21,6 +21,10 @@ export type {
   InventoryItem,
   InventoryWithdrawal,
   PartLifecycleEvent,
+  SupplierInvoice,
+  SupplierInvoiceLine,
+  SupplierCreditNote,
+  SupplierCreditNoteLine,
 } from '@/db/types';
 
 // Requirements (the spine)
@@ -80,3 +84,30 @@ export {
   type ReconciliationResult,
   type ReconciliationState,
 } from '../application/calculations/reconciliation';
+
+// Supplier invoicing (Sprint 14 Track F)
+export {
+  createSupplierInvoice,
+  addInvoiceLine,
+  bookInvoice,
+  createCreditNote,
+  addCreditLine,
+  type CreateInvoiceInput,
+  type AddInvoiceLineInput,
+  type CreateCreditNoteInput,
+  type AddCreditLineInput,
+} from '../application/services/invoicing';
+
+export {
+  listSupplierInvoices,
+  findSupplierInvoice,
+  type SupplierInvoiceListItem,
+  type SupplierInvoiceDetail,
+} from '../infrastructure/repositories/supplier-invoice-read-repository';
+
+export {
+  calculateInvoiceMatch,
+  type InvoiceMatchInput,
+  type InvoiceMatchResult,
+  type InvoiceMatchState,
+} from '../application/calculations/invoice-match';

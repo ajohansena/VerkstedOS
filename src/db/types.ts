@@ -52,6 +52,10 @@ import type { inventoryItems } from './schemas/parts/inventory-items';
 import type { inventoryStockMovements } from './schemas/parts/inventory-stock-movements';
 import type { inventoryWithdrawals } from './schemas/parts/inventory-withdrawals';
 import type { partLifecycleEvents } from './schemas/parts/part-lifecycle-events';
+import type { supplierInvoices } from './schemas/parts/supplier-invoices';
+import type { supplierInvoiceLines } from './schemas/parts/supplier-invoice-lines';
+import type { supplierCreditNotes } from './schemas/parts/supplier-credit-notes';
+import type { supplierCreditNoteLines } from './schemas/parts/supplier-credit-note-lines';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -308,6 +312,23 @@ export type NewInventoryWithdrawal = InferInsertModel<
 export type PartLifecycleEvent = InferSelectModel<typeof partLifecycleEvents>;
 export type NewPartLifecycleEvent = InferInsertModel<
   typeof partLifecycleEvents
+>;
+
+export type SupplierInvoice = InferSelectModel<typeof supplierInvoices>;
+export type NewSupplierInvoice = InferInsertModel<typeof supplierInvoices>;
+export type SupplierInvoiceLine = InferSelectModel<typeof supplierInvoiceLines>;
+export type NewSupplierInvoiceLine = InferInsertModel<
+  typeof supplierInvoiceLines
+>;
+export type SupplierCreditNote = InferSelectModel<typeof supplierCreditNotes>;
+export type NewSupplierCreditNote = InferInsertModel<
+  typeof supplierCreditNotes
+>;
+export type SupplierCreditNoteLine = InferSelectModel<
+  typeof supplierCreditNoteLines
+>;
+export type NewSupplierCreditNoteLine = InferInsertModel<
+  typeof supplierCreditNoteLines
 >;
 
 export type Document = InferSelectModel<typeof documents>;

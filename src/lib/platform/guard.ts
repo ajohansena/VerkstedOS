@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
+import { getDevAutoLoginUser } from '@/lib/auth/dev-auto-login';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
 import { resolvePlatformContext, type PlatformContext } from './auth';
@@ -10,7 +11,7 @@ import { resolvePlatformContext, type PlatformContext } from './auth';
  *
  * Order:
  *   1. IP allow-list (production only, when PLATFORM_ALLOWED_IPS is set).
- *   2. Supabase authentication.
+ *   2. Supabase authentication (or DEV_AUTO_LOGIN_EMAIL bypass in non-prod).
  *   3. Active `platform_users` row → otherwise 404 (we do NOT acknowledge the
  *      surface exists to non-platform users).
  *
@@ -33,13 +34,19 @@ export async function requirePlatformAccess(): Promise<PlatformContext> {
     }
   }
 
-  // 2. Authentication.
-  if (!isSupabaseConfigured()) {
-    notFound();
+  // 2. Authentication (TEMPORARY DEV BYPASS — see src/lib/auth/dev-auto-login.ts).
+  let userId: string | undefined;
+  const devUser = await getDevAutoLoginUser();
+  if (devUser) {
+    userId = devUser.id;
+  } else {
+    if (!isSupabaseConfigured()) {
+      notFound();
+    }
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    userId = data.user?.id;
   }
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  const userId = data.user?.id;
   if (!userId) {
     notFound();
   }

@@ -403,6 +403,8 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 ### Sprint 14 — Parts financial reconciliation
 
+> **Delivered (2026-06-08) as a UX-maturity sprint.** The binding directive reframed Sprint 14 around docs 11 + 12: ship the Operations Center as the post-login landing, a richer Production Board v2, a drawer-first Case Workspace, and end placeholder UI — while still delivering the supplier-invoice spine below (Track F). See `docs/sprint-reviews/sprint-14.md`. The per-case grouped reconciliation UI, `internal_cost_records`, bulk flows, and email ingestion are deferred to the next finance iteration.
+
 **Goal:** Full financial traceability across the parts lifecycle. One supplier invoice can span many cases.
 
 **Deliverables:**

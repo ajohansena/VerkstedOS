@@ -348,6 +348,21 @@ export const partLifecycleEventKind = pgEnum('part_lifecycle_event_kind', [
   'fulfilled',
 ]);
 
+export const supplierInvoiceStatus = pgEnum('supplier_invoice_status', [
+  'draft', // entered, not yet posted to the ledger
+  'booked', // posted; awaiting reconciliation against receipts
+  'matched', // fully reconciled against received quantities
+  'credited', // fully or partially reversed by credit note(s)
+]);
+
+export const supplierCreditNoteReason = pgEnum('supplier_credit_note_reason', [
+  'return', // parts sent back
+  'price_correction', // price adjustment
+  'overbilling', // billed more than received
+  'damaged', // goods arrived damaged
+  'other',
+]);
+
 // --- Documents (cross-cutting, docs/04-document-architecture.md) -------------
 
 export const documentKind = pgEnum('document_kind', [

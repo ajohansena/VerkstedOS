@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -68,6 +68,10 @@ import { PhotoGallery } from '@/components/photo-gallery';
 import { getDictionary } from '@/lib/i18n';
 import { WORK_SEGMENT_CATALOG } from '@/lib/seed/work-segment-catalog';
 import { cn } from '@/lib/utils';
+import { findCustomerById, findVehicleById } from '@/modules/customer/public';
+import { NORMAL_REPAIR_DAYS } from '@/lib/operations/snapshot';
+import { findCaseProductionState } from '@/modules/production/public';
+import { CaseSidePanel } from './case-side-panel';
 
 export const dynamic = 'force-dynamic';
 
@@ -183,35 +187,42 @@ export default async function CaseDetailPage({
   const smsReady = isSmsConfigured();
   const acceptanceContact = acceptanceThread?.contactValue ?? '';
 
-  return (
-    <main className="mx-auto max-w-3xl space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{case_.caseNumber}</h1>
-        <div className="flex gap-2">
-          <Link
-            href={`/cases/${case_.id}/estimate`}
-            className={cn(buttonVariants({ size: 'sm' }))}
-          >
-            Estimate
-          </Link>
-          <Link
-            href="/cases"
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-          >
-            Back
-          </Link>
-        </div>
-      </div>
+  // ── Side-panel data (Sprint 14 Track E) ──────────────────────────────────
+  const [vehicle, customer, currentState] = await Promise.all([
+    case_.vehicleId
+      ? findVehicleById(session.context, case_.vehicleId)
+      : Promise.resolve(null),
+    case_.primaryCustomerId
+      ? findCustomerById(session.context, case_.primaryCustomerId)
+      : Promise.resolve(null),
+    findCaseProductionState(session.context, id),
+  ]);
+  const vehicleSummary = vehicle
+    ? [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(' ') ||
+      null
+    : null;
+  const currentStateLabel = currentState?.label ?? null;
+  const etaDate = new Date(
+    new Date(case_.openedAt).getTime() +
+      NORMAL_REPAIR_DAYS * 24 * 60 * 60 * 1000,
+  );
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Case</CardTitle>
-          <CardDescription>
-            {case_.status}
-            {case_.incidentTag ? ` · ${case_.incidentTag}` : ''}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+  return (
+    <div className="mx-auto grid w-full max-w-7xl gap-6 p-4 md:p-6 lg:grid-cols-[1fr_320px]">
+      <main className="space-y-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {case_.caseNumber}
+        </h1>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {case_.status}
+        </span>
+        {case_.incidentTag ? (
+          <span className="text-xs text-muted-foreground">
+            {case_.incidentTag}
+          </span>
+        ) : null}
+      </div>
 
       <Card
         className={cn(
@@ -927,5 +938,48 @@ export default async function CaseDetailPage({
         </Card>
       ) : null}
     </main>
+      <CaseSidePanel
+        caseId={case_.id}
+        caseNumber={case_.caseNumber}
+        openedAt={case_.openedAt}
+        stateLabel={currentStateLabel}
+        vehicleSummary={vehicleSummary}
+        registrationNumber={vehicle?.registrationNumber ?? null}
+        customerName={customer?.name ?? null}
+        assignedTechName={null}
+        etaDate={etaDate}
+        funding={funding.map((f) => ({
+          id: f.id,
+          kind: f.kind,
+          label: f.label ?? null,
+          status: f.status,
+        }))}
+        availableTransitions={transitions.map((s) => ({
+          id: s.id,
+          code: s.code,
+          label: s.label,
+        }))}
+        labels={{
+          state: t.case.panelState,
+          vehicle: t.case.panelVehicle,
+          customer: t.case.panelCustomer,
+          openedDays: t.case.panelOpenedDays,
+          eta: t.case.panelEta,
+          tech: t.case.panelTech,
+          funding: t.case.panelFunding,
+          fundingEmpty: t.case.panelFundingEmpty,
+          quickActions: t.case.panelQuickActions,
+          changeStatus: t.case.panelChangeStatus,
+          estimate: t.case.panelEstimate,
+          cancel: t.case.panelCancel,
+          confirm: t.case.panelConfirm,
+          reason: t.case.panelReason,
+          reasonOptional: t.case.panelReasonOptional,
+          newStatus: t.case.panelNewStatus,
+          noState: t.case.panelNoState,
+          noTech: t.case.panelNoTech,
+        }}
+      />
+    </div>
   );
 }

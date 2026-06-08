@@ -7,6 +7,8 @@ import {
 } from '@/modules/identity/public';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 
+import { getDevAutoLoginUser } from './dev-auto-login';
+
 /** Cookie that remembers which org a multi-org user last selected. */
 export const ORG_COOKIE = 'vos_org';
 
@@ -25,15 +27,27 @@ export interface SessionContext {
  * `resolveContext` step of the authorization pipeline (docs/05 § lifecycle).
  */
 export async function getSessionContext(): Promise<SessionContext | null> {
-  if (!isSupabaseConfigured()) {
-    return null;
-  }
+  // ── TEMPORARY DEV-ONLY BYPASS (see src/lib/auth/dev-auto-login.ts) ────────
+  const devUser = await getDevAutoLoginUser();
+  let authUser: { id: string; email: string; user_metadata: Record<string, unknown> } | null = null;
 
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  const authUser = data.user;
-  if (!authUser?.email) {
-    return null;
+  if (devUser) {
+    authUser = {
+      id: devUser.id,
+      email: devUser.email,
+      user_metadata: devUser.fullName ? { full_name: devUser.fullName } : {},
+    };
+  } else {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    const u = data.user;
+    if (!u?.email) {
+      return null;
+    }
+    authUser = { id: u.id, email: u.email, user_metadata: u.user_metadata };
   }
 
   await ensureUser({
@@ -41,7 +55,7 @@ export async function getSessionContext(): Promise<SessionContext | null> {
     email: authUser.email,
     fullName:
       (typeof authUser.user_metadata['full_name'] === 'string'
-        ? authUser.user_metadata['full_name']
+        ? (authUser.user_metadata['full_name'] as string)
         : null) ?? null,
   });
 

@@ -40,6 +40,14 @@ export const metricRegistry = {
     module: 'quality',
     calc: 'calculateReworkRate',
   },
+  case_risk: {
+    module: 'operations',
+    calc: 'classifyCaseRisk',
+  },
+  supplier_invoice_match: {
+    module: 'parts',
+    calc: 'calculateInvoiceMatch',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

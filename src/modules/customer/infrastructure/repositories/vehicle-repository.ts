@@ -1,6 +1,7 @@
-import { and, desc, eq, ilike, isNull, or } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 
 import { withTransaction, type TenantTransaction } from '@/db/client';
+import { cases } from '@/db/schemas/case/cases';
 import { vehicleOwnershipHistory } from '@/db/schemas/customer/vehicle-ownership-history';
 import { vehicles } from '@/db/schemas/customer/vehicles';
 import type { Vehicle, VehicleOwnershipHistory } from '@/db/types';
@@ -183,5 +184,84 @@ export async function listRecentVehicles(
       )
       .orderBy(desc(vehicles.updatedAt))
       .limit(limit);
+  });
+}
+
+export interface VehicleWithStats {
+  vehicle: Vehicle;
+  activeCaseCount: number;
+  lastVisitAt: Date | null;
+}
+
+/**
+ * Rich vehicle list for the /vehicles surface (Sprint 14 Track G): each row
+ * carries its active-case count and last visit (most recent case openedAt).
+ * Optionally filtered by a reg/VIN search term.
+ */
+export async function listVehiclesWithCaseStats(
+  ctx: RequestContext,
+  search?: string,
+  limit = 50,
+): Promise<VehicleWithStats[]> {
+  return withTransaction(ctx, async (tx) => {
+    const term = search?.trim();
+    const baseWhere = and(
+      eq(vehicles.organizationId, ctx.organizationId),
+      isNull(vehicles.deletedAt),
+      term
+        ? or(
+            ilike(vehicles.registrationNumber, `%${term}%`),
+            ilike(vehicles.vin, `%${term}%`),
+          )
+        : undefined,
+    );
+
+    const vehicleRows = await tx
+      .select()
+      .from(vehicles)
+      .where(baseWhere)
+      .orderBy(desc(vehicles.updatedAt))
+      .limit(limit);
+
+    if (vehicleRows.length === 0) return [];
+    const ids = vehicleRows.map((v) => v.id);
+
+    const statRows = await tx
+      .select({
+        vehicleId: cases.vehicleId,
+        activeCount: sql<number>`count(*) filter (where ${cases.status} not in ('delivered','closed','cancelled'))::int`,
+        lastVisit: sql<Date | null>`max(${cases.openedAt})`,
+      })
+      .from(cases)
+      .where(
+        and(
+          eq(cases.organizationId, ctx.organizationId),
+          inArray(cases.vehicleId, ids),
+          isNull(cases.deletedAt),
+        ),
+      )
+      .groupBy(cases.vehicleId);
+
+    const statByVehicle = new Map<
+      string,
+      { activeCount: number; lastVisit: Date | null }
+    >();
+    for (const row of statRows) {
+      if (row.vehicleId) {
+        statByVehicle.set(row.vehicleId, {
+          activeCount: Number(row.activeCount),
+          lastVisit: row.lastVisit ? new Date(row.lastVisit) : null,
+        });
+      }
+    }
+
+    return vehicleRows.map((v) => {
+      const stat = statByVehicle.get(v.id);
+      return {
+        vehicle: v,
+        activeCaseCount: stat?.activeCount ?? 0,
+        lastVisitAt: stat?.lastVisit ?? null,
+      };
+    });
   });
 }

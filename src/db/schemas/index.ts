@@ -83,7 +83,10 @@ export { inventoryItems } from './parts/inventory-items';
 export { inventoryStockMovements } from './parts/inventory-stock-movements';
 export { inventoryWithdrawals } from './parts/inventory-withdrawals';
 export { partLifecycleEvents } from './parts/part-lifecycle-events';
-
+export { supplierInvoices } from './parts/supplier-invoices';
+export { supplierInvoiceLines } from './parts/supplier-invoice-lines';
+export { supplierCreditNotes } from './parts/supplier-credit-notes';
+export { supplierCreditNoteLines } from './parts/supplier-credit-note-lines';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

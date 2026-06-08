@@ -47,6 +47,16 @@ export async function findUserById(id: string): Promise<User | null> {
   return rows[0] ?? null;
 }
 
+export async function findUserByEmail(email: string): Promise<User | null> {
+  const db = getRawClient({ as: 'admin' });
+  const rows = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 /** Generate a correlation id for a fresh request. */
 export function newCorrelationId(): string {
   return randomUUID();

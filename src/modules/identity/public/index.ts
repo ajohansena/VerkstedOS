@@ -26,6 +26,7 @@ export {
 export {
   ensureUser,
   findUserById,
+  findUserByEmail,
 } from '../infrastructure/repositories/user-repository';
 
 // --- RBAC ---
@@ -44,6 +45,13 @@ export {
   createOrganizationWithOwner,
   addMembershipWithRole,
 } from '../application/services/organization-onboarding';
+
+export {
+  updateOrganizationSettings,
+  createWorkshop,
+  renameWorkflowState,
+  type UpdateOrgSettingsInput,
+} from '../application/services/admin-config';
 
 export { seedStandardRoles } from '../application/services/seed-standard-roles';
 

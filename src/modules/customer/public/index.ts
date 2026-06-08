@@ -46,7 +46,9 @@ export {
   findVehicleById,
   searchVehicles,
   listRecentVehicles,
+  listVehiclesWithCaseStats,
   listOwnershipHistory,
+  type VehicleWithStats,
 } from '../infrastructure/repositories/vehicle-repository';
 
 // Lookups
