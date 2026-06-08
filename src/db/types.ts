@@ -10,6 +10,14 @@ import type { insuranceClaims } from './schemas/case/insurance-claims';
 import type { caseFundingSources } from './schemas/case/case-funding-sources';
 import type { caseParties } from './schemas/case/case-parties';
 import type { caseNotes } from './schemas/case/case-notes';
+import type { integrationInbox } from './schemas/estimating/integration-inbox';
+import type { estimateImports } from './schemas/estimating/estimate-imports';
+import type { estimateDocuments } from './schemas/estimating/estimate-documents';
+import type { estimateOperations } from './schemas/estimating/estimate-operations';
+import type { estimateLaborLines } from './schemas/estimating/estimate-labor-lines';
+import type { estimatePaintLines } from './schemas/estimating/estimate-paint-lines';
+import type { estimateParts } from './schemas/estimating/estimate-parts';
+import type { estimateTotals } from './schemas/estimating/estimate-totals';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -101,6 +109,30 @@ export type NewCaseParty = InferInsertModel<typeof caseParties>;
 
 export type CaseNote = InferSelectModel<typeof caseNotes>;
 export type NewCaseNote = InferInsertModel<typeof caseNotes>;
+
+export type IntegrationInbox = InferSelectModel<typeof integrationInbox>;
+export type NewIntegrationInbox = InferInsertModel<typeof integrationInbox>;
+
+export type EstimateImport = InferSelectModel<typeof estimateImports>;
+export type NewEstimateImport = InferInsertModel<typeof estimateImports>;
+
+export type EstimateDocument = InferSelectModel<typeof estimateDocuments>;
+export type NewEstimateDocument = InferInsertModel<typeof estimateDocuments>;
+
+export type EstimateOperation = InferSelectModel<typeof estimateOperations>;
+export type NewEstimateOperation = InferInsertModel<typeof estimateOperations>;
+
+export type EstimateLaborLine = InferSelectModel<typeof estimateLaborLines>;
+export type NewEstimateLaborLine = InferInsertModel<typeof estimateLaborLines>;
+
+export type EstimatePaintLine = InferSelectModel<typeof estimatePaintLines>;
+export type NewEstimatePaintLine = InferInsertModel<typeof estimatePaintLines>;
+
+export type EstimatePart = InferSelectModel<typeof estimateParts>;
+export type NewEstimatePart = InferInsertModel<typeof estimateParts>;
+
+export type EstimateTotals = InferSelectModel<typeof estimateTotals>;
+export type NewEstimateTotals = InferInsertModel<typeof estimateTotals>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

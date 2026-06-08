@@ -27,3 +27,9 @@ export {
   type InspectResult,
   type InspectResultKind,
 } from '../infrastructure/repositories/platform-inspect-repository';
+
+export {
+  listDbsInbox,
+  dbsInboxStats,
+  type InboxItem,
+} from '../infrastructure/repositories/platform-dbs-repository';

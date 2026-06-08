@@ -47,12 +47,20 @@ export default async function CaseDetailPage({
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{case_.caseNumber}</h1>
-        <Link
-          href="/cases"
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-        >
-          Back
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/cases/${case_.id}/estimate`}
+            className={cn(buttonVariants({ size: 'sm' }))}
+          >
+            Estimate
+          </Link>
+          <Link
+            href="/cases"
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+          >
+            Back
+          </Link>
+        </div>
       </div>
 
       <Card>

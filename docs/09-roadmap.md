@@ -200,6 +200,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 7 — Estimate import (DBS)
 
+**Status:** ✅ Complete (2026-06-08) — see [sprint-reviews/sprint-07.md](sprint-reviews/sprint-07.md). DBS estimate import as immutable versioned snapshots (draft→active→locked→superseded), per-line funding allocation, integration inbox, `/dev/integrations/dbs`. Periods→hours is an SSoT calc (100 periods = 1 hour). Integration 43 tests (7 new); estimating unit 9 tests.
+
 **Goal:** DBS estimates flow into cases. Funding allocation per line is real.
 
 **Deliverables:**

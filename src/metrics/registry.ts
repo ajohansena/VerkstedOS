@@ -16,6 +16,9 @@ export interface MetricEntry {
   readonly calc: string;
 }
 
-export const metricRegistry = {} as const satisfies Record<string, MetricEntry>;
+export const metricRegistry = {
+  estimate_labor_hours: { module: 'estimating', calc: 'sumEstimateLabor' },
+  periods_to_hours: { module: 'estimating', calc: 'periodsToHours' },
+} as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

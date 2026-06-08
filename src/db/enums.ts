@@ -123,3 +123,44 @@ export const casePartyRole = pgEnum('case_party_role', [
   'third_party_payer',
   'other',
 ]);
+
+// --- Estimating & Integration ------------------------------------------------
+
+/** Estimate import version lifecycle (ADR-004 — immutable when locked). */
+export const estimateImportStatus = pgEnum('estimate_import_status', [
+  'draft',
+  'active',
+  'locked',
+  'superseded',
+]);
+
+export const estimateImportKind = pgEnum('estimate_import_kind', [
+  'original',
+  'supplement',
+  're_estimate',
+]);
+
+export const estimateSource = pgEnum('estimate_source', [
+  'dbs',
+  'manual',
+  'api',
+]);
+
+/** Estimate line categories (body labor, paint labor, paint material, parts). */
+export const estimateLineCategory = pgEnum('estimate_line_category', [
+  'body_labor',
+  'panel_beating',
+  'rust_protection',
+  'paint_labor',
+  'paint_material',
+  'part',
+  'external_work',
+  'other',
+]);
+
+export const integrationInboxStatus = pgEnum('integration_inbox_status', [
+  'received',
+  'processing',
+  'processed',
+  'failed',
+]);

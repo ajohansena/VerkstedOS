@@ -34,6 +34,16 @@ export { caseFundingSources } from './case/case-funding-sources';
 export { caseParties } from './case/case-parties';
 export { caseNotes } from './case/case-notes';
 
+// Estimating & Integration
+export { integrationInbox } from './estimating/integration-inbox';
+export { estimateImports } from './estimating/estimate-imports';
+export { estimateDocuments } from './estimating/estimate-documents';
+export { estimateOperations } from './estimating/estimate-operations';
+export { estimateLaborLines } from './estimating/estimate-labor-lines';
+export { estimatePaintLines } from './estimating/estimate-paint-lines';
+export { estimateParts } from './estimating/estimate-parts';
+export { estimateTotals } from './estimating/estimate-totals';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 
