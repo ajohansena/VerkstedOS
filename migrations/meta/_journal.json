@@ -85,6 +85,13 @@
       "when": 1780921671290,
       "tag": "0023_quality_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1780923629930,
+      "tag": "0025_communication_tables",
+      "breakpoints": true
     }
   ]
 }

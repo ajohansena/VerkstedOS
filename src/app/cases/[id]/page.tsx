@@ -46,6 +46,16 @@ import {
   raiseDeviationAction,
   resolveDeviationAction,
 } from '@/app/actions/quality';
+import {
+  latestAcceptance,
+  listThreads,
+  listMessages,
+  isSmsConfigured,
+} from '@/modules/communication/public';
+import {
+  requestAcceptanceAction,
+  recordManualAcceptanceAction,
+} from '@/app/actions/acceptance';
 import { PhotoUploader } from '@/components/photo-uploader';
 import { PhotoGallery } from '@/components/photo-gallery';
 import { getDictionary } from '@/lib/i18n';
@@ -140,6 +150,17 @@ export default async function CaseDetailPage({
     listDeviations(session.context, id),
   ]);
 
+  const acceptance = await latestAcceptance(session.context, id);
+  const threads = await listThreads(session.context, id);
+  const acceptanceThread = acceptance?.threadId
+    ? threads.find((th) => th.id === acceptance.threadId)
+    : threads[0];
+  const acceptanceMessages = acceptanceThread
+    ? await listMessages(session.context, acceptanceThread.id)
+    : [];
+  const smsReady = isSmsConfigured();
+  const acceptanceContact = acceptanceThread?.contactValue ?? '';
+
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -168,6 +189,115 @@ export default async function CaseDetailPage({
             {case_.incidentTag ? ` · ${case_.incidentTag}` : ''}
           </CardDescription>
         </CardHeader>
+      </Card>
+
+      <Card
+        className={cn(
+          'border-l-4',
+          acceptance?.status === 'accepted'
+            ? 'border-l-green-500'
+            : acceptance?.status === 'declined'
+              ? 'border-l-red-500'
+              : acceptance?.status === 'pending'
+                ? 'border-l-yellow-500'
+                : 'border-l-slate-300',
+        )}
+      >
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t.acceptance.title} —{' '}
+            {acceptance?.status === 'accepted'
+              ? t.acceptance.statusAccepted
+              : acceptance?.status === 'declined'
+                ? t.acceptance.statusDeclined
+                : acceptance?.status === 'pending'
+                  ? t.acceptance.statusPending
+                  : t.acceptance.statusNone}
+          </CardTitle>
+          <CardDescription>{t.acceptance.description}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {acceptance?.status === 'accepted' ? (
+            <p className="text-sm text-green-700">
+              {t.acceptance.acceptedVia}{' '}
+              <span className="font-medium">{acceptance.method}</span>
+              {acceptance.respondedAt
+                ? ` · ${acceptance.respondedAt.toISOString().slice(0, 16)}`
+                : ''}
+            </p>
+          ) : null}
+
+          {!smsReady ? (
+            <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
+              {t.acceptance.queued}
+            </p>
+          ) : null}
+
+          <form
+            action={requestAcceptanceAction}
+            className="space-y-2 rounded-md border p-3"
+          >
+            <input type="hidden" name="caseId" value={case_.id} />
+            <div className="flex gap-2">
+              <select
+                name="channel"
+                defaultValue="sms"
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="sms">SMS</option>
+                <option value="email">E-post</option>
+              </select>
+              <Input
+                name="contactValue"
+                defaultValue={acceptanceContact}
+                placeholder={t.acceptance.contactPhone}
+                className="flex-1"
+              />
+            </div>
+            <Input name="summary" placeholder={t.acceptance.summary} />
+            <Button type="submit" size="sm">
+              {t.acceptance.requestSms}
+            </Button>
+          </form>
+
+          <form action={recordManualAcceptanceAction}>
+            <input type="hidden" name="caseId" value={case_.id} />
+            <Button type="submit" size="sm" variant="outline">
+              {t.acceptance.manualAccept}
+            </Button>
+          </form>
+
+          {acceptanceMessages.length > 0 ? (
+            <div className="rounded-md border p-3">
+              <p className="mb-2 text-sm font-medium">
+                {t.acceptance.conversation}
+              </p>
+              <ul className="space-y-2">
+                {acceptanceMessages.map((m) => (
+                  <li
+                    key={m.id}
+                    className={cn(
+                      'rounded-md px-3 py-2 text-sm',
+                      m.direction === 'inbound'
+                        ? 'bg-muted'
+                        : 'bg-primary/10 text-right',
+                    )}
+                  >
+                    <p>{m.body}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {m.direction} · {m.status} ·{' '}
+                      {m.occurredAt.toISOString().slice(0, 16)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {t.acceptance.noMessages}
+            </p>
+          )}
+        </CardContent>
       </Card>
 
       <Card>

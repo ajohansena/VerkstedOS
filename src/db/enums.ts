@@ -457,3 +457,46 @@ export const qualityDeviationStatus = pgEnum('quality_deviation_status', [
   'resolved',
   'cancelled',
 ]);
+
+// --- Communication & Customer Acceptance (docs/03-data-model.md) -------------
+
+export const communicationChannel = pgEnum('communication_channel', [
+  'sms',
+  'email',
+]);
+
+export const communicationThreadStatus = pgEnum('communication_thread_status', [
+  'open',
+  'closed',
+]);
+
+export const communicationDirection = pgEnum('communication_direction', [
+  'outbound',
+  'inbound',
+]);
+
+export const communicationMessageStatus = pgEnum(
+  'communication_message_status',
+  [
+    'queued', // stored, awaiting a configured provider
+    'sent',
+    'delivered',
+    'failed',
+    'received', // inbound
+  ],
+);
+
+export const caseAcceptanceStatus = pgEnum('case_acceptance_status', [
+  'pending',
+  'accepted',
+  'declined',
+  'expired',
+  'cancelled',
+]);
+
+export const caseAcceptanceMethod = pgEnum('case_acceptance_method', [
+  'job_card_link', // customer clicked the link and accepted
+  'sms_reply', // customer replied OK to the SMS
+  'email_reply', // customer replied to the email
+  'manual', // staff recorded a verbal/in-person acceptance
+]);

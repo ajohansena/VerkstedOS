@@ -58,6 +58,9 @@ import type { checklistTemplateItems } from './schemas/quality/checklist-templat
 import type { checklistRuns } from './schemas/quality/checklist-runs';
 import type { checklistResponses } from './schemas/quality/checklist-responses';
 import type { qualityDeviations } from './schemas/quality/quality-deviations';
+import type { communicationThreads } from './schemas/communication/communication-threads';
+import type { communicationMessages } from './schemas/communication/communication-messages';
+import type { caseAcceptances } from './schemas/communication/case-acceptances';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -325,6 +328,21 @@ export type NewChecklistResponse = InferInsertModel<typeof checklistResponses>;
 
 export type QualityDeviation = InferSelectModel<typeof qualityDeviations>;
 export type NewQualityDeviation = InferInsertModel<typeof qualityDeviations>;
+
+export type CommunicationThread = InferSelectModel<typeof communicationThreads>;
+export type NewCommunicationThread = InferInsertModel<
+  typeof communicationThreads
+>;
+
+export type CommunicationMessage = InferSelectModel<
+  typeof communicationMessages
+>;
+export type NewCommunicationMessage = InferInsertModel<
+  typeof communicationMessages
+>;
+
+export type CaseAcceptance = InferSelectModel<typeof caseAcceptances>;
+export type NewCaseAcceptance = InferInsertModel<typeof caseAcceptances>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

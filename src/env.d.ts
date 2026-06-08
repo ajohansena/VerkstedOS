@@ -27,6 +27,12 @@ declare namespace NodeJS {
     // --- External lookups (Sprint 5) ---
     VEGVESEN_API_KEY: string | undefined;
     SVEVE_1881_API_KEY: string | undefined;
+    // --- Communication (Sprint 12; providers wired later) ---
+    SMS_API_KEY: string | undefined;
+    SMS_SENDER: string | undefined;
+    SMS_INBOUND_SECRET: string | undefined;
+    RESEND_API_KEY: string | undefined;
+    EMAIL_SENDER: string | undefined;
     // --- Dev Control Plane ---
     PLATFORM_ALLOWED_IPS: string | undefined;
     // --- Set by Next.js / CI ---

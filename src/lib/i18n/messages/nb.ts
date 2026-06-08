@@ -117,6 +117,28 @@ export const nb = {
     customerPhone: 'Telefon',
     startCase: 'Start sak',
   },
+  acceptance: {
+    title: 'Kundegodkjenning',
+    description:
+      'Kunden må godkjenne før reparasjonen starter. Send SMS (eller e-post) med lenke til jobbkort.',
+    statusPending: 'Venter på godkjenning',
+    statusAccepted: 'Godkjent',
+    statusDeclined: 'Avslått',
+    statusNone: 'Ikke etterspurt',
+    requestSms: 'Send SMS-godkjenning',
+    requestEmail: 'Send e-post-godkjenning',
+    contactPhone: 'Telefonnummer',
+    contactEmail: 'E-postadresse',
+    summary: 'Sammendrag (vises til kunden)',
+    queued: 'Melding lagret (ingen SMS-leverandør konfigurert ennå).',
+    sent: 'Melding sendt.',
+    manualAccept: 'Registrer muntlig godkjenning',
+    conversation: 'Samtale',
+    noMessages: 'Ingen meldinger ennå.',
+    acceptedVia: 'Godkjent via',
+    jobCardLink: 'Jobbkort-lenke',
+    respondedAt: 'Svart',
+  },
 } as const;
 
 /**

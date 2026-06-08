@@ -94,6 +94,11 @@ export { checklistRuns } from './quality/checklist-runs';
 export { checklistResponses } from './quality/checklist-responses';
 export { qualityDeviations } from './quality/quality-deviations';
 
+// Communication & Customer Acceptance
+export { communicationThreads } from './communication/communication-threads';
+export { communicationMessages } from './communication/communication-messages';
+export { caseAcceptances } from './communication/case-acceptances';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 
