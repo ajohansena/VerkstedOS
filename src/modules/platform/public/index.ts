@@ -42,3 +42,10 @@ export {
   type OutboxRow,
   type FailedEventRow,
 } from '../infrastructure/repositories/platform-events-repository';
+
+export {
+  listOpenSessions,
+  listTimeCorrections,
+  type OpenSessionRow,
+  type CorrectionRow,
+} from '../infrastructure/repositories/platform-workforce-repository';

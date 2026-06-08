@@ -52,6 +52,16 @@ export { productionOrders } from './production/production-orders';
 export { productionStateHistory } from './production/production-state-history';
 export { productionHolds } from './production/production-holds';
 
+// Workforce
+export { employees } from './workforce/employees';
+export { employeeSkills } from './workforce/employee-skills';
+export { resources } from './workforce/resources';
+export { shiftDefinitions } from './workforce/shift-definitions';
+export { clockSessions } from './workforce/clock-sessions';
+export { timeEntries } from './workforce/time-entries';
+export { absenceTypes } from './workforce/absence-types';
+export { absenceEntries } from './workforce/absence-entries';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 

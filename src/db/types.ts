@@ -24,6 +24,14 @@ import type { workflowTransitions } from './schemas/production/workflow-transiti
 import type { productionOrders } from './schemas/production/production-orders';
 import type { productionStateHistory } from './schemas/production/production-state-history';
 import type { productionHolds } from './schemas/production/production-holds';
+import type { employees } from './schemas/workforce/employees';
+import type { employeeSkills } from './schemas/workforce/employee-skills';
+import type { resources } from './schemas/workforce/resources';
+import type { shiftDefinitions } from './schemas/workforce/shift-definitions';
+import type { clockSessions } from './schemas/workforce/clock-sessions';
+import type { timeEntries } from './schemas/workforce/time-entries';
+import type { absenceTypes } from './schemas/workforce/absence-types';
+import type { absenceEntries } from './schemas/workforce/absence-entries';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -165,6 +173,30 @@ export type NewProductionStateHistory = InferInsertModel<
 
 export type ProductionHold = InferSelectModel<typeof productionHolds>;
 export type NewProductionHold = InferInsertModel<typeof productionHolds>;
+
+export type Employee = InferSelectModel<typeof employees>;
+export type NewEmployee = InferInsertModel<typeof employees>;
+
+export type EmployeeSkill = InferSelectModel<typeof employeeSkills>;
+export type NewEmployeeSkill = InferInsertModel<typeof employeeSkills>;
+
+export type Resource = InferSelectModel<typeof resources>;
+export type NewResource = InferInsertModel<typeof resources>;
+
+export type ShiftDefinition = InferSelectModel<typeof shiftDefinitions>;
+export type NewShiftDefinition = InferInsertModel<typeof shiftDefinitions>;
+
+export type ClockSession = InferSelectModel<typeof clockSessions>;
+export type NewClockSession = InferInsertModel<typeof clockSessions>;
+
+export type TimeEntry = InferSelectModel<typeof timeEntries>;
+export type NewTimeEntry = InferInsertModel<typeof timeEntries>;
+
+export type AbsenceType = InferSelectModel<typeof absenceTypes>;
+export type NewAbsenceType = InferInsertModel<typeof absenceTypes>;
+
+export type AbsenceEntry = InferSelectModel<typeof absenceEntries>;
+export type NewAbsenceEntry = InferInsertModel<typeof absenceEntries>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

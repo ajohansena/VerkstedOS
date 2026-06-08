@@ -195,3 +195,37 @@ export const productionHoldKind = pgEnum('production_hold_kind', [
   'paint_cure',
   'other',
 ]);
+
+// --- Workforce ---------------------------------------------------------------
+
+export const employeeStatus = pgEnum('employee_status', ['active', 'inactive']);
+
+export const resourceKind = pgEnum('resource_kind', [
+  'person',
+  'equipment',
+  'facility',
+]);
+
+export const resourceStatus = pgEnum('resource_status', [
+  'active',
+  'inactive',
+  'maintenance',
+]);
+
+export const skillProficiency = pgEnum('skill_proficiency', [
+  'apprentice',
+  'qualified',
+  'expert',
+]);
+
+/** Time-entry kind. `original` rows are event-tier; `correction` rows full-tier. */
+export const timeEntryKind = pgEnum('time_entry_kind', [
+  'work',
+  'break',
+  'correction',
+]);
+
+export const clockSessionStatus = pgEnum('clock_session_status', [
+  'open',
+  'closed',
+]);

@@ -252,6 +252,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 9 — Resources, time & clock
 
+**Status:** ✅ Complete (2026-06-08) — see [sprint-reviews/sprint-09.md](sprint-reviews/sprint-09.md). Employees (separate from users) with multi-skill, resources (person/equipment/facility), shifts, mobile clock-in/out (one-open-session partial unique), event-tier time entries + full-audited corrections, absences. Clock-in carries case+segment (the Sprint 10 driver link). Integration 59 tests (8 new).
+
 **Goal:** Workforce time tracking. Mobile-first clock-in/out.
 
 **Deliverables:**
