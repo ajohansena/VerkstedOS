@@ -347,3 +347,78 @@ export const partLifecycleEventKind = pgEnum('part_lifecycle_event_kind', [
   'cancelled',
   'fulfilled',
 ]);
+
+// --- Documents (cross-cutting, docs/04-document-architecture.md) -------------
+
+export const documentKind = pgEnum('document_kind', [
+  'photo',
+  'estimate_file',
+  'supplier_invoice',
+  'credit_note',
+  'insurance_document',
+  'customer_attachment',
+  'email_attachment',
+  'internal',
+  'generated_invoice',
+  'signed_agreement',
+  'quality_report',
+  'other',
+]);
+
+export const documentSource = pgEnum('document_source', [
+  'upload',
+  'email',
+  'dbs_import',
+  'api',
+  'webhook',
+  'generated',
+  'scan',
+  'system',
+]);
+
+export const documentSensitivity = pgEnum('document_sensitivity', [
+  'public',
+  'internal',
+  'confidential',
+  'restricted',
+]);
+
+export const documentUploaderKind = pgEnum('document_uploader_kind', [
+  'user',
+  'system',
+  'integration',
+  'customer_portal',
+]);
+
+export const documentLinkEntityType = pgEnum('document_link_entity_type', [
+  'case',
+  'claim',
+  'customer',
+  'vehicle',
+  'supplier_invoice',
+  'purchase_order',
+  'communication',
+  'work_segment',
+  'checklist_run',
+  'invoice_basis',
+]);
+
+export const documentLinkRole = pgEnum('document_link_role', [
+  'primary',
+  'attachment',
+  'before_photo',
+  'during_photo',
+  'after_photo',
+  'estimate_source',
+  'invoice_source',
+  'credit_source',
+  'signed_copy',
+  'generated_output',
+  'reference',
+]);
+
+export const documentAccessAction = pgEnum('document_access_action', [
+  'viewed',
+  'downloaded',
+  'signed_url_issued',
+]);

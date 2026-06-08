@@ -82,6 +82,11 @@ export { inventoryStockMovements } from './parts/inventory-stock-movements';
 export { inventoryWithdrawals } from './parts/inventory-withdrawals';
 export { partLifecycleEvents } from './parts/part-lifecycle-events';
 
+// Documents (cross-cutting)
+export { documents } from './documents/documents';
+export { documentLinks } from './documents/document-links';
+export { documentAccessEvents } from './documents/document-access-events';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 

@@ -65,3 +65,8 @@ export {
   type LifecycleRow,
   type RebuildResult,
 } from '../infrastructure/repositories/platform-parts-repository';
+
+export {
+  listDocumentsForOrg,
+  type DocumentRow,
+} from '../infrastructure/repositories/platform-documents-repository';

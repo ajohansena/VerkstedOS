@@ -71,6 +71,13 @@
       "when": 1780910590510,
       "tag": "0019_parts_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780914804520,
+      "tag": "0021_documents_tables",
+      "breakpoints": true
     }
   ]
 }

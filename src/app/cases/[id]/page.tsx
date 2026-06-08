@@ -30,7 +30,13 @@ import {
   remainingWorkMinutes,
 } from '@/modules/production/public';
 import { reconcileCaseParts, listCaseLifecycle } from '@/modules/parts/public';
+import {
+  listDocumentsForEntity,
+  isStorageConfigured,
+} from '@/modules/documents/public';
 import { flagPartAction } from '@/app/actions/parts';
+import { registerCasePhotoAction } from '@/app/actions/documents';
+import { getDictionary } from '@/lib/i18n';
 import { WORK_SEGMENT_CATALOG } from '@/lib/seed/work-segment-catalog';
 import { cn } from '@/lib/utils';
 
@@ -73,6 +79,15 @@ export default async function CaseDetailPage({
     reconcileCaseParts(session.context, id),
     listCaseLifecycle(session.context, id),
   ]);
+
+  const t = getDictionary();
+  const photos = await listDocumentsForEntity(session.context, 'case', id);
+  const storageReady = isStorageConfigured();
+  const photosByCategory = {
+    before_photo: photos.filter((p) => p.role === 'before_photo'),
+    during_photo: photos.filter((p) => p.role === 'during_photo'),
+    after_photo: photos.filter((p) => p.role === 'after_photo'),
+  };
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -213,6 +228,76 @@ export default async function CaseDetailPage({
           </CardContent>
         </Card>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t.case.photos} ({photos.length})
+          </CardTitle>
+          <CardDescription>{t.case.photosDescription}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {!storageReady ? (
+            <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
+              {t.case.storageNotConfigured}
+            </p>
+          ) : null}
+
+          <div className="grid grid-cols-3 gap-3">
+            {(
+              [
+                ['before_photo', t.case.photosBefore],
+                ['during_photo', t.case.photosDuring],
+                ['after_photo', t.case.photosAfter],
+              ] as const
+            ).map(([role, label]) => (
+              <div key={role} className="rounded-md border p-2">
+                <p className="mb-1 text-xs font-medium">
+                  {label} ({photosByCategory[role].length})
+                </p>
+                {photosByCategory[role].length > 0 ? (
+                  <ul className="space-y-1">
+                    {photosByCategory[role].map(({ document }) => (
+                      <li
+                        key={document.id}
+                        className="truncate text-xs text-muted-foreground"
+                        title={document.originalFilename ?? document.id}
+                      >
+                        {document.originalFilename ?? document.id}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {t.case.noPhotos}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <form
+            action={registerCasePhotoAction}
+            className="space-y-2 rounded-md border p-3"
+          >
+            <input type="hidden" name="caseId" value={case_.id} />
+            <p className="text-sm font-medium">{t.case.uploadPhoto}</p>
+            <select
+              name="category"
+              defaultValue="before"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="before">{t.case.photosBefore}</option>
+              <option value="during">{t.case.photosDuring}</option>
+              <option value="after">{t.case.photosAfter}</option>
+            </select>
+            <Input name="filename" placeholder="IMG_2451.jpg" />
+            <Button type="submit" size="sm">
+              {t.common.add}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

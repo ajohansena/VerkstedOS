@@ -337,6 +337,10 @@ Sprint 1 ─ Foundation ─ 4
 
 **Goal:** A complete, friendly workshop can run cases end-to-end. Dev Control Plane reaches "operational" quality.
 
+**Status:** 🚧 In progress. Landed so far: (1) **i18n foundation** — Norwegian Bokmål (nb-NO) is the binding default for all user-facing UI (`src/lib/i18n`, type-safe nb/en catalogs, `getDictionary`/`resolveLocale`/`format`; home + nav translated); DB schema, code, APIs and internals stay English. (2) **Documents module** (docs/04) — `documents`, `document_links` (polymorphic), `document_access_events` (append-only) with sensitivity-class storage buckets + deterministic tenant-prefixed paths (storage port; Supabase Storage adapter gated on config). (3) **Photo gallery** on case detail (før/under/etter, Norwegian). (4) Dev `/dev/documents` inspection. Integration 75 tests (4 new docs). Still to come this sprint: image upload pipeline + virus scan, checklists + QC sign-off, quality deviations, digital signatures, communication (SMS/email), Dev impersonation + feature flags, E2E coverage, then the First-Friendly-Customer go-live gate.
+
+**Localization policy (binding, from this sprint):** primary application language is Norwegian (nb-NO). User-facing labels, navigation, buttons, validation messages and workflows are Norwegian by default; a per-org `settings.locale` may override. Database schema, code, APIs and technical internals remain English.
+
 **Deliverables:**
 - `documents` module (table, document_links polymorphic, document_access_events)
 - Image upload (mobile + desktop) with virus scan + variant generation pipeline

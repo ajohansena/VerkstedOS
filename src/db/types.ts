@@ -50,6 +50,9 @@ import type { inventoryItems } from './schemas/parts/inventory-items';
 import type { inventoryStockMovements } from './schemas/parts/inventory-stock-movements';
 import type { inventoryWithdrawals } from './schemas/parts/inventory-withdrawals';
 import type { partLifecycleEvents } from './schemas/parts/part-lifecycle-events';
+import type { documents } from './schemas/documents/documents';
+import type { documentLinks } from './schemas/documents/document-links';
+import type { documentAccessEvents } from './schemas/documents/document-access-events';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -286,6 +289,17 @@ export type NewInventoryWithdrawal = InferInsertModel<
 export type PartLifecycleEvent = InferSelectModel<typeof partLifecycleEvents>;
 export type NewPartLifecycleEvent = InferInsertModel<
   typeof partLifecycleEvents
+>;
+
+export type Document = InferSelectModel<typeof documents>;
+export type NewDocument = InferInsertModel<typeof documents>;
+
+export type DocumentLink = InferSelectModel<typeof documentLinks>;
+export type NewDocumentLink = InferInsertModel<typeof documentLinks>;
+
+export type DocumentAccessEvent = InferSelectModel<typeof documentAccessEvents>;
+export type NewDocumentAccessEvent = InferInsertModel<
+  typeof documentAccessEvents
 >;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
