@@ -77,6 +77,8 @@ import type { outboxEvents } from './schemas/audit/outbox-events';
 import type { failedEvents } from './schemas/audit/failed-events';
 import type { auditEvents } from './schemas/audit/audit-events';
 import type { platformUsers } from './schemas/platform/platform-users';
+import type { featureFlags } from './schemas/platform/feature-flags';
+import type { platformImpersonationSessions } from './schemas/platform/platform-impersonation-sessions';
 import type { platformRoleAssignments } from './schemas/platform/platform-role-assignments';
 import type { platformAuditEvents } from './schemas/platform/platform-audit-events';
 
@@ -362,6 +364,16 @@ export type NewAuditEvent = InferInsertModel<typeof auditEvents>;
 
 export type PlatformUser = InferSelectModel<typeof platformUsers>;
 export type NewPlatformUser = InferInsertModel<typeof platformUsers>;
+
+export type FeatureFlag = InferSelectModel<typeof featureFlags>;
+export type NewFeatureFlag = InferInsertModel<typeof featureFlags>;
+
+export type PlatformImpersonationSession = InferSelectModel<
+  typeof platformImpersonationSessions
+>;
+export type NewPlatformImpersonationSession = InferInsertModel<
+  typeof platformImpersonationSessions
+>;
 
 export type PlatformRoleAssignment = InferSelectModel<
   typeof platformRoleAssignments

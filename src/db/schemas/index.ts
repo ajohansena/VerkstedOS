@@ -112,7 +112,8 @@ export { platformUsers } from './platform/platform-users';
 export { platformRoleAssignments } from './platform/platform-role-assignments';
 export { platformPermissions } from './platform/platform-permissions';
 export { platformRolePermissions } from './platform/platform-role-permissions';
-
+export { featureFlags } from './platform/feature-flags';
+export { platformImpersonationSessions } from './platform/platform-impersonation-sessions';
 // NOTE: audit_events and platform_audit_events are partitioned tables created by
 // hand-authored migrations; they are intentionally NOT exported here so
 // drizzle-kit does not generate plain CREATE TABLE for them. Query them via the

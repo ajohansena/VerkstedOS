@@ -99,6 +99,13 @@
       "when": 1780928708594,
       "tag": "0027_digital_signatures_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1780929193423,
+      "tag": "0029_platform_flags_impersonation_tables",
+      "breakpoints": true
     }
   ]
 }

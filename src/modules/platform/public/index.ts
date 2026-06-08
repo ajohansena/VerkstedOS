@@ -79,6 +79,21 @@ export {
 } from '../infrastructure/repositories/platform-communication-repository';
 
 export {
+  listFeatureFlags,
+  setFeatureFlag,
+  isFeatureEnabled,
+  type FeatureFlagRow,
+} from '../infrastructure/repositories/platform-feature-flag-repository';
+
+export {
+  startImpersonation,
+  endImpersonation,
+  listImpersonationSessions,
+  type StartImpersonationInput,
+  type ImpersonationRow,
+} from '../infrastructure/repositories/platform-impersonation-repository';
+
+export {
   qcSummaryForOrg,
   type QcRunRow,
   type QcOrgSummary,
