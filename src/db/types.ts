@@ -53,6 +53,11 @@ import type { partLifecycleEvents } from './schemas/parts/part-lifecycle-events'
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
+import type { checklistTemplates } from './schemas/quality/checklist-templates';
+import type { checklistTemplateItems } from './schemas/quality/checklist-template-items';
+import type { checklistRuns } from './schemas/quality/checklist-runs';
+import type { checklistResponses } from './schemas/quality/checklist-responses';
+import type { qualityDeviations } from './schemas/quality/quality-deviations';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -301,6 +306,25 @@ export type DocumentAccessEvent = InferSelectModel<typeof documentAccessEvents>;
 export type NewDocumentAccessEvent = InferInsertModel<
   typeof documentAccessEvents
 >;
+
+export type ChecklistTemplate = InferSelectModel<typeof checklistTemplates>;
+export type NewChecklistTemplate = InferInsertModel<typeof checklistTemplates>;
+
+export type ChecklistTemplateItem = InferSelectModel<
+  typeof checklistTemplateItems
+>;
+export type NewChecklistTemplateItem = InferInsertModel<
+  typeof checklistTemplateItems
+>;
+
+export type ChecklistRun = InferSelectModel<typeof checklistRuns>;
+export type NewChecklistRun = InferInsertModel<typeof checklistRuns>;
+
+export type ChecklistResponse = InferSelectModel<typeof checklistResponses>;
+export type NewChecklistResponse = InferInsertModel<typeof checklistResponses>;
+
+export type QualityDeviation = InferSelectModel<typeof qualityDeviations>;
+export type NewQualityDeviation = InferInsertModel<typeof qualityDeviations>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

@@ -11,40 +11,70 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { createCaseAction } from '@/app/actions/case';
+import { IntakeSearch } from '@/components/intake-search';
 import { getSessionContext } from '@/lib/auth/session';
 import { listRecentCustomers } from '@/modules/customer/public';
+import { getDictionary } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * /cases/new — intake form (User surface). Creates a case and, optionally, a
- * first funding source. Additional funding sources are added on the case detail
- * page. The service validates the multi-funding rules.
+ * /cases/new — intake (User surface, Sprint 12 UX). Reception starts from a
+ * registration number or phone number (how Norwegian workshops actually work),
+ * with instant existing-customer/vehicle detection and a fast create-and-open
+ * path. The original customer-dropdown form remains below as an advanced option
+ * (e.g. setting an incident tag / first funding source up front).
  */
 export default async function NewCasePage() {
   const session = await getSessionContext();
   if (!session) redirect('/login');
 
+  const t = getDictionary();
   const customers = await listRecentCustomers(session.context, 50);
 
   return (
     <main className="mx-auto max-w-xl space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">New case</h1>
+        <h1 className="text-2xl font-semibold">{t.intake.title}</h1>
         <Link
           href="/cases"
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
         >
-          Back
+          {t.common.back}
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Case intake</CardTitle>
+          <CardTitle>{t.intake.title}</CardTitle>
+          <CardDescription>{t.intake.searchHint}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <IntakeSearch
+            labels={{
+              searchPlaceholder: t.intake.searchPlaceholder,
+              searchHint: t.intake.searchHint,
+              search: t.intake.search,
+              vehicles: t.intake.vehicles,
+              customers: t.intake.customers,
+              noResults: t.intake.noResults,
+              createCase: t.intake.createCase,
+              quickCreate: t.intake.quickCreate,
+              regNumber: t.intake.regNumber,
+              customerName: t.intake.customerName,
+              customerPhone: t.intake.customerPhone,
+              startCase: t.intake.startCase,
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Avansert</CardTitle>
           <CardDescription>
-            A case number is assigned automatically (per-org format).
+            Velg eksisterende kunde og legg til hendelse / finansieringskilde.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -54,14 +84,14 @@ export default async function NewCasePage() {
                 htmlFor="primaryCustomerId"
                 className="text-sm font-medium"
               >
-                Primary customer
+                {t.nav.customers}
               </label>
               <select
                 id="primaryCustomerId"
                 name="primaryCustomerId"
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="">— none —</option>
+                <option value="">— {t.common.none} —</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -71,41 +101,41 @@ export default async function NewCasePage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="incidentTag" className="text-sm font-medium">
-                Incident
+                Hendelse
               </label>
               <Input
                 id="incidentTag"
                 name="incidentTag"
-                placeholder="e.g. Parking lot collision"
+                placeholder="f.eks. Parkeringsskade"
               />
             </div>
 
             <fieldset className="space-y-3 rounded-md border p-3">
               <legend className="px-1 text-sm font-medium">
-                First funding source (optional)
+                Finansieringskilde ({t.common.optional})
               </legend>
               <select
                 name="fundingKind"
                 defaultValue=""
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="">— add later —</option>
-                <option value="insurance">Insurance</option>
-                <option value="private_pay">Private pay</option>
-                <option value="warranty">Warranty</option>
-                <option value="goodwill">Goodwill</option>
-                <option value="internal_rework">Internal rework</option>
+                <option value="">— legg til senere —</option>
+                <option value="insurance">Forsikring</option>
+                <option value="private_pay">Privat</option>
+                <option value="warranty">Garanti</option>
+                <option value="goodwill">Kulanse</option>
+                <option value="internal_rework">Internt omarbeid</option>
               </select>
               <Input
                 name="fundingLabel"
-                placeholder="Label (e.g. Front – Fremtind)"
+                placeholder="Etikett (f.eks. Front – Fremtind)"
               />
               <select
                 name="payerCustomerId"
                 defaultValue=""
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="">Payer customer (private pay)</option>
+                <option value="">Betalende kunde (privat)</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -113,13 +143,13 @@ export default async function NewCasePage() {
                 ))}
               </select>
               <p className="text-xs text-muted-foreground">
-                Insurance funding requires an insurer — add it on the case page
-                where the insurer can be selected.
+                Forsikring krever et forsikringsselskap — legges til på
+                saksiden.
               </p>
             </fieldset>
 
             <Button type="submit" className="w-full">
-              Create case
+              {t.intake.createCase}
             </Button>
           </form>
         </CardContent>

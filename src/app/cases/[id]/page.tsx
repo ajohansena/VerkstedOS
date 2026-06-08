@@ -31,11 +31,23 @@ import {
 } from '@/modules/production/public';
 import { reconcileCaseParts, listCaseLifecycle } from '@/modules/parts/public';
 import {
-  listDocumentsForEntity,
+  listCasePhotos,
   isStorageConfigured,
 } from '@/modules/documents/public';
+import {
+  listChecklistTemplates,
+  listChecklistRuns,
+  listDeviations,
+} from '@/modules/quality/public';
 import { flagPartAction } from '@/app/actions/parts';
 import { registerCasePhotoAction } from '@/app/actions/documents';
+import {
+  startChecklistAction,
+  raiseDeviationAction,
+  resolveDeviationAction,
+} from '@/app/actions/quality';
+import { PhotoUploader } from '@/components/photo-uploader';
+import { PhotoGallery } from '@/components/photo-gallery';
 import { getDictionary } from '@/lib/i18n';
 import { WORK_SEGMENT_CATALOG } from '@/lib/seed/work-segment-catalog';
 import { cn } from '@/lib/utils';
@@ -81,13 +93,52 @@ export default async function CaseDetailPage({
   ]);
 
   const t = getDictionary();
-  const photos = await listDocumentsForEntity(session.context, 'case', id);
+  const photos = await listCasePhotos(session.context, id);
   const storageReady = isStorageConfigured();
-  const photosByCategory = {
-    before_photo: photos.filter((p) => p.role === 'before_photo'),
-    during_photo: photos.filter((p) => p.role === 'during_photo'),
-    after_photo: photos.filter((p) => p.role === 'after_photo'),
-  };
+  const photoGroups = [
+    {
+      role: 'before_photo',
+      label: t.case.photosBefore,
+      photos: photos
+        .filter((p) => p.role === 'before_photo')
+        .map((p) => ({
+          id: p.document.id,
+          filename: p.document.originalFilename ?? p.document.id,
+          thumbUrl: p.thumbUrl,
+          fullUrl: p.fullUrl,
+        })),
+    },
+    {
+      role: 'during_photo',
+      label: t.case.photosDuring,
+      photos: photos
+        .filter((p) => p.role === 'during_photo')
+        .map((p) => ({
+          id: p.document.id,
+          filename: p.document.originalFilename ?? p.document.id,
+          thumbUrl: p.thumbUrl,
+          fullUrl: p.fullUrl,
+        })),
+    },
+    {
+      role: 'after_photo',
+      label: t.case.photosAfter,
+      photos: photos
+        .filter((p) => p.role === 'after_photo')
+        .map((p) => ({
+          id: p.document.id,
+          filename: p.document.originalFilename ?? p.document.id,
+          thumbUrl: p.thumbUrl,
+          fullUrl: p.fullUrl,
+        })),
+    },
+  ];
+
+  const [qcTemplates, qcRuns, deviations] = await Promise.all([
+    listChecklistTemplates(session.context),
+    listChecklistRuns(session.context, id),
+    listDeviations(session.context, id),
+  ]);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -237,65 +288,173 @@ export default async function CaseDetailPage({
           <CardDescription>{t.case.photosDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {!storageReady ? (
+          {storageReady ? (
+            <PhotoUploader
+              caseId={case_.id}
+              labels={{
+                before: t.case.photosBefore,
+                during: t.case.photosDuring,
+                after: t.case.photosAfter,
+                drop: t.case.photosDrop,
+                choose: t.case.photosChoose,
+                camera: t.case.photosCamera,
+                uploading: t.case.photosUploading,
+                done: t.case.photosDone,
+                failed: t.case.photosFailed,
+              }}
+            />
+          ) : (
             <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
               {t.case.storageNotConfigured}
             </p>
-          ) : null}
+          )}
 
-          <div className="grid grid-cols-3 gap-3">
-            {(
-              [
-                ['before_photo', t.case.photosBefore],
-                ['during_photo', t.case.photosDuring],
-                ['after_photo', t.case.photosAfter],
-              ] as const
-            ).map(([role, label]) => (
-              <div key={role} className="rounded-md border p-2">
-                <p className="mb-1 text-xs font-medium">
-                  {label} ({photosByCategory[role].length})
-                </p>
-                {photosByCategory[role].length > 0 ? (
-                  <ul className="space-y-1">
-                    {photosByCategory[role].map(({ document }) => (
-                      <li
-                        key={document.id}
-                        className="truncate text-xs text-muted-foreground"
-                        title={document.originalFilename ?? document.id}
-                      >
-                        {document.originalFilename ?? document.id}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    {t.case.noPhotos}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+          <PhotoGallery groups={photoGroups} emptyLabel={t.case.noPhotos} />
 
-          <form
-            action={registerCasePhotoAction}
-            className="space-y-2 rounded-md border p-3"
-          >
-            <input type="hidden" name="caseId" value={case_.id} />
-            <p className="text-sm font-medium">{t.case.uploadPhoto}</p>
-            <select
-              name="category"
-              defaultValue="before"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+          {!storageReady ? (
+            <form
+              action={registerCasePhotoAction}
+              className="space-y-2 rounded-md border p-3"
             >
-              <option value="before">{t.case.photosBefore}</option>
-              <option value="during">{t.case.photosDuring}</option>
-              <option value="after">{t.case.photosAfter}</option>
-            </select>
-            <Input name="filename" placeholder="IMG_2451.jpg" />
-            <Button type="submit" size="sm">
-              {t.common.add}
-            </Button>
-          </form>
+              <input type="hidden" name="caseId" value={case_.id} />
+              <p className="text-sm font-medium">{t.case.uploadPhoto}</p>
+              <select
+                name="category"
+                defaultValue="before"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="before">{t.case.photosBefore}</option>
+                <option value="during">{t.case.photosDuring}</option>
+                <option value="after">{t.case.photosAfter}</option>
+              </select>
+              <Input name="filename" placeholder="IMG_2451.jpg" />
+              <Button type="submit" size="sm">
+                {t.common.add}
+              </Button>
+            </form>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {t.quality.title} ({qcRuns.length})
+          </CardTitle>
+          <CardDescription>{t.quality.description}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {qcRuns.length > 0 ? (
+            <ul className="divide-y rounded-md border">
+              {qcRuns.map((run) => (
+                <li
+                  key={run.id}
+                  className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+                >
+                  <span className="text-xs text-muted-foreground">
+                    {run.status === 'passed'
+                      ? t.quality.statusPassed
+                      : run.status === 'failed'
+                        ? t.quality.statusFailed
+                        : t.quality.statusInProgress}
+                  </span>
+                  <Link
+                    href={`/cases/${case_.id}/qc/${run.id}`}
+                    className="text-xs underline"
+                  >
+                    {t.quality.open}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t.quality.noRuns}</p>
+          )}
+
+          {qcTemplates.length > 0 ? (
+            <form
+              action={startChecklistAction}
+              className="flex flex-wrap items-center gap-2 rounded-md border p-3"
+            >
+              <input type="hidden" name="caseId" value={case_.id} />
+              <select
+                name="templateId"
+                className="h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {qcTemplates.map((tpl) => (
+                  <option key={tpl.id} value={tpl.id}>
+                    {tpl.name}
+                  </option>
+                ))}
+              </select>
+              <Button type="submit" size="sm">
+                {t.quality.startChecklist}
+              </Button>
+            </form>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {/* No templates yet — seed them in admin */}
+              <Link href="/admin/checklists" className="underline">
+                {t.quality.selectTemplate}
+              </Link>
+            </p>
+          )}
+
+          <div className="rounded-md border p-3">
+            <p className="mb-2 text-sm font-medium">
+              {t.quality.deviations} ({deviations.length})
+            </p>
+            {deviations.length > 0 ? (
+              <ul className="mb-2 divide-y rounded-md border">
+                {deviations.map((d) => (
+                  <li
+                    key={d.id}
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+                  >
+                    <span>{d.title}</span>
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {d.severity} · {d.status}
+                      {d.status === 'open' ? (
+                        <form action={resolveDeviationAction}>
+                          <input type="hidden" name="caseId" value={case_.id} />
+                          <input
+                            type="hidden"
+                            name="deviationId"
+                            value={d.id}
+                          />
+                          <Button type="submit" size="sm" variant="outline">
+                            {t.quality.resolve}
+                          </Button>
+                        </form>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mb-2 text-xs text-muted-foreground">
+                {t.quality.noDeviations}
+              </p>
+            )}
+            <form action={raiseDeviationAction} className="space-y-2">
+              <input type="hidden" name="caseId" value={case_.id} />
+              <Input name="title" placeholder={t.quality.deviationTitle} />
+              <div className="flex gap-2">
+                <select
+                  name="severity"
+                  defaultValue="minor"
+                  className="h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="minor">{t.quality.severityMinor}</option>
+                  <option value="major">{t.quality.severityMajor}</option>
+                  <option value="critical">{t.quality.severityCritical}</option>
+                </select>
+                <Button type="submit" size="sm">
+                  {t.quality.raiseDeviation}
+                </Button>
+              </div>
+            </form>
+          </div>
         </CardContent>
       </Card>
 

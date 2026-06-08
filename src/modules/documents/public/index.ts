@@ -18,7 +18,19 @@ export {
 } from '../application/services/documents';
 
 export {
+  createPhotoUpload,
+  finalizePhoto,
+  listCasePhotos,
+  type PhotoCategory,
+  type CreatePhotoUploadInput,
+  type PhotoUploadTicket,
+  type CasePhoto,
+} from '../application/services/photo-upload';
+
+export {
   isStorageConfigured,
   bucketForSensitivity,
   type Sensitivity,
 } from '../infrastructure/storage/storage-port';
+
+export { ensureBuckets } from '../infrastructure/storage/supabase-storage';

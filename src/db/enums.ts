@@ -422,3 +422,38 @@ export const documentAccessAction = pgEnum('document_access_action', [
   'downloaded',
   'signed_url_issued',
 ]);
+
+// --- Quality (docs/03-data-model.md, docs/10-production-domain.md) -----------
+
+export const checklistTemplateKind = pgEnum('checklist_template_kind', [
+  'delivery',
+  'calibration',
+  'paint',
+  'general',
+]);
+
+export const checklistRunStatus = pgEnum('checklist_run_status', [
+  'in_progress',
+  'passed',
+  'failed',
+  'cancelled',
+]);
+
+export const checklistResponseResult = pgEnum('checklist_response_result', [
+  'pass',
+  'fail',
+  'na',
+]);
+
+export const qualityDeviationSeverity = pgEnum('quality_deviation_severity', [
+  'minor',
+  'major',
+  'critical',
+]);
+
+export const qualityDeviationStatus = pgEnum('quality_deviation_status', [
+  'open',
+  'in_progress',
+  'resolved',
+  'cancelled',
+]);

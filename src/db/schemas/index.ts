@@ -87,6 +87,13 @@ export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';
 export { documentAccessEvents } from './documents/document-access-events';
 
+// Quality
+export { checklistTemplates } from './quality/checklist-templates';
+export { checklistTemplateItems } from './quality/checklist-template-items';
+export { checklistRuns } from './quality/checklist-runs';
+export { checklistResponses } from './quality/checklist-responses';
+export { qualityDeviations } from './quality/quality-deviations';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 

@@ -78,6 +78,13 @@
       "when": 1780914804520,
       "tag": "0021_documents_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780921671290,
+      "tag": "0023_quality_tables",
+      "breakpoints": true
     }
   ]
 }

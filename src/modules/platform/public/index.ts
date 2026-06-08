@@ -70,3 +70,9 @@ export {
   listDocumentsForOrg,
   type DocumentRow,
 } from '../infrastructure/repositories/platform-documents-repository';
+
+export {
+  qcSummaryForOrg,
+  type QcRunRow,
+  type QcOrgSummary,
+} from '../infrastructure/repositories/platform-quality-repository';
