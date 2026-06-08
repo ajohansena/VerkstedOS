@@ -18,6 +18,12 @@ import type { estimateLaborLines } from './schemas/estimating/estimate-labor-lin
 import type { estimatePaintLines } from './schemas/estimating/estimate-paint-lines';
 import type { estimateParts } from './schemas/estimating/estimate-parts';
 import type { estimateTotals } from './schemas/estimating/estimate-totals';
+import type { workflowDefinitions } from './schemas/production/workflow-definitions';
+import type { workflowStates } from './schemas/production/workflow-states';
+import type { workflowTransitions } from './schemas/production/workflow-transitions';
+import type { productionOrders } from './schemas/production/production-orders';
+import type { productionStateHistory } from './schemas/production/production-state-history';
+import type { productionHolds } from './schemas/production/production-holds';
 import type { effectivePermissionsCache } from './schemas/identity/effective-permissions-cache';
 import type { memberships } from './schemas/identity/memberships';
 import type { organizations } from './schemas/identity/organizations';
@@ -133,6 +139,32 @@ export type NewEstimatePart = InferInsertModel<typeof estimateParts>;
 
 export type EstimateTotals = InferSelectModel<typeof estimateTotals>;
 export type NewEstimateTotals = InferInsertModel<typeof estimateTotals>;
+
+export type WorkflowDefinition = InferSelectModel<typeof workflowDefinitions>;
+export type NewWorkflowDefinition = InferInsertModel<
+  typeof workflowDefinitions
+>;
+
+export type WorkflowState = InferSelectModel<typeof workflowStates>;
+export type NewWorkflowState = InferInsertModel<typeof workflowStates>;
+
+export type WorkflowTransition = InferSelectModel<typeof workflowTransitions>;
+export type NewWorkflowTransition = InferInsertModel<
+  typeof workflowTransitions
+>;
+
+export type ProductionOrder = InferSelectModel<typeof productionOrders>;
+export type NewProductionOrder = InferInsertModel<typeof productionOrders>;
+
+export type ProductionStateHistory = InferSelectModel<
+  typeof productionStateHistory
+>;
+export type NewProductionStateHistory = InferInsertModel<
+  typeof productionStateHistory
+>;
+
+export type ProductionHold = InferSelectModel<typeof productionHolds>;
+export type NewProductionHold = InferInsertModel<typeof productionHolds>;
 
 export type InsuranceCompany = InferSelectModel<typeof insuranceCompanies>;
 export type NewInsuranceCompany = InferInsertModel<typeof insuranceCompanies>;

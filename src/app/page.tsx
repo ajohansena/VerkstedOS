@@ -83,6 +83,12 @@ export default async function HomePage() {
                 Cases
               </Link>
               <Link
+                href="/production"
+                className={cn(buttonVariants({ variant: 'outline' }))}
+              >
+                Production
+              </Link>
+              <Link
                 href="/customers"
                 className={cn(buttonVariants({ variant: 'outline' }))}
               >

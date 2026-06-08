@@ -224,6 +224,8 @@ Sprint 1 ─ Foundation ─ 4
 
 ### Sprint 8 — Production workflow + event inspection
 
+**Status:** ✅ Complete (2026-06-08) — see [sprint-reviews/sprint-08.md](sprint-reviews/sprint-08.md). Configurable workflow (data, per org), ProductionOrder container, append-only state history, transition machine with **status as projection** (the Sprint 8 guardrail), holds, production board, workflow admin view, and `/dev/events` (outbox/failed/replay). Integration 51 tests (8 new).
+
 **Goal:** Cases move through production states. Workflow is configurable. Events inspectable.
 
 **Deliverables:**

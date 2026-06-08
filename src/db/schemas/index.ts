@@ -44,6 +44,14 @@ export { estimatePaintLines } from './estimating/estimate-paint-lines';
 export { estimateParts } from './estimating/estimate-parts';
 export { estimateTotals } from './estimating/estimate-totals';
 
+// Production
+export { workflowDefinitions } from './production/workflow-definitions';
+export { workflowStates } from './production/workflow-states';
+export { workflowTransitions } from './production/workflow-transitions';
+export { productionOrders } from './production/production-orders';
+export { productionStateHistory } from './production/production-state-history';
+export { productionHolds } from './production/production-holds';
+
 // Platform-shared catalogs
 export { insuranceCompanies } from './platform/insurance-companies';
 

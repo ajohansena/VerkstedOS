@@ -33,3 +33,12 @@ export {
   dbsInboxStats,
   type InboxItem,
 } from '../infrastructure/repositories/platform-dbs-repository';
+
+export {
+  listOutbox,
+  outboxCounts,
+  listFailedEvents,
+  replayOutboxEvent,
+  type OutboxRow,
+  type FailedEventRow,
+} from '../infrastructure/repositories/platform-events-repository';

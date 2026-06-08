@@ -11,12 +11,17 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { addFundingAction } from '@/app/actions/case';
+import { ensureOrderAction, transitionAction } from '@/app/actions/production';
 import { getSessionContext } from '@/lib/auth/session';
 import {
   findCaseById,
   listCaseParties,
   listFundingSources,
 } from '@/modules/case/public';
+import {
+  listAvailableTransitions,
+  listStateHistory,
+} from '@/modules/production/public';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -42,6 +47,12 @@ export default async function CaseDetailPage({
     listFundingSources(session.context, id),
     listCaseParties(session.context, id),
   ]);
+
+  const [transitions, history] = await Promise.all([
+    listAvailableTransitions(session.context, id),
+    listStateHistory(session.context, id),
+  ]);
+  const hasProductionOrder = history.length > 0;
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -71,6 +82,42 @@ export default async function CaseDetailPage({
             {case_.incidentTag ? ` · ${case_.incidentTag}` : ''}
           </CardDescription>
         </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Production</CardTitle>
+          <CardDescription>
+            Status is a projection of the transition log ({history.length}{' '}
+            transition(s)).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {!hasProductionOrder ? (
+            <form action={ensureOrderAction}>
+              <input type="hidden" name="caseId" value={case_.id} />
+              <Button type="submit" size="sm">
+                Start production
+              </Button>
+            </form>
+          ) : transitions.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {transitions.map((t) => (
+                <form key={t.id} action={transitionAction}>
+                  <input type="hidden" name="caseId" value={case_.id} />
+                  <input type="hidden" name="toStateCode" value={t.code} />
+                  <Button type="submit" size="sm" variant="outline">
+                    → {t.label}
+                  </Button>
+                </form>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No further transitions from the current state.
+            </p>
+          )}
+        </CardContent>
       </Card>
 
       <Card>

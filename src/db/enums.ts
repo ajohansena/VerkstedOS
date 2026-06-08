@@ -164,3 +164,34 @@ export const integrationInboxStatus = pgEnum('integration_inbox_status', [
   'processed',
   'failed',
 ]);
+
+// --- Production --------------------------------------------------------------
+
+/**
+ * Workflow state category — drives behavior, NOT the source of truth
+ * (docs/10-production-domain.md, Sprint 8 guardrail). `active` = work running;
+ * `waiting` = paused by external dependency; `terminal` = closed.
+ */
+export const workflowStateCategory = pgEnum('workflow_state_category', [
+  'active',
+  'waiting',
+  'terminal',
+]);
+
+export const workflowTransitionTrigger = pgEnum('workflow_transition_trigger', [
+  'manual',
+  'automatic',
+  'event_driven',
+]);
+
+export const productionHoldKind = pgEnum('production_hold_kind', [
+  'parts',
+  'approval_insurance',
+  'approval_customer',
+  'transport',
+  'subcontractor',
+  'documentation',
+  'equipment_offline',
+  'paint_cure',
+  'other',
+]);
