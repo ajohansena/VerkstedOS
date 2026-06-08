@@ -53,3 +53,20 @@ export {
   type ReworkRateResult,
   type ChecklistRunOutcome,
 } from '../application/calculations/qc-metrics';
+
+// Digital signatures (tamper-evident chain)
+export {
+  appendSignature,
+  listSignatures,
+  verifyCaseChain,
+  verifyCaseChainAdmin,
+  type SignInput,
+} from '../application/services/signatures';
+
+export {
+  hashPayload,
+  computeChainHash,
+  verifyChain,
+  type VerifyResult,
+  type ChainEntry,
+} from '../application/calculations/signature-chain';

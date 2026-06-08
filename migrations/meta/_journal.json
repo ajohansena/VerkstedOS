@@ -92,6 +92,13 @@
       "when": 1780923629930,
       "tag": "0025_communication_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1780928708594,
+      "tag": "0027_digital_signatures_tables",
+      "breakpoints": true
     }
   ]
 }

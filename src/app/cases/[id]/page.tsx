@@ -38,6 +38,8 @@ import {
   listChecklistTemplates,
   listChecklistRuns,
   listDeviations,
+  listSignatures,
+  verifyCaseChain,
 } from '@/modules/quality/public';
 import { flagPartAction } from '@/app/actions/parts';
 import { registerCasePhotoAction } from '@/app/actions/documents';
@@ -46,6 +48,7 @@ import {
   raiseDeviationAction,
   resolveDeviationAction,
 } from '@/app/actions/quality';
+import { signCaseAction } from '@/app/actions/signatures';
 import {
   latestAcceptance,
   listThreads,
@@ -148,6 +151,11 @@ export default async function CaseDetailPage({
     listChecklistTemplates(session.context),
     listChecklistRuns(session.context, id),
     listDeviations(session.context, id),
+  ]);
+
+  const [signatures, signatureChain] = await Promise.all([
+    listSignatures(session.context, id),
+    verifyCaseChain(session.context, id),
   ]);
 
   const acceptance = await latestAcceptance(session.context, id);
@@ -581,6 +589,73 @@ export default async function CaseDetailPage({
                 </select>
                 <Button type="submit" size="sm">
                   {t.quality.raiseDeviation}
+                </Button>
+              </div>
+            </form>
+          </div>
+
+          <div className="rounded-md border p-3">
+            <p className="mb-2 flex items-center justify-between text-sm font-medium">
+              <span>
+                {t.quality.signatures} ({signatures.length})
+              </span>
+              {signatures.length > 0 ? (
+                <span
+                  className={cn(
+                    'text-xs',
+                    signatureChain.valid
+                      ? 'text-green-600'
+                      : 'text-destructive',
+                  )}
+                >
+                  {signatureChain.valid
+                    ? t.quality.chainValid
+                    : t.quality.chainBroken}
+                </span>
+              ) : null}
+            </p>
+            {signatures.length > 0 ? (
+              <ul className="mb-2 divide-y rounded-md border">
+                {signatures.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-xs"
+                  >
+                    <span>
+                      #{s.sequenceNo} · {s.kind}
+                      {s.signerName ? ` · ${s.signerName}` : ''}
+                    </span>
+                    <span
+                      className="font-mono text-muted-foreground"
+                      title={s.chainHash}
+                    >
+                      {s.chainHash.slice(0, 10)}…
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mb-2 text-xs text-muted-foreground">
+                {t.quality.noSignatures}
+              </p>
+            )}
+            <form action={signCaseAction} className="space-y-2">
+              <input type="hidden" name="caseId" value={case_.id} />
+              <div className="flex gap-2">
+                <select
+                  name="kind"
+                  defaultValue="delivery_handover"
+                  className="h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="repair_acceptance">
+                    {t.acceptance.title}
+                  </option>
+                  <option value="delivery_handover">Levering</option>
+                  <option value="quality_signoff">{t.quality.signOff}</option>
+                </select>
+                <Input name="signerName" placeholder={t.quality.signerName} />
+                <Button type="submit" size="sm">
+                  {t.quality.sign}
                 </Button>
               </div>
             </form>

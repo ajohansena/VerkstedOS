@@ -94,6 +94,12 @@ export const en = {
     noRuns: 'No checklists yet.',
     noDeviations: 'No deviations.',
     commentRequired: 'A comment is required on failure.',
+    signatures: 'Signatures',
+    sign: 'Sign',
+    signerName: 'Signer name',
+    chainValid: 'Signature chain valid',
+    chainBroken: 'Signature chain broken (tampering detected)',
+    noSignatures: 'No signatures yet.',
   },
   validation: {
     required: 'This field is required.',

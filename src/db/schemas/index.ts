@@ -93,6 +93,7 @@ export { checklistTemplateItems } from './quality/checklist-template-items';
 export { checklistRuns } from './quality/checklist-runs';
 export { checklistResponses } from './quality/checklist-responses';
 export { qualityDeviations } from './quality/quality-deviations';
+export { digitalSignatures } from './quality/digital-signatures';
 
 // Communication & Customer Acceptance
 export { communicationThreads } from './communication/communication-threads';

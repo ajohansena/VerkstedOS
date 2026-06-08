@@ -500,3 +500,19 @@ export const caseAcceptanceMethod = pgEnum('case_acceptance_method', [
   'email_reply', // customer replied to the email
   'manual', // staff recorded a verbal/in-person acceptance
 ]);
+
+// --- Digital signatures (docs/03-data-model.md, quality module) -------------
+
+export const signatureKind = pgEnum('signature_kind', [
+  'repair_acceptance', // customer approved a repair start
+  'delivery_handover', // customer signed at handover
+  'rental_agreement', // signed rental contract
+  'quality_signoff', // internal QC sign-off signature
+  'other',
+]);
+
+export const signatureSignerKind = pgEnum('signature_signer_kind', [
+  'customer',
+  'staff',
+  'system',
+]);

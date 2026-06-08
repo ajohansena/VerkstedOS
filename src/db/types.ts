@@ -58,6 +58,7 @@ import type { checklistTemplateItems } from './schemas/quality/checklist-templat
 import type { checklistRuns } from './schemas/quality/checklist-runs';
 import type { checklistResponses } from './schemas/quality/checklist-responses';
 import type { qualityDeviations } from './schemas/quality/quality-deviations';
+import type { digitalSignatures } from './schemas/quality/digital-signatures';
 import type { communicationThreads } from './schemas/communication/communication-threads';
 import type { communicationMessages } from './schemas/communication/communication-messages';
 import type { caseAcceptances } from './schemas/communication/case-acceptances';
@@ -328,6 +329,9 @@ export type NewChecklistResponse = InferInsertModel<typeof checklistResponses>;
 
 export type QualityDeviation = InferSelectModel<typeof qualityDeviations>;
 export type NewQualityDeviation = InferInsertModel<typeof qualityDeviations>;
+
+export type DigitalSignature = InferSelectModel<typeof digitalSignatures>;
+export type NewDigitalSignature = InferInsertModel<typeof digitalSignatures>;
 
 export type CommunicationThread = InferSelectModel<typeof communicationThreads>;
 export type NewCommunicationThread = InferInsertModel<

@@ -96,6 +96,12 @@ export const nb = {
     noRuns: 'Ingen sjekklister ennå.',
     noDeviations: 'Ingen avvik.',
     commentRequired: 'Kommentar er påkrevd ved avvik.',
+    signatures: 'Signaturer',
+    sign: 'Signer',
+    signerName: 'Navn på underskriver',
+    chainValid: 'Signaturkjede gyldig',
+    chainBroken: 'Signaturkjede brått (tukling oppdaget)',
+    noSignatures: 'Ingen signaturer ennå.',
   },
   validation: {
     required: 'Dette feltet er påkrevd.',
