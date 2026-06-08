@@ -6,6 +6,7 @@ import { idColumn } from '@/db/schemas/_shared';
 import { cases } from '@/db/schemas/case/cases';
 import { employees } from '@/db/schemas/workforce/employees';
 import { organizations } from '@/db/schemas/identity/organizations';
+import { workSegments } from '@/db/schemas/production/work-segments';
 import { workshops } from '@/db/schemas/identity/workshops';
 
 /**
@@ -32,9 +33,12 @@ export const clockSessions = pgTable(
     caseId: uuid('case_id').references(() => cases.id, {
       onDelete: 'set null',
     }),
-    /** Segment code the employee clocked into (e.g. 'paint_preparation').
-     *  Becomes a work_segment_id FK in Sprint 10. */
+    /** Segment code the employee clocked into (e.g. 'paint_preparation'). */
     segmentCode: varchar('segment_code', { length: 64 }),
+    /** The work segment clocked into (Sprint 10 — drives production progress). */
+    workSegmentId: uuid('work_segment_id').references(() => workSegments.id, {
+      onDelete: 'set null',
+    }),
     status: clockSessionStatus('status').notNull().default('open'),
     startedAt: timestamp('started_at', { withTimezone: true })
       .notNull()

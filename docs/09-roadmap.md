@@ -281,6 +281,8 @@ Sprint 1 ─ Foundation ─ 4
 
 **Goal:** Cases decomposed into segments. Capacity-aware planning. Drag-and-drop calendar.
 
+**Status:** ✅ Complete (2026-06-08) — see [sprint-reviews/sprint-10.md](sprint-reviews/sprint-10.md). GUARDRAIL ACTIVATION: status is now DERIVED from work activity — a technician clocking into a `work_segment` moves it to `in_progress` and stamps `actual_start_at`; completing a segment recomputes `actual_minutes` from its tagged time entries and emits `production.segment.completed`. Work-segment catalog (23 codes), capacity as an SSoT calculation (computeCapacity/classifyFeasibility, 3 new metrics), resource assignment with conflict surfacing (overlap → `RESOURCE_CONFLICT`, override recorded). Three Surfaces: case-detail segment planning (User), conflict-override policy via `allowConflict` (Admin), `/dev/production` segment inspection + actual-minutes recompute repair (Dev). Integration 64 tests (5 new). Deferred to a later UI-polish sprint: drag-and-drop calendar and the capacity heatmap visualization (the underlying capacity engine + reads ship now).
+
 **Deliverables:**
 - `work_segments` table with required_skills, required_equipment_kinds, planned_minutes
 - Work segment catalog seeded (~23 default segment codes)

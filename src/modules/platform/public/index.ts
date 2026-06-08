@@ -49,3 +49,10 @@ export {
   type OpenSessionRow,
   type CorrectionRow,
 } from '../infrastructure/repositories/platform-workforce-repository';
+
+export {
+  listSegmentsForOrg,
+  recomputeSegmentActuals,
+  type SegmentRow,
+  type RecomputeResult,
+} from '../infrastructure/repositories/platform-planning-repository';

@@ -57,6 +57,13 @@
       "when": 1780904260804,
       "tag": "0015_workforce_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780906116623,
+      "tag": "0017_work_segments_planning",
+      "breakpoints": true
     }
   ]
 }

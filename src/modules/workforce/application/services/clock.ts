@@ -8,6 +8,7 @@ import { timeEntries } from '@/db/schemas/workforce/time-entries';
 import type { ClockSession } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 import { requirePermission } from '@/modules/identity/public';
+import { markSegmentActive } from '@/modules/production/public';
 
 import { findOpenSession } from '../../infrastructure/repositories/workforce-repository';
 
@@ -30,12 +31,13 @@ export async function clockIn(
     employeeId: string;
     caseId?: string | null;
     segmentCode?: string | null;
+    workSegmentId?: string | null;
     workshopId?: string | null;
   },
 ): Promise<ClockSession> {
   await requirePermission(ctx, 'time:self');
 
-  return withTransaction(ctx, async (tx) => {
+  const session = await withTransaction(ctx, async (tx) => {
     const open = await findOpenSession(ctx, input.employeeId, tx);
     if (open) {
       throw new Error('ALREADY_CLOCKED_IN');
@@ -49,24 +51,34 @@ export async function clockIn(
         employeeId: input.employeeId,
         caseId: input.caseId ?? null,
         segmentCode: input.segmentCode ?? null,
+        workSegmentId: input.workSegmentId ?? null,
         status: 'open',
       })
       .returning();
-    const session = rows[0];
-    if (!session) throw new Error('Failed to clock in');
+    const created = rows[0];
+    if (!created) throw new Error('Failed to clock in');
 
     await emitEvent(tx, ctx, {
       eventType: 'workforce.clock.in',
       payload: {
         employeeId: input.employeeId,
-        clockSessionId: session.id,
+        clockSessionId: created.id,
         caseId: input.caseId ?? null,
         segmentCode: input.segmentCode ?? null,
+        workSegmentId: input.workSegmentId ?? null,
       },
     });
 
-    return session;
+    return created;
   });
+
+  // GUARDRAIL: clocking into a work segment marks it active — technician
+  // activity drives production progress (docs/10; verification risk 3).
+  if (input.workSegmentId) {
+    await markSegmentActive(ctx, input.workSegmentId);
+  }
+
+  return session;
 }
 
 export async function clockOut(
@@ -105,6 +117,7 @@ export async function clockOut(
       caseId: open.caseId,
       clockSessionId: open.id,
       segmentCode: open.segmentCode,
+      workSegmentId: open.workSegmentId,
       kind: 'work',
       startedAt: open.startedAt,
       endedAt,

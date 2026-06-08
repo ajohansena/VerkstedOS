@@ -229,3 +229,42 @@ export const clockSessionStatus = pgEnum('clock_session_status', [
   'open',
   'closed',
 ]);
+
+// --- Production planning (work segments) -------------------------------------
+
+export const workSegmentStatus = pgEnum('work_segment_status', [
+  'not_started',
+  'queued',
+  'in_progress',
+  'paused',
+  'blocked',
+  'completed',
+  'cancelled',
+]);
+
+export const taskStatus = pgEnum('task_status', [
+  'not_started',
+  'in_progress',
+  'completed',
+  'cancelled',
+]);
+
+export const segmentDependencyKind = pgEnum('segment_dependency_kind', [
+  'must_complete_before',
+  'must_start_before',
+  'soft_preferred',
+]);
+
+export const resourceAssignmentRole = pgEnum('resource_assignment_role', [
+  'primary',
+  'assist',
+  'observer',
+]);
+
+export const resourceAssignmentStatus = pgEnum('resource_assignment_status', [
+  'planned',
+  'confirmed',
+  'in_progress',
+  'completed',
+  'cancelled',
+]);

@@ -19,6 +19,15 @@ export interface MetricEntry {
 export const metricRegistry = {
   estimate_labor_hours: { module: 'estimating', calc: 'sumEstimateLabor' },
   periods_to_hours: { module: 'estimating', calc: 'periodsToHours' },
+  resource_capacity: { module: 'production', calc: 'computeCapacity' },
+  remaining_work_minutes: {
+    module: 'production',
+    calc: 'remainingWorkMinutes',
+  },
+  case_acceptance_feasibility: {
+    module: 'production',
+    calc: 'classifyFeasibility',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

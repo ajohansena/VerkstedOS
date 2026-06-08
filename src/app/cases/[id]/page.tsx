@@ -11,7 +11,12 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { addFundingAction } from '@/app/actions/case';
-import { ensureOrderAction, transitionAction } from '@/app/actions/production';
+import {
+  ensureOrderAction,
+  transitionAction,
+  addSegmentAction,
+  completeSegmentAction,
+} from '@/app/actions/production';
 import { getSessionContext } from '@/lib/auth/session';
 import {
   findCaseById,
@@ -21,7 +26,10 @@ import {
 import {
   listAvailableTransitions,
   listStateHistory,
+  listWorkSegments,
+  remainingWorkMinutes,
 } from '@/modules/production/public';
+import { WORK_SEGMENT_CATALOG } from '@/lib/seed/work-segment-catalog';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -53,6 +61,11 @@ export default async function CaseDetailPage({
     listStateHistory(session.context, id),
   ]);
   const hasProductionOrder = history.length > 0;
+
+  const segments = hasProductionOrder
+    ? await listWorkSegments(session.context, id)
+    : [];
+  const remainingMinutes = remainingWorkMinutes(segments);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -119,6 +132,80 @@ export default async function CaseDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {hasProductionOrder ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Work segments ({segments.length})
+            </CardTitle>
+            <CardDescription>
+              The planning unit. Status is driven by clock activity —{' '}
+              {Math.round(remainingMinutes / 60)}h of work remaining.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {segments.length > 0 ? (
+              <ul className="divide-y rounded-md border">
+                {segments.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium">{s.label}</span>
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {s.status} · {Math.round(s.plannedMinutes / 60)}h planned
+                      {s.status !== 'completed' &&
+                      s.status !== 'cancelled' &&
+                      s.status !== 'not_started' ? (
+                        <form action={completeSegmentAction}>
+                          <input type="hidden" name="caseId" value={case_.id} />
+                          <input type="hidden" name="segmentId" value={s.id} />
+                          <Button type="submit" size="sm" variant="outline">
+                            Complete
+                          </Button>
+                        </form>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No work segments yet.
+              </p>
+            )}
+
+            <form
+              action={addSegmentAction}
+              className="space-y-2 rounded-md border p-3"
+            >
+              <input type="hidden" name="caseId" value={case_.id} />
+              <p className="text-sm font-medium">Add work segment</p>
+              <select
+                name="segmentCode"
+                defaultValue="body_repair"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {WORK_SEGMENT_CATALOG.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <Input
+                name="plannedMinutes"
+                type="number"
+                min="0"
+                placeholder="Planned minutes"
+              />
+              <Button type="submit" size="sm">
+                Add segment
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

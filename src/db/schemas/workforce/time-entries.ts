@@ -50,6 +50,8 @@ export const timeEntries = pgTable(
       },
     ),
     segmentCode: varchar('segment_code', { length: 64 }),
+    /** The work segment this time is against (Sprint 10). */
+    workSegmentId: uuid('work_segment_id'),
     kind: timeEntryKind('kind').notNull().default('work'),
     startedAt: timestamp('started_at', { withTimezone: true })
       .notNull()

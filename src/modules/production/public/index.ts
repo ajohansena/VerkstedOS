@@ -15,6 +15,9 @@ export type {
   WorkflowDefinition,
   WorkflowState,
   WorkflowTransition,
+  WorkSegment,
+  ResourceAssignment,
+  Task,
 } from '@/db/types';
 
 // Container + transition machine
@@ -29,6 +32,36 @@ export { seedDefaultWorkflow } from '../application/services/seed-workflow';
 
 // Holds
 export { createHold, resolveHold } from '../application/services/holds';
+
+// Work segments
+export {
+  addWorkSegment,
+  listWorkSegments,
+} from '../application/services/work-segments';
+
+// Segment-driven progress (the guardrail activation)
+export {
+  markSegmentActive,
+  completeSegment,
+} from '../application/services/segment-progress';
+
+// Resource assignment + conflict detection
+export {
+  assignResource,
+  listAssignments,
+  ResourceConflictError,
+  type AssignInput,
+} from '../application/services/resource-assignment';
+
+// Capacity calculations (SSoT)
+export {
+  computeCapacity,
+  segmentRemainingMinutes,
+  remainingWorkMinutes,
+  classifyFeasibility,
+  type CapacityResult,
+  type Feasibility,
+} from '../application/calculations/capacity';
 
 // Reads
 export {

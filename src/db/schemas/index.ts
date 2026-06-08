@@ -51,6 +51,11 @@ export { workflowTransitions } from './production/workflow-transitions';
 export { productionOrders } from './production/production-orders';
 export { productionStateHistory } from './production/production-state-history';
 export { productionHolds } from './production/production-holds';
+export { workSegments } from './production/work-segments';
+export { tasks } from './production/tasks';
+export { workSegmentDependencies } from './production/work-segment-dependencies';
+export { resourceAssignments } from './production/resource-assignments';
+export { capacityForecastSnapshots } from './production/capacity-forecast-snapshots';
 
 // Workforce
 export { employees } from './workforce/employees';

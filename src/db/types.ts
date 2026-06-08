@@ -24,6 +24,11 @@ import type { workflowTransitions } from './schemas/production/workflow-transiti
 import type { productionOrders } from './schemas/production/production-orders';
 import type { productionStateHistory } from './schemas/production/production-state-history';
 import type { productionHolds } from './schemas/production/production-holds';
+import type { workSegments } from './schemas/production/work-segments';
+import type { tasks } from './schemas/production/tasks';
+import type { workSegmentDependencies } from './schemas/production/work-segment-dependencies';
+import type { resourceAssignments } from './schemas/production/resource-assignments';
+import type { capacityForecastSnapshots } from './schemas/production/capacity-forecast-snapshots';
 import type { employees } from './schemas/workforce/employees';
 import type { employeeSkills } from './schemas/workforce/employee-skills';
 import type { resources } from './schemas/workforce/resources';
@@ -173,6 +178,31 @@ export type NewProductionStateHistory = InferInsertModel<
 
 export type ProductionHold = InferSelectModel<typeof productionHolds>;
 export type NewProductionHold = InferInsertModel<typeof productionHolds>;
+
+export type WorkSegment = InferSelectModel<typeof workSegments>;
+export type NewWorkSegment = InferInsertModel<typeof workSegments>;
+
+export type Task = InferSelectModel<typeof tasks>;
+export type NewTask = InferInsertModel<typeof tasks>;
+
+export type WorkSegmentDependency = InferSelectModel<
+  typeof workSegmentDependencies
+>;
+export type NewWorkSegmentDependency = InferInsertModel<
+  typeof workSegmentDependencies
+>;
+
+export type ResourceAssignment = InferSelectModel<typeof resourceAssignments>;
+export type NewResourceAssignment = InferInsertModel<
+  typeof resourceAssignments
+>;
+
+export type CapacityForecastSnapshot = InferSelectModel<
+  typeof capacityForecastSnapshots
+>;
+export type NewCapacityForecastSnapshot = InferInsertModel<
+  typeof capacityForecastSnapshots
+>;
 
 export type Employee = InferSelectModel<typeof employees>;
 export type NewEmployee = InferInsertModel<typeof employees>;
