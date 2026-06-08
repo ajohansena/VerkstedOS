@@ -22,6 +22,8 @@ import {
   findCaseById,
   listCaseParties,
   listFundingSources,
+  listTransfers,
+  listAssignments,
 } from '@/modules/case/public';
 import {
   listAvailableTransitions,
@@ -49,6 +51,8 @@ import {
   resolveDeviationAction,
 } from '@/app/actions/quality';
 import { signCaseAction } from '@/app/actions/signatures';
+import { initiateTransferAction } from '@/app/actions/transfer';
+import { listWorkshops } from '@/modules/identity/public';
 import {
   latestAcceptance,
   listThreads,
@@ -157,6 +161,16 @@ export default async function CaseDetailPage({
     listSignatures(session.context, id),
     verifyCaseChain(session.context, id),
   ]);
+
+  const [transfers, assignments, allWorkshops] = await Promise.all([
+    listTransfers(session.context, id),
+    listAssignments(session.context, id),
+    listWorkshops(session.context),
+  ]);
+  const currentWorkshopId = case_.currentWorkshopId;
+  const transferTargets = allWorkshops.filter(
+    (w) => w.id !== currentWorkshopId,
+  );
 
   const acceptance = await latestAcceptance(session.context, id);
   const threads = await listThreads(session.context, id);
@@ -417,6 +431,93 @@ export default async function CaseDetailPage({
           </CardContent>
         </Card>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t.transfer.title}</CardTitle>
+          <CardDescription>
+            {t.transfer.currentWorkshop}:{' '}
+            {allWorkshops.find((w) => w.id === currentWorkshopId)?.name ??
+              t.common.none}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {transferTargets.length > 0 ? (
+            <form
+              action={initiateTransferAction}
+              className="flex flex-wrap items-center gap-2 rounded-md border p-3"
+            >
+              <input type="hidden" name="caseId" value={case_.id} />
+              <select
+                name="toWorkshopId"
+                className="h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {transferTargets.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                name="transportMode"
+                defaultValue="drive"
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="drive">Kjøres</option>
+                <option value="tow">Berging</option>
+                <option value="trailer">Henger</option>
+              </select>
+              <Input name="reason" placeholder={t.transfer.reason} />
+              <Button type="submit" size="sm">
+                {t.transfer.initiate}
+              </Button>
+            </form>
+          ) : null}
+
+          {assignments.length > 0 ? (
+            <div className="rounded-md border p-3">
+              <p className="mb-2 text-sm font-medium">{t.transfer.timeline}</p>
+              <ol className="space-y-1 text-xs text-muted-foreground">
+                {assignments.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between">
+                    <span>
+                      #{a.sequenceNo + 1}{' '}
+                      {allWorkshops.find((w) => w.id === a.workshopId)?.name ??
+                        a.workshopId.slice(0, 8)}{' '}
+                      · {a.role}
+                    </span>
+                    <span>{a.status}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+
+          {transfers.length > 0 ? (
+            <div className="rounded-md border p-3">
+              <p className="mb-2 text-sm font-medium">{t.transfer.history}</p>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                {transfers.map((tr) => (
+                  <li key={tr.id} className="flex items-center justify-between">
+                    <span>
+                      {allWorkshops.find((w) => w.id === tr.fromWorkshopId)
+                        ?.name ?? '—'}{' '}
+                      →{' '}
+                      {allWorkshops.find((w) => w.id === tr.toWorkshopId)
+                        ?.name ?? '—'}
+                    </span>
+                    <span>{tr.status}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.transfer.noTransfers}
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -516,3 +516,36 @@ export const signatureSignerKind = pgEnum('signature_signer_kind', [
   'staff',
   'system',
 ]);
+
+// --- Multi-location case operations (docs/03-data-model.md, Sprint 13) -------
+
+export const caseAssignmentRole = pgEnum('case_assignment_role', [
+  'body',
+  'paint',
+  'mechanical',
+  'calibration',
+  'assembly',
+  'qc',
+  'storage',
+  'other',
+]);
+
+export const caseAssignmentStatus = pgEnum('case_assignment_status', [
+  'active',
+  'completed',
+  'cancelled',
+]);
+
+export const caseTransferStatus = pgEnum('case_transfer_status', [
+  'initiated', // source raised the transfer
+  'in_transit', // accepted by target / dispatched
+  'arrived', // confirmed at destination
+  'cancelled',
+]);
+
+export const caseTransferMode = pgEnum('case_transfer_mode', [
+  'drive', // driven under own power
+  'tow', // tow truck
+  'trailer',
+  'other',
+]);

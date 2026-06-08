@@ -145,6 +145,27 @@ export const nb = {
     jobCardLink: 'Jobbkort-lenke',
     respondedAt: 'Svart',
   },
+  transfer: {
+    title: 'Overføring mellom verksteder',
+    currentWorkshop: 'Nåværende verksted',
+    transferTo: 'Overfør til',
+    initiate: 'Start overføring',
+    transport: 'Transport',
+    reason: 'Årsak',
+    accept: 'Aksepter',
+    confirmArrival: 'Bekreft ankomst',
+    cancel: 'Avbryt',
+    statusInitiated: 'Startet',
+    statusInTransit: 'Under transport',
+    statusArrived: 'Ankommet',
+    statusCancelled: 'Avbrutt',
+    history: 'Overføringshistorikk',
+    noTransfers: 'Ingen overføringer.',
+    yard: 'Innkommende saker',
+    noInbound: 'Ingen innkommende saker.',
+    blockingSegments: 'Saken har segmenter under arbeid.',
+    timeline: 'Verkstedhistorikk',
+  },
 } as const;
 
 /**

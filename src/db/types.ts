@@ -10,6 +10,8 @@ import type { insuranceClaims } from './schemas/case/insurance-claims';
 import type { caseFundingSources } from './schemas/case/case-funding-sources';
 import type { caseParties } from './schemas/case/case-parties';
 import type { caseNotes } from './schemas/case/case-notes';
+import type { caseAssignments } from './schemas/case/case-assignments';
+import type { caseTransfers } from './schemas/case/case-transfers';
 import type { integrationInbox } from './schemas/estimating/integration-inbox';
 import type { estimateImports } from './schemas/estimating/estimate-imports';
 import type { estimateDocuments } from './schemas/estimating/estimate-documents';
@@ -155,6 +157,12 @@ export type NewCaseParty = InferInsertModel<typeof caseParties>;
 
 export type CaseNote = InferSelectModel<typeof caseNotes>;
 export type NewCaseNote = InferInsertModel<typeof caseNotes>;
+
+export type CaseAssignment = InferSelectModel<typeof caseAssignments>;
+export type NewCaseAssignment = InferInsertModel<typeof caseAssignments>;
+
+export type CaseTransfer = InferSelectModel<typeof caseTransfers>;
+export type NewCaseTransfer = InferInsertModel<typeof caseTransfers>;
 
 export type IntegrationInbox = InferSelectModel<typeof integrationInbox>;
 export type NewIntegrationInbox = InferInsertModel<typeof integrationInbox>;

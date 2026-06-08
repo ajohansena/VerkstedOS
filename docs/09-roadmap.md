@@ -377,6 +377,8 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 **Goal:** A → B → C → A actually works. The complete-case-across-workshops promise is real.
 
+**Status:** ✅ Complete (2026-06-08). The A → B → A promise is proven by integration tests against real Postgres. `case_assignments` (temporal placement, repeats allowed, `sequence_no` ordered) + `case_transfers` (initiate → accept → confirm-arrival, transport mode + reason) ship with migrations 0031/0032. On arrival the active assignment and `cases.current_workshop_id` flip to the destination; operational records (segments, time entries, photos) keep their original `workshop_id`. Validation blocks same-workshop transfers and transfers with in-progress segments at the source (overridable). `case.transfer.initiated/in_transit/arrived` events fire (the initiated event notifies the receiving workshop). Three Surfaces: case-detail transfer + workshop timeline (User), cross-workshop **yard view** `/yard` (accept + confirm arrival), `/dev/transfers` history + stuck-transfer force-cancel repair (Dev). Documents follow the case via `document_links` (no copies). Reused `case:view`/`case:edit` (no new permissions, 24). Gates green: unit 56/56, integration 99/99 (+5 multi-location), build. Deferred to a later polish pass: capacity-warning-at-target heatmap (the capacity engine exists) and admin transfer-route policies (transfers are org-wide for the MVP).
+
 **Deliverables:**
 - `case_assignments` lifecycle (start, end, role, sequence)
 - `case_transfers` table with transport tracking

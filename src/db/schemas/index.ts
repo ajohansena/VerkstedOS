@@ -33,6 +33,8 @@ export { insuranceClaims } from './case/insurance-claims';
 export { caseFundingSources } from './case/case-funding-sources';
 export { caseParties } from './case/case-parties';
 export { caseNotes } from './case/case-notes';
+export { caseAssignments } from './case/case-assignments';
+export { caseTransfers } from './case/case-transfers';
 
 // Estimating & Integration
 export { integrationInbox } from './estimating/integration-inbox';

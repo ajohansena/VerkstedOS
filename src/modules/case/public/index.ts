@@ -10,6 +10,8 @@ export type {
   CaseParty,
   CaseNote,
   InsuranceClaim,
+  CaseAssignment,
+  CaseTransfer,
 } from '@/db/types';
 
 // Case intake & funding
@@ -41,3 +43,21 @@ export {
   countCases,
   type CaseListItem,
 } from '../infrastructure/repositories/case-repository';
+
+// Multi-location: assignments + transfers (Sprint 13)
+export {
+  assignCaseToWorkshop,
+  listAssignments,
+} from '../application/services/assignments';
+
+export {
+  initiateTransfer,
+  acceptTransfer,
+  confirmArrival,
+  cancelTransfer,
+  listTransfers,
+  listInboundTransfers,
+  TransferValidationError,
+  type InitiateTransferInput,
+  type InboundTransfer,
+} from '../application/services/transfers';
