@@ -27,7 +27,9 @@ export type PlatformAuditAction =
   | 'dangerous_op_approved'
   | 'dangerous_op_rejected'
   | 'dangerous_op_executed'
-  | 'dangerous_op_cancelled';
+  | 'dangerous_op_cancelled'
+  | 'ai_model_registered'
+  | 'ai_model_status_changed';
 
 export interface PlatformAuditInput {
   action: PlatformAuditAction;

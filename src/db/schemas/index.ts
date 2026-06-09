@@ -113,6 +113,9 @@ export { vehiclePlacements } from './yard/vehicle-placements';
 export { vehicleMovements } from './yard/vehicle-movements';
 // Platform — Dev Control Plane (Sprint 20)
 export { dangerousOperations } from './platform/dangerous-operations';
+// AI foundation (Sprint 21)
+export { aiModelVersions } from './ai/ai-model-versions';
+export { aiPredictions } from './ai/ai-predictions';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

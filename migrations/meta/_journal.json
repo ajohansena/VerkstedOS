@@ -162,6 +162,13 @@
       "when": 1781023004522,
       "tag": "0045_dangerous_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1781028405191,
+      "tag": "0046_ai_foundation_tables",
+      "breakpoints": true
     }
   ]
 }

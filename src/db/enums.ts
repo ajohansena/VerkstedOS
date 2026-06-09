@@ -746,3 +746,26 @@ export const dangerousOperationStatus = pgEnum('dangerous_operation_status', [
   'executed',
   'cancelled',
 ]);
+
+// --- AI foundation (Sprint 21 — model registry + predictions projection) ----
+
+export const aiModelProvider = pgEnum('ai_model_provider', [
+  'internal',
+  'openai_compatible',
+  'custom',
+]);
+
+export const aiModelStatus = pgEnum('ai_model_status', [
+  'active',
+  'shadow',
+  'retired',
+]);
+
+export const aiPredictionKind = pgEnum('ai_prediction_kind', [
+  'delay_risk',
+  'eta_estimate',
+  'cross_workshop_transfer',
+  'photo_damage_classification',
+  'parts_suggestion',
+  'generic',
+]);
