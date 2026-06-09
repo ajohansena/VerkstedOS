@@ -4,7 +4,7 @@ This document defines the six role-specific dashboards in VerkstedOS. Each is de
 
 These are not generic admin dashboards. They are operational cockpits, each tuned to a specific workshop role.
 
-> **Read alongside [12-ux-architecture.md](./12-ux-architecture.md).** This document defines the *information* each role needs. Doc 12 defines the *experience* that delivers it. In the product, these six "dashboards" are not six destinations you navigate between — they are role-adaptive renderings of a single **Operations Center** plus the **Case Workspace** where most work happens. Treat the per-role content below as the information inventory; treat doc 12 as how that information is surfaced and navigated.
+> **Read alongside [12-ux-architecture.md](./12-ux-architecture.md) and [13-production-planning.md](./13-production-planning.md).** This document defines the *information* each role needs. Doc 12 defines the *experience* that delivers it. Doc 13 is the authoritative specification for the **Production Planner** (Production Manager's primary operational surface). In the product, these six "dashboards" are not six destinations you navigate between — they are role-adaptive renderings of a single **Operations Center** plus the **Case Workspace** where most work happens, with the **Production Planner** as the third primary surface for planning-heavy roles. Treat the per-role content below as the information inventory; treat doc 12 as how that information is surfaced and navigated, and doc 13 as binding for anything Planner-related (doc 13 § 20, directive 2026-06-09).
 
 ---
 
@@ -909,6 +909,7 @@ User lands on the dashboard their role grants. Role determines auto-routing on l
 - `/admin/dashboards/widgets` — enable/disable widgets per role per org (defaults shipped)
 - `/admin/dashboards/kpi-targets` — set numeric targets per workshop / per org for traffic-light logic
 - `/admin/dashboards/visibility` — control which KPI categories are visible (e.g. small workshop disables NPS until they're ready to capture it)
+- `/admin/production-board/terminology` — rename / reorder / hide Production Board columns per org or per workshop (presentation only — underlying workflow engine standardized; doc 13 § 20.6)
 
 Permissions: `admin:config`
 
@@ -918,8 +919,9 @@ Permissions: `admin:config`
 - `/dev/dashboards/usage` — which widgets are clicked, which are ignored (input for design iteration)
 - `/dev/dashboards/render-trace` — for a given user complaining of slow dashboard, see exact query plan and projection refresh state
 - `/dev/dashboards/kpi-drift` — automated detection of KPI values diverging between dashboards (Single Source of Truth violation alarm)
+- `/dev/impersonation/view-as-role` — render the customer application **as if** the platform operator held a given role (Owner, Production Manager, Estimator, Reception, Office, Technician, Painter, Parts, Customer Portal) inside a given (demo / test) organization. Audited via `platform_audit_events` (`impersonated_started` / `impersonated_ended` + `metadata.role_perspective`). Implementation extends doc 06's impersonation framework; binding spec in doc 13 § 20.8 and doc 12 § 11.
 
-Permissions: `platform:org:view`, `platform:data:repair`
+Permissions: `platform:org:view`, `platform:data:repair`, `platform:user:impersonate`
 
 ---
 

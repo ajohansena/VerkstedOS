@@ -19,6 +19,20 @@ The resolution:
 
 Read doc 11 for the per-role information inventory. Read this document for the experience that delivers it.
 
+## Reconciliation with doc 13 (Production Planning)
+
+Doc 13 is the authoritative specification for the **Production Planner** — the primary operational surface for production managers and planners. Per the binding directive of 2026-06-09 (doc 13 § 20), the following supersede earlier descriptions in this document:
+
+- The Production Planner is one of the three primary operational surfaces of VerkstedOS, alongside the Operations Center (§ 4) and the Case Workspace (§ 5). See doc 13 § 20.1.
+- The legacy "Capacity view" and "Planning calendar" entries in the Key Screens Inventory (§ 14) are **absorbed** as modes of the Production Planner (doc 13 § 2 / § 4). They remain in § 14 below for historical clarity, flagged as absorbed.
+- New planning surfaces (Timeline, Capacity, Vehicle Movement, Cross-workshop, Future Forecast overlays, AI overlays) are **modes of the same engine**, never separate calendar pages. See doc 13 § 20.2.
+- Booking & scheduling are first-class at intake (doc 13 § 20.4). The intake flow in § 8 evolves accordingly.
+- Tasks (non-production work tied to a case) are schedulable from intake and visible in the Planner (doc 13 § 20.5), pending the office-task entity decision in doc 13 § 16.1.
+- **Single-application feeling** — case details, customer details, vehicle details, planning information and similar objects open as drawers / side panels / modal dialogs / split views inside the current context. Full-page navigation is reserved for genuine context switches. See doc 13 § 20.11 and § 16 design principle 13 below.
+- **Existing surfaces absorb new functionality** — before creating a new standalone page, ask whether the feature can live inside the Production Planner, Case Workspace, Operations Center, Parts Coordinator, Dashboard, Customer Workspace or another existing surface. New standalone pages are the exception, not the default. See doc 13 § 20.12 and § 16 design principle 14 below.
+
+Where this document and doc 13 disagree about planning behaviour, **doc 13 wins** (per CLAUDE.md § 2 — a more specific doc supersedes a more general one on its own subject).
+
 ---
 
 ## 1. UX Vision
@@ -305,6 +319,22 @@ It is generated from the same events that drive the system (doc 02 § Event arch
 
 The side panel (delivery, vehicle, funding, assigned, quick actions) is **persistent** across tabs. The key facts never leave your sight.
 
+### Target evolution — the complete repair workspace (binding)
+
+Per doc 13 § 20.3, the long-term target is that **users rarely leave the Case Workspace** while working a case. Incrementally over future sprints, the workspace must surface every section relevant to a case:
+
+- Customer information · Vehicle information · Funding / insurance
+- DBS estimate · Work segments · Production status
+- **Planning** (a Planner mode rendered inside the workspace)
+- Photos · Documents · QC checklists · Signatures
+- Communication · Timeline · Financial overview · Audit history
+
+Rules:
+- This evolution is incremental and never redesigns existing implementations.
+- Sections appear as tabs or progressive-disclosure panels — not as one giant scrolling form.
+- Opening the Case Workspace from the Production Planner is a **drawer over the Planner** (doc 13 § 7), not a navigation away. The full-page Case Workspace remains the canonical destination.
+- A new case-related feature defaults to "add to the Case Workspace" unless there is a strong reason.
+
 ### Inline everything
 
 - Change status: click the status pill → pick the new state (permission-checked)
@@ -360,8 +390,8 @@ The Production Manager's primary surface is the **Production Board** — a moder
 ### The manager's other surfaces
 
 - **Operations Center** (Flow Zone = production flow summary + bottlenecks) for the "what needs attention" loop
-- **Capacity view** — a forward 14-day grid of resource load (people, paint booth, frame bench), reached from the Operations Center or Production Board, used when planning
-- **Planning calendar** — drag-and-drop resource assignment (desktop), for deliberate planning sessions
+- **Capacity view** — a forward 14-day grid of resource load (people, paint booth, frame bench), reached from the Operations Center or Production Board, used when planning *(absorbed as a mode of the Production Planner — doc 13 § 4 / § 20.2)*
+- **Planning calendar** — drag-and-drop resource assignment (desktop), for deliberate planning sessions *(absorbed as Day / Week / Resource modes of the Production Planner — doc 13 § 4)*
 
 The manager lives on the Production Board and the Operations Center. They visit Capacity and Planning when they need to plan. They rarely see a "report."
 
@@ -587,6 +617,12 @@ Like Stripe's events view or a log explorer: a filterable, searchable stream of 
 - **Audited.** Every view of sensitive data and every action is logged (doc 06).
 - **Separate aesthetic.** It should *feel* like a different, more technical product than the customer app — because it is. 404 for non-platform users; they never know it exists.
 
+### "View as role" mode (binding — doc 13 § 20.8)
+
+Platform developers and Platform Owners can inspect the customer application **as if** they held a given role within a given (demo / test) organization. Supported perspectives include at minimum Owner, Production Manager, Estimator, Reception, Office, Technician, Painter, Parts Department and Customer Portal.
+
+Implementation lives in doc 06's impersonation framework — this is an *extension*, not a duplicate. Every "view as" session is `platform_audit_events`-logged (`impersonated_started` / `impersonated_ended` with `metadata.role_perspective`), shows a persistent in-product banner, is gated by `platform:user:impersonate`, and is time-limited + IP-allow-listed in production per doc 08. The two-person rule (doc 10 dangerous-operations) applies to any write performed through a perspective that exceeds the platform user's direct ACL.
+
 ---
 
 ## 12. Dashboard Strategy
@@ -694,8 +730,8 @@ The complete set of surfaces. Notably short — that's the point.
 | Case Workspace | Desktop (full) / mobile (slice) | The core work surface |
 | Technician Queue | Mobile | My work, current task |
 | Parts | Desktop / tablet | Parts needing action, reconciliation |
-| Capacity view | Desktop | Forward resource load |
-| Planning calendar | Desktop | Drag-drop resource assignment |
+| Capacity view | Desktop | Forward resource load *(mode of Production Planner — doc 13 § 4 / § 20.2)* |
+| Planning calendar | Desktop | Drag-drop resource assignment *(mode of Production Planner — doc 13 § 4)* |
 | Yard map | Tablet / mobile | Physical vehicle location |
 | Insights | Desktop | Deliberate analytics destination |
 | Intake / new case | Desktop / tablet | Fast case creation |
@@ -743,6 +779,8 @@ Wireframes for the surfaces not already shown above (Operations Center § 4, Cas
 Linear-style list. Saved views in the sidebar. Click a row → Case Workspace. Group/filter compose and save.
 
 ### Capacity view (production manager)
+
+> **Absorbed by the Production Planner.** Per doc 13 § 20.1 / § 20.2, the Capacity view is a **mode of the Production Planner**, not a separate surface. The wireframe below is preserved for historical context only.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -836,6 +874,10 @@ The durable rules that guide every UX decision.
 
 12. **Quiet when quiet.** When nothing needs attention, the product says so. It doesn't manufacture noise or vanity metrics to fill space.
 
+13. **Single-application feeling (binding — directive 2026-06-09).** VerkstedOS should feel like one coherent desktop application. Users should almost never feel that they are leaving their current context. Case details, customer details, vehicle details, planning information, parts requirements and similar objects open as **drawers, side panels, modal dialogs or split views** inside the current surface — not as full-page navigations. Full-page navigation is reserved for genuine context switches (e.g. moving from the Operations Center to the Production Planner, or from a case to a different case via a deliberate full-page open). See doc 13 § 20.11.
+
+14. **Existing surfaces absorb new functionality (binding — directive 2026-06-09).** Whenever a new feature is introduced, first ask: *"Can this naturally live inside an existing surface?"* Examples of absorbing surfaces: Production Planner, Case Workspace, Operations Center, Parts Coordinator, Dashboards, Customer Workspace, Settings. Creating a completely new standalone page is the **exception**, not the default. Each proposed new top-level route must be justified in the PR (System Impact Analysis, CLAUDE.md § 11). See doc 13 § 20.12.
+
 ---
 
 ## 17. UX Anti-Patterns to Avoid
@@ -872,14 +914,65 @@ The explicit "do not build this" list. If a design drifts toward any of these, s
 
 15. ❌ **Making the user operate the software** — the user's job is to repair cars. Any UX that makes operating VerkstedOS feel like a job has failed.
 
+16. ❌ **Separate planning module or disconnected calendar page** — building scheduling UI outside the Production Planner. Per doc 13 § 20.1 / § 20.2, planning is one engine with many modes. New planning views are modes of the Planner.
+
+17. ❌ **Defaulting to a new full-page route when an existing surface could absorb the feature** — every new top-level route is an admission that no existing surface could host the feature. Per principle 14 above and doc 13 § 20.12, the absorption question must be asked first; new routes are the exception, not the default.
+
+18. ❌ **Full-page navigation for inspecting a sub-object** — opening a case from a list as a full-page navigation away from the list (when a drawer or split-view preserves context). Per principle 13 and doc 13 § 20.11, sub-object inspection opens as a drawer / side panel / modal / split view; full-page is reserved for genuine context switches.
+
+---
+
+## 18. Demo Environment (binding pre-launch requirement)
+
+A deterministic, repeatable demo environment is a binding precondition for production launch. The Planner (doc 13), the Case Workspace (§ 5), the role-adaptive Operations Center (§ 4), the dashboards (doc 11) and the Dev "view as role" mode (§ 11) all depend on it for validation, onboarding, customer demos, screenshots and investor presentations.
+
+### Target dataset
+
+| Object | Target volume | Purpose |
+|---|---|---|
+| Organizations | 1 demo organization ("Johansen Bilskade") + 1 chain example | Single-org and multi-workshop demos |
+| Workshops | 3 (Oslo Sentrum, Bergen, Trondheim) | Multi-workshop transfers, cross-workshop planning (doc 13 § 11 / § 20.2) |
+| Departments | Body, Paint, Mechanical, Calibration per workshop | Capacity & Resource modes (doc 13 § 4.4) |
+| Employees | 25–40 across roles (technicians, painters, planners, estimators, owner) | Resource assignment, My Tasks (doc 13 § 4.5), role-perspective demos |
+| Customers | 300+ | Search, intake, customer history |
+| Vehicles | 250+ | Plate lookup, vehicle history |
+| Insurance companies | 6–8 (Fremtind, If, Gjensidige, Tryg, KLP, Codan, ...) | Funding sources, claim handling |
+| Cases | 100+ spread across all workflow states | Full Production Board (doc 13 § 4.1), Operations Center attention triage |
+| Active cases | 30–50 | Daily/weekly capacity views populated |
+| Estimates (DBS) | One per case, mix of insurance and private | Estimate tab, invoice basis |
+| Photos | 5–15 per case | Documents tab, customer portal |
+| Time entries | 60–90 days of history | Workforce reports, productivity trends |
+| Parts orders | mix of received / pending / backordered | Parts module, reconciliation |
+| Insurer comms threads | per case | Comms tab |
+| Office tasks | per active case (once doc 13 § 16.1 is decided) | My Tasks, office lane (doc 13 § 20.5) |
+
+### Quality requirements
+
+- **Realistic.** Norwegian names, Norwegian addresses, Norwegian plate numbers, NOK amounts, Bokmål terminology where customer-facing.
+- **Deterministic.** Same seed → same data. Demos are reproducible.
+- **Tenant-isolated.** Demo data lives in a dedicated `demo` organization with the same RLS path as production. Demoing never reveals real customer data.
+- **Time-anchored.** Dates are relative to `now()` so the demo always looks current (cases delivered last week, intake today, deliveries due next Friday).
+- **State-distributed.** Cases span every workflow state in realistic proportions — not 100 cases all sitting in "intake."
+- **Risk-distributed.** A realistic mix of green / yellow / red attention items so the Operations Center triage looks like a real workshop.
+- **Forecast-distributed.** Delivery forecasts span confident, medium, and at-risk so the dashboards demonstrate meaningful states.
+
+### Implementation
+
+- Lives in `scripts/seed-demo.ts` (already exists). Extended **incrementally** in future sprints toward the target dataset above.
+- Never blocks a sprint; the demo environment is improved alongside the features it must demonstrate.
+- Reset & reseed must be a single command for the platform team (`pnpm db:seed-demo`).
+- Always available in non-production environments. Optionally available in production behind a `demo_mode` org-level flag for sales contexts.
+- The Dev "view as role" mode (§ 11 / doc 13 § 20.8) presumes this dataset — perspectives are only meaningful with real-looking data behind them.
+
 ---
 
 ## Relationship to other documents
 
 - **Doc 11 (Dashboards)** — the per-role information inventory; this document defines the experience that delivers it. The six "dashboards" become role-adaptive renderings of the Operations Center plus the Case Workspace.
+- **Doc 13 (Production Planning)** — the authoritative spec for the Production Planner. Per doc 13 § 20 (binding 2026-06-09), planning UX is governed by doc 13; this document defers to it on Planner behaviour, intake-booking, office-task scheduling, board column customization and board UX evolution.
 - **Doc 10 (Production Domain)** — the production model this UX surfaces (Production Board, capacity, forecast, multi-location).
 - **Doc 05 (RBAC)** — role determines which Operations Center rendering, which sidebar items, which actions appear.
-- **Doc 06 (Dev Control Plane)** — the Dev Control Plane UX in § 11 here realizes the capabilities specified there.
+- **Doc 06 (Dev Control Plane)** — the Dev Control Plane UX in § 11 here realizes the capabilities specified there. The "view as role" extension (§ 11, doc 13 § 20.8) is implemented in doc 06's impersonation framework.
 - **Doc 02 (System Architecture)** — the Case timeline (the spine of the Case Workspace) is a projection of the event stream.
 
 ## Implementation note

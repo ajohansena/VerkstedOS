@@ -8,10 +8,15 @@ This document defines how production planning should work inside a modern Norweg
 
 ## Status of this document
 
-> **Review basis: documented architecture (Option A).**
+> **Approved & binding (directive of 2026-06-09).**
+> Document 13 is now part of the approved architecture, alongside docs 02, 03, 05, 06, 10, 11 and 12. Every planning, scheduling, intake-booking, office-task, board-UX and case-workspace evolution made in any future sprint must comply with this document. The binding principles introduced by the 2026-06-09 directive are captured in § 20.
+>
+> Cross-referenced from: doc 11 (Dashboards) header, doc 12 (UX Architecture) header / § 5 / § 11 / § 14 / § 17 / § 18, and CLAUDE.md § 2 (Source-of-truth hierarchy).
+>
+> **Review basis for § 3: documented architecture (Option A).**
 > The "Current Production Board review" in § 3 evaluates the *designed* Production Board as specified in doc 11 (Production Manager dashboard) and doc 12 (Production Board section). It is **not** a review of the actual sprint 1–16 implementation, because that code has not been provided. Every finding in § 3 marked ⚠ *(verify against code)* must be confirmed against what was actually built before it is treated as fact.
 >
-> When the real implementation is available, § 3 should be re-run against it. The rest of the document (the target experience, the planning modes, the architecture-compatibility validation in § 16) stands regardless.
+> When the real implementation is available, § 3 should be re-run against it. The rest of the document (the target experience, the planning modes, the architecture-compatibility validation in § 16, and the binding principles in § 20) stands regardless.
 
 ---
 
@@ -956,6 +961,295 @@ Per CLAUDE.md, the planning system defines all three surfaces.
 - Inspect office-task generation (which event created which task) — pending § 16.1
 - Routes: `/dev/production/assignments`, `/dev/production/board-health`, `/dev/production/office-tasks`
 - Permissions: `platform:org:view`, `platform:data:repair`, `platform:event:replay`
+
+---
+
+## 20. Binding architectural principles (directive 2026-06-09)
+
+This section captures binding guidance issued after the architecture-approval phase. **Every future planning, intake-booking, office-task, board-UX and case-workspace evolution must comply.** Nothing here redesigns the domain (doc 10) or the database (doc 03); these are presentation-layer, evolution-direction and governance rules.
+
+### 20.1 — The Production Planner is a primary operational surface
+
+The Production Planner (this document, § 1 / § 4 / § 15) is one of the **primary operational surfaces** of VerkstedOS, alongside the Operations Center (doc 12 § 4) and the Case Workspace (doc 12 § 5).
+
+**Binding rules:**
+
+- Planning-related functionality must be integrated into the Production Planner whenever practical.
+- Do **not** create separate planning modules or disconnected calendar pages. The legacy "Capacity view" and "Planning calendar" entries in doc 11 / doc 12 § 14 are **absorbed** as modes of the Planner (§ 2 / § 4.x).
+- Planning evolves through **multiple visualizations backed by the same planning engine** (§ 2). Never duplicate scheduling logic.
+- A new planning surface is allowed only with explicit project-owner approval and an ADR; the default answer is "add it as a mode of the Planner."
+
+### 20.2 — Calendar-first planning (one engine, many views)
+
+The Planner is the operational heart of the workshop. Users — production managers, planners, dispatchers — spend most of their workday inside it. The five modes described in § 4 (Board / Day / Week / Resource / My Tasks) are the **first wave**; the Planner is expected to grow.
+
+**Target view portfolio (all over the same engine, § 2):**
+
+| Mode | Already in § 4 | Target / future | Reads (existing engine, doc 10) |
+|---|---|---|---|
+| Board View | ✅ § 4.1 | — | workflow state + segment status |
+| Day View | ✅ § 4.2 | — | ResourceAssignment (today) |
+| Week View | ✅ § 4.3 | — | ResourceAssignment (week) + Capacity |
+| Resource View | ✅ § 4.4 | — | Resource + ResourceAssignment + Capacity |
+| My Tasks | ✅ § 4.5 | — | ResourceAssignment (self) + office tasks (§ 16.1) |
+| **Timeline View** | — | binding | ResourceAssignment + WorkSegmentDependency (case-row Gantt across many cases) |
+| **Capacity View** | — | binding (absorbs the legacy doc 11/12 surface) | Capacity engine + ResourceAssignment aggregated |
+| **Vehicle Movement View** | — | binding | yard placements + vehicle_movements + CaseTransfer (the physical movement layer) |
+| **Cross-workshop Planning** | partial via § 11 transfers | binding | CaseAssignment + ResourceAssignment across multiple workshops |
+| **Future Forecast overlays** | — | binding | DeliveryForecast + capacity_forecast_snapshots projected forward |
+| **AI recommendation overlays** | — | binding (gated by `ai.*` feature flags, doc 21 substrate) | AiPrediction (planning predictions only — not auto-applied) |
+
+**Binding rules:**
+
+- Every new mode is a projection of the **same** ProductionOrder / WorkSegment / ResourceAssignment / Capacity / DeliveryForecast data (doc 10). No mode invents its own calculation.
+- Every mode goes through the **same** drag pipeline (§ 8): validate → conflict-detect → confirm → commit → recalc → audit.
+- AI overlays are **suggestions, never auto-applied** — they propose drags; the human commits. Audit records "AI-suggested, human-approved" vs "human-initiated" via the existing `AiPrediction` linkage.
+- Switching modes never changes data, permissions or calculations; only the projection.
+
+### 20.3 — Case Workspace becomes the complete repair workspace
+
+The long-term target is that users **rarely leave the Case Workspace** while working a case. Doc 12 § 5 already defines the Case Workspace; this directive elevates its scope from "where most case work happens" to "the unified workspace for everything about a case."
+
+**Binding target tab/section inventory** (the Case Workspace must, incrementally over future sprints, contain all of):
+
+| Section | Source domain |
+|---|---|
+| Customer information | doc 03 (Customer) |
+| Vehicle information | doc 03 (Vehicle) |
+| Funding / insurance | doc 03 (CaseFundingSource, InsuranceClaim) |
+| DBS estimate | doc 03 (EstimateImport, EstimateOperations/Parts/Labor/Paint) |
+| Work segments | doc 10 (WorkSegment) |
+| Production status | doc 10 (ProductionOrder + workflow state) |
+| **Planning** (incl. drag from this surface) | doc 13 — Planner mode rendered inside the Case Workspace |
+| Photos | doc 04 |
+| Documents | doc 04 |
+| QC | doc 10 (ChecklistRun, QualityDeviation) |
+| Signatures | doc 04 / doc 03 (digital_signatures) |
+| Communication | doc 03 (CommThread, CommMessage) |
+| Timeline | doc 02 (event-stream projection) |
+| Financial overview | doc 08 (InvoiceBasis, supplier invoice reconciliation) |
+| Audit history | doc 03 (audit_events filtered to this case) |
+
+**Binding rules:**
+
+- This evolution is **incremental** across future sprints. Do **not** redesign current implementations.
+- The Case Workspace remains the case-centric surface (doc 12 § 1, § 5). Adding sections must not turn it into a generic ERP page — sections appear as tabs or progressive-disclosure panels, not as one giant scrolling form.
+- A new case-related feature defaults to "add to the Case Workspace" unless there is a strong reason (e.g. a cross-case operational surface like Parts).
+- The drawer-first principle (§ 7) still applies — opening the Case Workspace from the Planner is a drawer over the Planner, not a navigation away.
+
+### 20.4 — Booking & scheduling are first-class citizens of intake
+
+Creating a new case must not only create a repair case — it must also be the natural place to **plan the work**. The estimator intake flow (doc 12 § 8) evolves to support booking into the Planner.
+
+**Binding intake-flow capabilities (evolved incrementally):**
+
+- Desired customer appointment date / time
+- Estimated arrival date
+- Expected delivery date (initial promise)
+- Booking into available workshop capacity
+- Booking into specific employees (ResourceAssignment at intake)
+- Booking into specific departments
+- Booking into the paint booth if required (equipment as Resource, doc 10)
+- Booking into calibration / ADAS resources if required
+
+**Planner-assisted booking at intake:**
+
+The intake flow must surface planning context **inline** — the same data the Planner shows, projected for the intake decision:
+
+- Available capacity (per department, per day) — reads `Capacity`
+- Overbooking warnings (with org overbooking policy honored — doc 10)
+- Technician availability — reads `ResourceAssignment` + calendar/absence
+- Department load — reads `Capacity` aggregated per department
+- Workshop load — reads `Capacity` aggregated per workshop
+- Resource conflicts — same conflict-detection as drag pipeline (§ 8)
+
+**Binding rules:**
+
+- Capacity at intake is driven by the **existing planning engine** (doc 10 Capacity engine) and `ResourceAssignment` records — never a parallel "intake calendar" calculation.
+- Bookings created at intake are normal `ResourceAssignment` rows; they appear immediately in Day / Week / Resource modes (§ 2).
+- The intake flow remains fast (doc 12 § 8 "under 90 seconds"); booking widgets are progressive — quick-book defaults, advanced controls behind a disclosure.
+- Permissions: intake booking requires both `case:edit` and `production:plan`. A receptionist without `production:plan` can capture customer-desired dates but cannot commit `ResourceAssignment` rows; a planner reviews and confirms (configurable per org).
+
+### 20.5 — Tasks are schedulable directly from case intake & edit
+
+When creating or editing a case, planners must be able to schedule **future tasks** tied to the case (not only production work). This builds on the office-task substrate flagged in § 10 / § 16.1.
+
+**Target task examples (illustrative, not exhaustive):**
+
+- Order parts 14 days before arrival
+- Contact customer 3 days before arrival
+- Arrange rental vehicle
+- Book transport
+- Book calibration
+- Order ADAS equipment
+- Insurance follow-up
+- Invoice preparation
+- Customer follow-up after delivery
+
+**Required task attributes:**
+
+- Due date and (optional) due time
+- Assigned employee
+- Assigned department
+- Priority
+- Recurring templates (per org / per case-template, e.g. "ADAS calibration intake checklist")
+
+**Integration with the Planner:**
+
+- Tasks created at intake appear in **My Tasks** (§ 4.5), in the **office lane** on **Day View** (§ 4.2) and **Week View** (§ 4.3), and on the Case Workspace timeline (§ 20.3).
+- Tasks tied to a case carry a backlink; tasks without a case (e.g. weekly insurer reconciliation) are valid.
+
+**Compatibility flag:** the underlying entity for these tasks is still subject to § 16.1's STOP AND ASK (recommendation: new `OfficeTask` entity, requires Architecture-Freeze approval per CLAUDE.md § 4.1). This directive does **not** resolve § 16.1; it elevates the requirement and binds future implementations to integrate tasks with the Planner once § 16.1 is decided.
+
+### 20.6 — Local administrators customize workflow terminology (presentation only)
+
+Every workshop's vocabulary differs. Local administrators must be able to customize the **presentation** of the Production Board without altering the underlying engine.
+
+**Allowed customization (per organization, per workshop where applicable):**
+
+- Rename production board columns (display label only)
+- Reorder production board columns
+- Hide unused columns from the default rendering
+- Define workshop-specific terminology (e.g. "Karosseri" vs "Body repair")
+
+**Binding rules:**
+
+- The **domain model remains standardized**: WorkflowDefinition, WorkflowState, WorkflowTransition, ProductionOrder.status (doc 10) are unchanged. Customization is a **presentation overlay** keyed on the workflow-state code.
+- Renames do not affect events, audit, calculations, KPIs, integrations, exports, accounting or TakstKontroll comparability (CLAUDE.md § 4.7).
+- Customizations are **per-org configuration data** (light audit tier — doc 03), backed by an admin surface under `/admin/production-board` (already noted in § 19 Admin Surface) — extended to cover label / order / visibility overrides.
+- A factory-reset action returns any workshop to the standard naming.
+- The Dev Control Plane must always be able to see the **canonical** state codes alongside the displayed labels (`/dev/production/board-health`).
+
+### 20.7 — Production Board UX evolution
+
+The Production Board continues evolving toward the experience defined in this document. The following behaviours are **binding targets**:
+
+| Behaviour | Rule |
+|---|---|
+| **Columns with no active work collapse by default** | The board reflects the workshop's real state; empty columns shrink to a thin labeled rail. |
+| **Manual expand / collapse** | Users can pin columns expanded or collapsed; the choice is per-user. |
+| **Saved personal layout preferences** | Per-user board preferences (mode, filters, grouping, column collapse state, density) persist across sessions, in addition to the org-publishable saved views (§ 13). |
+| **Richer-but-compact cards** | Cards carry the field inventory in § 5 (identity + risk + quick indicators + the most relevant fact) — never expanded into mini-pages. Three density variants (Compact / Expanded / Micro) per § 5. |
+| **Drawer / modal / split-view case inspection** | Opening a case from the Board defaults to a **right-side drawer over the Planner** (§ 7); a full-page navigation remains available via the `[\u2197]` button. On tablet, full-screen overlay; on mobile, the case slice (§ 14). Never page-hop away from the Planner as the default. |
+
+**Binding rules:**
+
+- Personal layout preferences are user-scoped configuration (light audit, doc 03). They do not alter the planning engine or other users' views.
+- All collapse / expand / personal layout interactions are presentation-only and must not change data, permissions, calculations, or the validity of saved org-wide views.
+- The drawer-first principle (§ 7) is **binding for the Planner** — it refines, not contradicts, doc 12 § 5 (Case Workspace as a full destination): the full Case Workspace continues to exist; the drawer is the in-Planner presentation of it.
+
+### 20.8 — Dev / Platform Owner "view as role" mode
+
+Platform developers and Platform Owners need the ability to inspect the product from each role's perspective without creating separate user accounts. This is an extension of the existing impersonation capability (doc 06).
+
+**Binding capability:**
+
+A Dev Control Plane action that renders the customer application **as if** the platform operator held a given role within a given (demo / test) organization. Supported role perspectives include at minimum:
+
+- Owner
+- Production Manager
+- Estimator
+- Reception
+- Office
+- Technician
+- Painter
+- Parts Department
+- Customer Portal (token-scoped read-only)
+
+**Binding rules:**
+
+- Implementation lives in doc 06's impersonation framework (Dev Control Plane). This directive **extends, does not duplicate**, doc 06.
+- Every "view as" session opens a `platform_audit_events` entry: `action: impersonated_started` with `metadata.role_perspective` set, and a corresponding `impersonated_ended` on session close (consistent with doc 06).
+- Customer-org users must never be able to grant themselves a "view as" — the action is `platform:user:impersonate` only.
+- The product must show a **persistent banner** (consistent with the existing DEV bypass banner) while a role-perspective session is active, so the operator cannot forget they are viewing through someone else's lens.
+- In production environments, role-perspective sessions are time-limited and IP-allow-listed per doc 06 / doc 08.
+- Two-person rule (doc 10 dangerous-operations) applies if the role perspective is used to perform a write that the underlying platform user would not normally have permission to perform via direct ACL.
+
+### 20.9 — Demo environment as a binding pre-launch requirement
+
+A deterministic, repeatable demo environment is a binding precondition for production launch (full specification: doc 12 § 18 — "Demo environment"). The Planner, the Case Workspace, the dashboards and the Dev "view as role" mode (§ 20.8) all depend on it for validation, onboarding, customer demos, screenshots and investor presentations.
+
+Implementation home: `scripts/seed-demo.ts` (already exists) extended over future sprints toward the target dataset in doc 12 § 18.
+
+### 20.11 — Single-application feeling (binding)
+
+VerkstedOS should feel like **one coherent desktop application**. Users should almost never feel they are leaving their current context.
+
+**Binding rules:**
+
+- Case details, customer details, vehicle details, planning information, parts requirements, supplier-invoice lines, time entries and similar sub-objects open as **drawers, side panels, modal dialogs or split views** inside the current surface — not as full-page navigations.
+- Full-page navigation is reserved for **genuine context switches** — e.g. moving from the Operations Center to the Production Planner, opening a different case workspace as the primary surface, or visiting Settings.
+- The Production Planner drawer-first principle (§ 7) is the canonical pattern: opening a Case from the Planner is a right-side drawer over the Planner; the full Case Workspace remains available via an explicit `[↗]` open-full action.
+- Mobile follows the device-appropriate analogue (full-screen overlay on tablet, single-pane stack on phone — doc 12 § 13 / § 14).
+- "Back" must always return to the surface the user came from, with state intact (scroll position, filters, selection).
+- **Anti-patterns:** modal-on-modal-on-modal, page-hopping to read a related entity, navigating away to perform a quick action that could be inline, "save and return" flows that drop the user back at a list instead of where they were.
+
+This refines doc 12 principles 1, 4, 5 and 7 (Case-centric · Speed · Progressive disclosure · Actions where you need them) and is now binding for every UI feature in every module.
+
+### 20.12 — Existing surfaces absorb new functionality (binding)
+
+Whenever a new feature is introduced, the **first** design question is:
+
+> *"Can this naturally live inside an existing surface?"*
+
+**Canonical absorbing surfaces:**
+
+- Production Planner (this document — § 4 modes, § 5 cards, § 7 drawer)
+- Case Workspace (doc 12 § 5 + doc 13 § 20.3)
+- Operations Center (doc 12 § 4)
+- Parts Coordinator (`/parts`)
+- Dashboards (doc 11 — role-adaptive renderings)
+- Customer Workspace (`/cases/:id` from the customer-portal token side)
+- Settings (org/workshop/workflow/integrations admin)
+- Dev Control Plane (doc 06 — `/dev/*`)
+
+**Binding rules:**
+
+- A new feature creates a new top-level route **only when** no existing surface can plausibly host it. The default outcome is *"add to an existing surface."*
+- New top-level routes require explicit justification in the PR (System Impact Analysis, CLAUDE.md § 11 / Appendix A). The reviewer's first question is "could this have been a tab, drawer, section or mode of an existing surface?"
+- Sprint Implementation Review (CLAUDE.md § 9.1) checks: "No new standalone pages introduced that should have been absorbed into existing surfaces."
+- Dashboards, lists and detail views for new entities default to **tabs / drawers / sections** of the surface that owns the entity's context. (Example: a new "case notes" feature lives as a section of the Case Workspace, not as `/notes`.)
+- Cross-cutting operational queues (e.g. Parts Coordinator) are allowed as their own surface when they aggregate across cases and have a distinct user persona; they are still subject to the single-application-feeling rule (§ 20.11) — inspecting a case from such a queue opens a drawer.
+
+**Examples of correct absorption:**
+
+| Feature | Wrong (default new page) | Right (absorbed) |
+|---|---|---|
+| View a case from a list | navigate to `/cases/:id` as full page | drawer over the list (§ 7) |
+| Edit a part requirement | dedicated `/parts/:id/edit` page | inline edit + drawer in Parts Coordinator and Case Workspace |
+| See a customer's history | `/customers/:id` full page | side panel on the Case Workspace |
+| Plan a new case at intake | hop to Planner to drag | inline booking widgets in intake (§ 20.4) reading the planning engine |
+| QC checklist for a segment | dedicated QC page | drawer inside the Case Workspace Production tab |
+| Schedule a follow-up task | new "Tasks" module | My Tasks (§ 4.5) + office lane (§ 4.2 / § 4.3), tied to the case |
+
+**Examples of legitimate new surfaces:**
+
+| Feature | Why it's a surface |
+|---|---|
+| Operations Center | Cross-case "what needs attention" — not naturally inside any one case |
+| Production Planner | Cross-case scheduling engine with multiple modes |
+| Parts Coordinator | Cross-case purchasing queue with its own persona |
+| Insights | Deliberate analytics destination — separate by design (doc 12 § 1) |
+| Dev Control Plane | Operationally distinct — different audience, audit, IP-allow-list |
+
+### 20.10 — Governance & scope
+
+**What this directive does:**
+
+- Establishes doc 13 as approved & binding architecture.
+- Adds binding presentation-layer, evolution-direction and governance rules (§§ 20.1–20.9, §§ 20.11–20.12).
+- Cross-references doc 11 (header), doc 12 (header / § 5 / § 11 / § 14 / § 16 / § 17 / § 18) and CLAUDE.md.
+
+**What this directive does NOT do:**
+
+- It does **not** redesign any bounded context, domain entity, table, RLS policy, permission, event type or workflow state (CLAUDE.md § 4.1 Architecture Freeze remains in force).
+- It does **not** modify sprint status, milestones, or the roadmap (`docs/09-roadmap.md` is untouched).
+- It does **not** resolve the four STOP-AND-ASK flags in § 16. Where § 20 reaches into office-tasks (§ 20.5) or single-segment cross-workshop moves (§ 20.2 / § 11), it explicitly defers to § 16's flagged decisions.
+- It does **not** introduce new permissions; existing permissions (`production:plan`, `production:transition`, `case:edit`, `admin:config`, `platform:user:impersonate`) cover the binding rules above. New permissions, if any prove necessary, follow CLAUDE.md § 4.3 (justify, split don't layer, project-owner approval).
+
+**Compliance gate (future implementation):**
+
+Any PR that builds against §§ 20.1–20.8 must declare so in the System Impact Analysis (CLAUDE.md § 11 / Appendix A) and verify it against this section in the sprint Implementation Review (CLAUDE.md § 9.1).
 
 ---
 
