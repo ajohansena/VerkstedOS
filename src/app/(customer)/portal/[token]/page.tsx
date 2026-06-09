@@ -3,9 +3,12 @@ import { notFound } from 'next/navigation';
 import { getDictionary } from '@/lib/i18n';
 import {
   readPortalCase,
+  readPortalSignatureByCase,
   resolvePortalToken,
   touchPortalToken,
 } from '@/modules/notifications/public';
+
+import { PortalSignSection } from './sign-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +55,11 @@ export default async function CustomerPortalPage(props: {
     );
   }
 
+  const existingSignature = await readPortalSignatureByCase(
+    resolved.token.organizationId,
+    resolved.token.caseId,
+  );
+
   const fmt = (iso: string): string =>
     new Intl.DateTimeFormat('nb-NO', {
       day: '2-digit',
@@ -94,6 +102,14 @@ export default async function CustomerPortalPage(props: {
           {t.portal.refreshNote}
         </p>
       </div>
+      <PortalSignSection
+        token={token}
+        alreadySigned={existingSignature !== null}
+        signedAtIso={existingSignature?.signedAt.toISOString() ?? null}
+        sequenceNo={existingSignature?.sequenceNo ?? null}
+        signerName={existingSignature?.signerName ?? null}
+        t={t}
+      />
     </div>
   );
 }

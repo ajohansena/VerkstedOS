@@ -75,6 +75,7 @@ import type { yardLayouts } from './schemas/yard/yard-layouts';
 import type { yardLocations } from './schemas/yard/yard-locations';
 import type { vehiclePlacements } from './schemas/yard/vehicle-placements';
 import type { vehicleMovements } from './schemas/yard/vehicle-movements';
+import type { dangerousOperations } from './schemas/platform/dangerous-operations';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -406,6 +407,9 @@ export type NewVehiclePlacement = InferInsertModel<typeof vehiclePlacements>;
 
 export type VehicleMovement = InferSelectModel<typeof vehicleMovements>;
 export type NewVehicleMovement = InferInsertModel<typeof vehicleMovements>;
+
+export type DangerousOperation = InferSelectModel<typeof dangerousOperations>;
+export type NewDangerousOperation = InferInsertModel<typeof dangerousOperations>;
 
 export type Document = InferSelectModel<typeof documents>;
 export type NewDocument = InferInsertModel<typeof documents>;

@@ -6,11 +6,15 @@ import {
   type DeliveredCase,
 } from '@/modules/production/public';
 import { calculateUtilization } from '@/modules/workforce/public';
+import { listWorkshops } from '@/modules/identity/public';
 
 import {
   countActiveEmployees,
+  countActiveEmployeesByWorkshop,
   listCasesForKpis,
+  listCasesForKpisByWorkshop,
   sumBookedMinutes,
+  sumBookedMinutesByWorkshop,
   upsertKpiSnapshot,
 } from '../../infrastructure/repositories/kpi-repository';
 
@@ -109,5 +113,60 @@ export async function computeRolling30Snapshots(
     sampleSize: headcount,
   });
 
-  return { computed: 4, periodStart, periodEnd };
+  // Per-workshop snapshots (Sprint 20 — executive dashboard fuel).
+  const workshops = await listWorkshops(ctx);
+  let perWorkshopWrites = 0;
+  for (const ws of workshops) {
+    const [wsRows, wsBooked, wsHeadcount] = await Promise.all([
+      listCasesForKpisByWorkshop(ctx, ws.id, periodStart, now),
+      sumBookedMinutesByWorkshop(ctx, ws.id, periodStart, now),
+      countActiveEmployeesByWorkshop(ctx, ws.id),
+    ]);
+    const wsDelivered: DeliveredCase[] = wsRows.map((r) => ({
+      openedAt: r.openedAt,
+      deliveredAt: r.deliveredAt,
+      promisedAt: new Date(r.openedAt.getTime() + NORMAL_REPAIR_DAYS * DAY_MS),
+    }));
+    const wsThroughput = calculateThroughput(wsDelivered, periodStart, now);
+    const wsCycle = calculateAverageCycleTime(wsDelivered);
+    const wsOnTime = calculateOnTimeDeliveryRate(wsDelivered);
+    const wsUtilization = calculateUtilization({
+      bookedMinutes: wsBooked,
+      availableMinutes:
+        wsHeadcount * MINUTES_PER_EMPLOYEE_DAY * WORKING_DAYS_30,
+    });
+    const wsCommon = {
+      period: 'rolling_30' as const,
+      periodStart,
+      periodEnd,
+      workshopId: ws.id,
+    };
+    await upsertKpiSnapshot(ctx, {
+      ...wsCommon,
+      kpiCode: 'throughput',
+      value: wsThroughput,
+      sampleSize: wsThroughput,
+    });
+    await upsertKpiSnapshot(ctx, {
+      ...wsCommon,
+      kpiCode: 'cycle_time',
+      value: wsCycle.averageDays,
+      sampleSize: wsCycle.sampleSize,
+    });
+    await upsertKpiSnapshot(ctx, {
+      ...wsCommon,
+      kpiCode: 'on_time_rate',
+      value: Math.round(wsOnTime.rate * 100),
+      sampleSize: wsOnTime.delivered,
+    });
+    await upsertKpiSnapshot(ctx, {
+      ...wsCommon,
+      kpiCode: 'utilization',
+      value: wsUtilization.percent,
+      sampleSize: wsHeadcount,
+    });
+    perWorkshopWrites += 4;
+  }
+
+  return { computed: 4 + perWorkshopWrites, periodStart, periodEnd };
 }

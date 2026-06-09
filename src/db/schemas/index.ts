@@ -111,6 +111,8 @@ export { yardLayouts } from './yard/yard-layouts';
 export { yardLocations } from './yard/yard-locations';
 export { vehiclePlacements } from './yard/vehicle-placements';
 export { vehicleMovements } from './yard/vehicle-movements';
+// Platform — Dev Control Plane (Sprint 20)
+export { dangerousOperations } from './platform/dangerous-operations';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

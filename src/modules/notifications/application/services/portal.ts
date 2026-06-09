@@ -4,8 +4,12 @@
  */
 
 import type { RequestContext } from '@/lib/tenancy/context';
-import type { PortalToken } from '@/db/types';
+import type { DigitalSignature, PortalToken } from '@/db/types';
 import { requirePermission } from '@/modules/identity/public';
+import {
+  appendCustomerPortalSignature,
+  readPortalSignature,
+} from '@/modules/quality/public';
 
 import {
   createPortalToken as createInfra,
@@ -57,3 +61,83 @@ export async function revokePortalTokenById(
 
 // Re-export for tests / scripts.
 export { generatePortalToken };
+
+/**
+ * Customer-initiated portal signing (Sprint 20). The portal route validates
+ * the token, then calls this with the customer's name + the same payload
+ * the portal renders. Throws if the token is missing/expired/revoked, if the
+ * customer is missing data, or if the case already has a customer signature.
+ */
+export interface SignByTokenInput {
+  token: string;
+  signerName: string;
+  evidence?: Record<string, unknown>;
+}
+
+export type SignByTokenResult =
+  | { ok: true; signature: DigitalSignature }
+  | {
+      ok: false;
+      reason:
+        | 'token_invalid'
+        | 'token_expired'
+        | 'token_revoked'
+        | 'name_required'
+        | 'already_signed';
+    };
+
+export async function signRepairAcceptanceByToken(
+  input: SignByTokenInput,
+): Promise<SignByTokenResult> {
+  const resolved = await lookupInfra(input.token);
+  if (!resolved) return { ok: false, reason: 'token_invalid' };
+  if (!resolved.active) {
+    return {
+      ok: false,
+      reason: resolved.reason === 'expired' ? 'token_expired' : 'token_revoked',
+    };
+  }
+  const signerName = input.signerName.trim();
+  if (signerName.length < 2) {
+    return { ok: false, reason: 'name_required' };
+  }
+
+  // Existing signature short-circuit (the portal also displays this state).
+  const existing = await readPortalSignature(
+    resolved.token.organizationId,
+    resolved.token.caseId,
+  );
+  if (existing) {
+    return { ok: false, reason: 'already_signed' };
+  }
+
+  const payload = JSON.stringify({
+    kind: 'repair_acceptance',
+    caseId: resolved.token.caseId,
+    signerName,
+    tokenId: resolved.token.id,
+  });
+  try {
+    const signature = await appendCustomerPortalSignature({
+      organizationId: resolved.token.organizationId,
+      caseId: resolved.token.caseId,
+      signerName,
+      payload,
+      ...(input.evidence ? { evidence: input.evidence } : {}),
+    });
+    await recordUseInfra(resolved.token.id);
+    return { ok: true, signature };
+  } catch (err) {
+    if (err instanceof Error && err.message === 'PORTAL_ALREADY_SIGNED') {
+      return { ok: false, reason: 'already_signed' };
+    }
+    throw err;
+  }
+}
+
+export async function readPortalSignatureByCase(
+  organizationId: string,
+  caseId: string,
+): Promise<DigitalSignature | null> {
+  return readPortalSignature(organizationId, caseId);
+}

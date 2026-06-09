@@ -18,6 +18,7 @@ export {
 // Reads
 export {
   listLatestSnapshots,
+  listLatestSnapshotsByWorkshop,
   listSnapshotSeries,
   listKpiDefinitions,
   type DeliveredCaseRow,

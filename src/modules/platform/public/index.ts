@@ -137,3 +137,22 @@ export {
   type PlatformVehiclePlacementRow,
   type PlatformVehicleMovementRow,
 } from '../infrastructure/repositories/platform-yard-repository';
+
+export {
+  requestDangerousOp,
+  approveDangerousOp,
+  rejectDangerousOp,
+  executeDangerousOp,
+  cancelDangerousOp,
+  listQueue as listDangerousOpsQueue,
+  TwoPersonRuleViolationError,
+  DangerousOperationNotFoundError,
+  DangerousOperationStateError,
+  type RequestDangerousOpInput,
+} from '../application/services/two-person';
+
+export {
+  type DangerousOperationRow,
+  type DangerousOperationKind,
+  type DangerousOperationStatus,
+} from '../infrastructure/repositories/platform-dangerous-ops-repository';

@@ -11,11 +11,12 @@ import {
   listWorkflowAdjacency,
   listWorkflowStates,
 } from '@/modules/production/public';
-import { listApprovedAbsenceWindowsForEmployees } from '@/modules/workforce/public';
+import { findEmployeeByUserId, listApprovedAbsenceWindowsForEmployees } from '@/modules/workforce/public';
 
 import { BoardV2 } from './board-v2';
 import { DayView } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
+import { MyTasksView, type MyTasksRow } from './my-tasks-view';
 import { ResourceView, type ResourceRow as RV_Row } from './resource-view';
 import { WeekView, type WeekRow as WV_Row } from './week-view';
 
@@ -74,7 +75,7 @@ export default async function ProductionBoardPage(props: {
       {mode === 'week' && <WeekSection session={session} t={t} />}
       {mode === 'resource' && <ResourceSection session={session} t={t} />}
       {mode === 'mytasks' && (
-        <Placeholder message={t.productionBoard.myTasksComingSoon} />
+        <MyTasksSection session={session} t={t} />
       )}
     </div>
   );
@@ -174,11 +175,61 @@ async function DaySection({
   );
 }
 
-function Placeholder({ message }: { message: string }) {
+/**
+ * My Tasks composer (Sprint 20, doc 13 §4.5). Looks up the employee row
+ * linked to the current user, finds resources owned by that employee, and
+ * shows planned segments split into today / rest-of-the-week buckets.
+ */
+async function MyTasksSection({
+  session,
+  t,
+}: {
+  session: Awaited<ReturnType<typeof getSessionContext>>;
+  t: ReturnType<typeof getDictionary>;
+}) {
+  if (!session) return null;
+  const DAY = 86400000;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(today.getTime() + DAY);
+  const weekEnd = new Date(today.getTime() + 7 * DAY);
+
+  const employee = await findEmployeeByUserId(session.context, session.user.id);
+  const [resources, planned] = await Promise.all([
+    listResourcesForBoard(session.context),
+    listPlannedSegmentsForRange(session.context, today, weekEnd),
+  ]);
+  const myResourceIds = new Set(
+    resources
+      .filter((r) => employee && r.employeeId === employee.id)
+      .map((r) => r.id),
+  );
+
+  const todays: MyTasksRow[] = [];
+  const rest: MyTasksRow[] = [];
+  for (const p of planned) {
+    if (!myResourceIds.has(p.resourceId)) continue;
+    if (!p.plannedStartAt) continue;
+    const row: MyTasksRow = {
+      segmentId: p.segmentId,
+      segmentLabel: p.segmentLabel,
+      caseId: p.caseId,
+      caseNumber: p.caseNumber,
+      resourceName: p.resourceName,
+      plannedStartAt: p.plannedStartAt,
+      plannedEndAt: p.plannedEndAt,
+    };
+    if (p.plannedStartAt < todayEnd) todays.push(row);
+    else rest.push(row);
+  }
+
   return (
-    <div className="rounded-lg border bg-background p-6 text-sm text-muted-foreground">
-      {message}
-    </div>
+    <MyTasksView
+      todays={todays}
+      rest={rest}
+      hasResources={employee !== null && myResourceIds.size > 0}
+      t={t}
+    />
   );
 }
 

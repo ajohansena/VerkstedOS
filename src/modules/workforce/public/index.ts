@@ -32,6 +32,7 @@ export {
 export {
   listEmployees,
   findEmployeeById,
+  findEmployeeByUserId,
   listSkills,
   findOpenSession,
   listWorkingNow,

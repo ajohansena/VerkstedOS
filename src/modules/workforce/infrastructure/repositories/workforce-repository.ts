@@ -82,6 +82,30 @@ export async function findEmployeeById(
   });
 }
 
+/**
+ * Look up the employee record linked to a given user (Sprint 20, My Tasks).
+ * Returns null when the user is not staff (no employee row links to them).
+ */
+export async function findEmployeeByUserId(
+  ctx: RequestContext,
+  userId: string,
+): Promise<Employee | null> {
+  return withTransaction(ctx, async (tx) => {
+    const rows = await tx
+      .select()
+      .from(employees)
+      .where(
+        and(
+          eq(employees.userId, userId),
+          eq(employees.organizationId, ctx.organizationId),
+          isNull(employees.deletedAt),
+        ),
+      )
+      .limit(1);
+    return rows[0] ?? null;
+  });
+}
+
 export async function addSkill(
   tx: TenantTransaction,
   ctx: RequestContext,

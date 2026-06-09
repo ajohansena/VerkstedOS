@@ -22,7 +22,12 @@ export type PlatformAuditAction =
   | 'org_locked'
   | 'org_unlocked'
   | 'feature_flag_changed'
-  | 'integration_disabled';
+  | 'integration_disabled'
+  | 'dangerous_op_requested'
+  | 'dangerous_op_approved'
+  | 'dangerous_op_rejected'
+  | 'dangerous_op_executed'
+  | 'dangerous_op_cancelled';
 
 export interface PlatformAuditInput {
   action: PlatformAuditAction;

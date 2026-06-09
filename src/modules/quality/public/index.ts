@@ -65,10 +65,13 @@ export {
 // Digital signatures (tamper-evident chain)
 export {
   appendSignature,
+  appendCustomerPortalSignature,
+  readPortalSignature,
   listSignatures,
   verifyCaseChain,
   verifyCaseChainAdmin,
   type SignInput,
+  type PortalSignInput,
 } from '../application/services/signatures';
 
 export {

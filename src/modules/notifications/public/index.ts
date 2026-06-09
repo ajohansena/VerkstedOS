@@ -46,6 +46,10 @@ export {
   touchPortalToken,
   revokePortalTokenById,
   generatePortalToken,
+  signRepairAcceptanceByToken,
+  readPortalSignatureByCase,
+  type SignByTokenInput,
+  type SignByTokenResult,
 } from '../application/services/portal';
 
 // Portal read helper (used by the unauth'd portal route)

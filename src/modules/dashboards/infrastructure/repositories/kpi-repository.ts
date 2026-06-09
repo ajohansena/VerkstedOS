@@ -206,3 +206,109 @@ export async function listKpiDefinitions(
       .orderBy(kpiDefinitions.category, kpiDefinitions.code);
   });
 }
+
+/**
+ * Latest snapshots BY WORKSHOP (executive dashboard, Sprint 20). Returns the
+ * most recent value per (workshopId, kpiCode) for the requested period. Only
+ * rows that actually carry a workshopId are returned; org-level rollups stay
+ * with `listLatestSnapshots`.
+ */
+export async function listLatestSnapshotsByWorkshop(
+  ctx: RequestContext,
+  period: 'day' | 'week' | 'month' | 'rolling_30' = 'rolling_30',
+): Promise<KpiSnapshot[]> {
+  return withTransaction(ctx, async (tx) => {
+    return tx
+      .selectDistinctOn([kpiSnapshots.workshopId, kpiSnapshots.kpiCode])
+      .from(kpiSnapshots)
+      .where(
+        and(
+          eq(kpiSnapshots.organizationId, ctx.organizationId),
+          eq(kpiSnapshots.period, period),
+          sql`${kpiSnapshots.workshopId} is not null`,
+        ),
+      )
+      .orderBy(
+        kpiSnapshots.workshopId,
+        kpiSnapshots.kpiCode,
+        desc(kpiSnapshots.periodStart),
+      );
+  });
+}
+
+/** Cases opened/delivered for ONE workshop. */
+export async function listCasesForKpisByWorkshop(
+  ctx: RequestContext,
+  workshopId: string,
+  from: Date,
+  to: Date,
+): Promise<DeliveredCaseRow[]> {
+  return withTransaction(ctx, async (tx) => {
+    const rows = await tx
+      .select({
+        caseId: cases.id,
+        openedAt: cases.openedAt,
+        deliveredAt: cases.deliveredAt,
+      })
+      .from(cases)
+      .where(
+        and(
+          eq(cases.organizationId, ctx.organizationId),
+          eq(cases.currentWorkshopId, workshopId),
+          isNull(cases.deletedAt),
+          lte(cases.openedAt, to),
+        ),
+      );
+    return rows.filter(
+      (r) =>
+        r.deliveredAt === null ||
+        (r.deliveredAt >= from && r.deliveredAt <= to) ||
+        r.deliveredAt > to,
+    );
+  });
+}
+
+/** Booked minutes for ONE workshop. */
+export async function sumBookedMinutesByWorkshop(
+  ctx: RequestContext,
+  workshopId: string,
+  from: Date,
+  to: Date,
+): Promise<number> {
+  return withTransaction(ctx, async (tx) => {
+    const rows = await tx
+      .select({
+        total: sql<number>`coalesce(sum(${workSegments.actualMinutes}), 0)::int`,
+      })
+      .from(workSegments)
+      .where(
+        and(
+          eq(workSegments.organizationId, ctx.organizationId),
+          eq(workSegments.plannedWorkshopId, workshopId),
+          gte(workSegments.updatedAt, from),
+          lte(workSegments.updatedAt, to),
+        ),
+      );
+    return Number(rows[0]?.total ?? 0);
+  });
+}
+
+/** Active employees for ONE workshop. */
+export async function countActiveEmployeesByWorkshop(
+  ctx: RequestContext,
+  workshopId: string,
+): Promise<number> {
+  return withTransaction(ctx, async (tx) => {
+    const rows = await tx
+      .select({ n: sql<number>`count(*)::int` })
+      .from(employees)
+      .where(
+        and(
+          eq(employees.organizationId, ctx.organizationId),
+          eq(employees.workshopId, workshopId),
+          isNull(employees.deletedAt),
+        ),
+      );
+    return Number(rows[0]?.n ?? 0);
+  });
+}

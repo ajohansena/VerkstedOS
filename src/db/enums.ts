@@ -725,3 +725,24 @@ export const vehicleMovementReason = pgEnum('vehicle_movement_reason', [
   'departure',
   'correction',
 ]);
+
+// --- Dangerous operations (Sprint 20 — two-person rule queue) ---------------
+
+export const dangerousOperationKind = pgEnum('dangerous_operation_kind', [
+  'org_lock',
+  'org_unlock',
+  'jobs_pause',
+  'jobs_resume',
+  'maintenance_mode_on',
+  'maintenance_mode_off',
+  'data_delete',
+  'data_restore',
+]);
+
+export const dangerousOperationStatus = pgEnum('dangerous_operation_status', [
+  'pending_approval',
+  'approved',
+  'rejected',
+  'executed',
+  'cancelled',
+]);

@@ -135,6 +135,114 @@ export async function listSignatures(
   });
 }
 
+/**
+ * Customer portal signing path (Sprint 20). The caller is UNAUTHENTICATED —
+ * the portal token IS the credential, and validation happens UPSTREAM in
+ * the notifications module before this is called. Uses the admin client.
+ * Always seals the customer's portal acceptance — `signer_kind = customer`,
+ * `kind = repair_acceptance`. Returns the appended row including the chain
+ * position so the portal can render confirmation.
+ */
+export interface PortalSignInput {
+  organizationId: string;
+  caseId: string;
+  signerName: string;
+  payload: string;
+  evidence?: Record<string, unknown>;
+}
+
+export async function appendCustomerPortalSignature(
+  input: PortalSignInput,
+): Promise<DigitalSignature> {
+  const db = getRawClient({ as: 'admin' });
+
+  // Disallow double-signing: if this case already carries a
+  // repair_acceptance from the customer, raise.
+  const existing = await db
+    .select()
+    .from(digitalSignatures)
+    .where(
+      and(
+        eq(digitalSignatures.organizationId, input.organizationId),
+        eq(digitalSignatures.caseId, input.caseId),
+        eq(digitalSignatures.kind, 'repair_acceptance'),
+      ),
+    )
+    .limit(1);
+  if (existing.length > 0) {
+    throw new Error('PORTAL_ALREADY_SIGNED');
+  }
+
+  const prevRows = await db
+    .select()
+    .from(digitalSignatures)
+    .where(
+      and(
+        eq(digitalSignatures.organizationId, input.organizationId),
+        eq(digitalSignatures.caseId, input.caseId),
+      ),
+    )
+    .orderBy(desc(digitalSignatures.sequenceNo))
+    .limit(1);
+  const prev = prevRows[0];
+
+  const signedAt = new Date();
+  const signedAtIso = signedAt.toISOString();
+  const signer = input.signerName.trim() || 'customer';
+  const payloadHash = hashPayload(input.payload);
+  const previousChainHash = prev?.chainHash ?? null;
+  const chainHash = computeChainHash({
+    previousChainHash,
+    payloadHash,
+    signedAtIso,
+    signer,
+  });
+  const sequenceNo = (prev?.sequenceNo ?? -1) + 1;
+
+  const [inserted] = await db
+    .insert(digitalSignatures)
+    .values({
+      organizationId: input.organizationId,
+      caseId: input.caseId,
+      kind: 'repair_acceptance',
+      signerKind: 'customer',
+      signerName: signer,
+      signerReference: null,
+      subjectType: 'portal_acceptance',
+      subjectId: null,
+      payloadHash,
+      chainHash,
+      previousChainHash,
+      sequenceNo,
+      evidence: (input.evidence ?? null) as never,
+      signedByUserId: null,
+      signedAt,
+    })
+    .returning();
+  if (!inserted) throw new Error('Failed to append portal signature');
+  return inserted;
+}
+
+/** Read the customer's portal repair_acceptance signature, if any. */
+export async function readPortalSignature(
+  organizationId: string,
+  caseId: string,
+): Promise<DigitalSignature | null> {
+  const db = getRawClient({ as: 'admin' });
+  const rows = await db
+    .select()
+    .from(digitalSignatures)
+    .where(
+      and(
+        eq(digitalSignatures.organizationId, organizationId),
+        eq(digitalSignatures.caseId, caseId),
+        eq(digitalSignatures.kind, 'repair_acceptance'),
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 /** Verify the integrity of a case's signature chain (tamper detection). */
 export async function verifyCaseChain(
   ctx: RequestContext,
