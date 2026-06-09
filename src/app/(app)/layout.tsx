@@ -50,6 +50,8 @@ export default async function AppLayout({
     admin: t.nav.admin,
     clock: t.nav.clock,
     finance: t.nav.finance,
+    absence: t.absence.title,
+    rental: t.rental.title,
   };
 
   const topbarLabels = {

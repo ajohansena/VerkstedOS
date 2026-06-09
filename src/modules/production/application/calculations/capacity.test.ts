@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  absenceMinutesInDay,
   classifyFeasibility,
   computeCapacity,
   remainingWorkMinutes,
@@ -59,5 +60,68 @@ describe('classifyFeasibility', () => {
   });
   it('overbooked when exceeding total', () => {
     expect(classifyFeasibility(load, 240)).toBe('overbooked'); // 540 > 480
+  });
+});
+
+describe('absenceMinutesInDay', () => {
+  const dayStart = new Date('2026-06-22T07:00:00Z').getTime();
+  const dayEnd = new Date('2026-06-22T15:00:00Z').getTime();
+
+  it('returns 0 when no absences', () => {
+    expect(absenceMinutesInDay(dayStart, dayEnd, [])).toBe(0);
+  });
+
+  it('returns 0 when range is degenerate', () => {
+    expect(absenceMinutesInDay(dayStart, dayStart, [])).toBe(0);
+  });
+
+  it('counts a single fully-contained window', () => {
+    const a = {
+      startMs: new Date('2026-06-22T09:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T12:00:00Z').getTime(),
+    };
+    expect(absenceMinutesInDay(dayStart, dayEnd, [a])).toBe(180);
+  });
+
+  it('clips windows that extend past the day boundary', () => {
+    const a = {
+      startMs: new Date('2026-06-22T06:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T10:00:00Z').getTime(),
+    };
+    // overlap with 07:00–10:00 = 180 min
+    expect(absenceMinutesInDay(dayStart, dayEnd, [a])).toBe(180);
+  });
+
+  it('merges overlapping windows', () => {
+    const a = {
+      startMs: new Date('2026-06-22T09:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T11:00:00Z').getTime(),
+    };
+    const b = {
+      startMs: new Date('2026-06-22T10:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T13:00:00Z').getTime(),
+    };
+    // merged 09:00–13:00 = 240 min (not 120+180 = 300)
+    expect(absenceMinutesInDay(dayStart, dayEnd, [a, b])).toBe(240);
+  });
+
+  it('sums disjoint windows', () => {
+    const a = {
+      startMs: new Date('2026-06-22T08:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T09:00:00Z').getTime(),
+    };
+    const b = {
+      startMs: new Date('2026-06-22T13:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T14:00:00Z').getTime(),
+    };
+    expect(absenceMinutesInDay(dayStart, dayEnd, [a, b])).toBe(120);
+  });
+
+  it('returns 0 when the absence is entirely outside the day', () => {
+    const a = {
+      startMs: new Date('2026-06-21T08:00:00Z').getTime(),
+      endMs: new Date('2026-06-22T06:00:00Z').getTime(),
+    };
+    expect(absenceMinutesInDay(dayStart, dayEnd, [a])).toBe(0);
   });
 });

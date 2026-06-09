@@ -502,23 +502,25 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 ### Sprint 18 — Absence management & rental
 
-**Goal:** Absence integrates with capacity planning. Rental vehicles tracked.
+**Status:** ✅ Delivered.
 
-**Deliverables:**
-- `absence_entries` with full integration to capacity engine (reduces resource availability)
-- `absence_types` configurable per org (vacation, sick, training, other)
-- Calendar UI showing absences with capacity impact
-- `rental_vehicles`, `rental_reservations`, `rental_agreements`, `rental_returns`
-- Rental availability calendar
-- Digital signing of rental agreements (cryptographic chain)
-- Rental linked to case via funding source (insurance pays for rental during repair)
+**Demoable (shipped):** Painter submits a vacation request from `/fravær`; owner approves it at `/admin/fravær`; Production → **Ressurser** tab shows that painter's row dropping to 0 % on the absence day so the planner re-balances. Coordinator opens `/leiebil`, books a rental for an insurance case (overlap rejected against the same vehicle), captures the customer signature on a tablet, and later records the odometer + fuel on return. Platform inspector at `/dev/rental` sees every reservation, agreement, return and absence across all orgs.
 
-**Three Surfaces:**
-- User: technician requests vacation; manager approves; customer signs rental agreement
-- Admin: rental fleet management, absence type config, rental rate cards
-- Dev: rental booking history, agreement signature chain inspection, rental availability projection rebuild
+**Deliverables (shipped):**
+- Absence approval workflow on existing `absence_entries`: new columns `status`, `requested_by`, `requested_at`, `decided_by`, `decided_at`, `decision_reason`; default absence types seeded idempotently per org (`vacation`, `sick`, `training`, `other`).
+- 4 new rental tables + 3 enums; migrations `0041_absence_rental_tables.sql` + `0042_absence_rental_rls.sql`.
+- Capacity-engine SSoT: `absenceMinutesInDay(windows, day)` merges overlapping approved-absence windows and clips to the working day; registered as metric `absence_minutes_in_day`.
+- Rental availability SSoT: `hasConflict` + `projectAvailability` in `rental/application/calculations/availability.ts`; `createReservation` rejects with `RentalConflictError`.
+- Service surfaces (case:edit / admin:config / time:self) for absence approval and the full rental lifecycle (`registerRentalVehicle`, `createReservation`, `activateReservation`, `completeReservation`, `cancelReservation`, `createAgreement`, `signAgreement`, `recordReturn`).
+- User surfaces: `/fravær` (request + 30-day list), `/leiebil` (reservations + sign + return).
+- Admin surfaces: `/admin/fravær` (approval queue; decline-with-reason), `/admin/rental` (fleet management).
+- Dev surface: `/dev/rental` (5 platform inspectors across vehicles / reservations / agreements / returns / absences).
+- Production Board v3 — **Resource View** (third of five visualizations): per-resource × 7-day grid, traffic-light utilization (emerald < 85 %, amber 85–100 %, red > 100 %), absence minutes subtracted from available capacity via the SSoT.
+- Sidebar gains `Fravær` + `Leiebil` in the secondary group; admin index hides both new links behind `canConfig`.
 
-**Demoable:** Painter on vacation Friday → capacity calendar shows reduced paint capacity → planner re-balances; customer signs rental on tablet.
+**Deferred (D1–D3):** cryptographic chained signature on rental agreements (lands with customer portal v2 in Sprint 20), rate-card pricing on rentals (configuration UI in Sprint 20), per-org absence-type configuration UI (defers to Sprint 19's admin touch).
+
+**Sprint review:** [docs/sprint-reviews/sprint-18.md](./sprint-reviews/sprint-18.md). Tests: 113 unit + 124 integration green. Gates green: `typecheck`, `lint`, `depcruise` (438), `check:metrics` (17), `check:permissions` (24).
 
 ---
 

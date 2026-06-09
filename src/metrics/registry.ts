@@ -72,6 +72,10 @@ export const metricRegistry = {
     module: 'workforce',
     calc: 'calculateUtilization',
   },
+  absence_minutes_in_day: {
+    module: 'production',
+    calc: 'absenceMinutesInDay',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

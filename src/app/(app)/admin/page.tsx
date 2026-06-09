@@ -51,6 +51,8 @@ export default async function AdminPage() {
       label: t.admin.notifications,
       show: canConfig,
     },
+    { href: '/admin/absence', label: t.absence.queueTitle, show: canConfig },
+    { href: '/admin/rental', label: t.rental.fleetTitle, show: canConfig },
   ];
 
   return (

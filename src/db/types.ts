@@ -67,6 +67,10 @@ import type { notifications } from './schemas/notifications/notifications';
 import type { notificationDeliveries } from './schemas/notifications/notification-deliveries';
 import type { notificationPreferences } from './schemas/notifications/notification-preferences';
 import type { portalTokens } from './schemas/notifications/portal-tokens';
+import type { rentalVehicles } from './schemas/rental/rental-vehicles';
+import type { rentalReservations } from './schemas/rental/rental-reservations';
+import type { rentalAgreements } from './schemas/rental/rental-agreements';
+import type { rentalReturns } from './schemas/rental/rental-returns';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -374,6 +378,18 @@ export type NewNotificationPreference = InferInsertModel<typeof notificationPref
 
 export type PortalToken = InferSelectModel<typeof portalTokens>;
 export type NewPortalToken = InferInsertModel<typeof portalTokens>;
+
+export type RentalVehicle = InferSelectModel<typeof rentalVehicles>;
+export type NewRentalVehicle = InferInsertModel<typeof rentalVehicles>;
+
+export type RentalReservation = InferSelectModel<typeof rentalReservations>;
+export type NewRentalReservation = InferInsertModel<typeof rentalReservations>;
+
+export type RentalAgreement = InferSelectModel<typeof rentalAgreements>;
+export type NewRentalAgreement = InferInsertModel<typeof rentalAgreements>;
+
+export type RentalReturn = InferSelectModel<typeof rentalReturns>;
+export type NewRentalReturn = InferInsertModel<typeof rentalReturns>;
 
 export type Document = InferSelectModel<typeof documents>;
 export type NewDocument = InferInsertModel<typeof documents>;

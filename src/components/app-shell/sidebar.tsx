@@ -3,6 +3,7 @@
 import {
   Activity,
   Boxes,
+  Car,
   ClipboardList,
   Clock,
   KanbanSquare,
@@ -12,6 +13,7 @@ import {
   Settings,
   TrendingUp,
   Truck,
+  UserMinus,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -32,7 +34,9 @@ interface NavItem {
     | 'insights'
     | 'finance'
     | 'admin'
-    | 'clock';
+    | 'clock'
+    | 'absence'
+    | 'rental';
   icon: LucideIcon;
 }
 
@@ -49,6 +53,8 @@ const PRIMARY: NavItem[] = [
 const SECONDARY: NavItem[] = [
   { href: '/customers', labelKey: 'customers', icon: Users },
   { href: '/vehicles', labelKey: 'vehicles', icon: Boxes },
+  { href: '/absence', labelKey: 'absence', icon: UserMinus },
+  { href: '/rental', labelKey: 'rental', icon: Car },
   { href: '/finance', labelKey: 'finance', icon: Receipt },
 ];
 
@@ -72,6 +78,8 @@ interface SidebarProps {
     finance: string;
     admin: string;
     clock: string;
+    absence: string;
+    rental: string;
   };
   organization: { name: string };
 }

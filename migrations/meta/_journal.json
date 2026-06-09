@@ -141,6 +141,13 @@
       "when": 1781015810915,
       "tag": "0039_notifications_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1781018825311,
+      "tag": "0041_absence_rental_tables",
+      "breakpoints": true
     }
   ]
 }

@@ -59,8 +59,10 @@ export {
   segmentRemainingMinutes,
   remainingWorkMinutes,
   classifyFeasibility,
+  absenceMinutesInDay,
   type CapacityResult,
   type Feasibility,
+  type AbsenceWindow,
 } from '../application/calculations/capacity';
 
 // KPI calculations (SSoT)
@@ -85,8 +87,10 @@ export {
   listWorkflowAdjacency,
   findCaseProductionState,
   listPlannedSegmentsForRange,
+  listResourcesForBoard,
   type BoardItem,
   type RichBoardItem,
   type OrgHold,
   type PlannedSegmentRow,
+  type ResourceRow,
 } from '../infrastructure/repositories/production-repository';

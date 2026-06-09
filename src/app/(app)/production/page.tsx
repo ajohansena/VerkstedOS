@@ -4,15 +4,19 @@ import { getSessionContext } from '@/lib/auth/session';
 import { getDictionary, resolveLocale } from '@/lib/i18n';
 import { getCurrentOrganization } from '@/modules/identity/public';
 import {
+  absenceMinutesInDay,
   listPlannedSegmentsForRange,
   listProductionBoardRich,
+  listResourcesForBoard,
   listWorkflowAdjacency,
   listWorkflowStates,
 } from '@/modules/production/public';
+import { listApprovedAbsenceWindowsForEmployees } from '@/modules/workforce/public';
 
 import { BoardV2 } from './board-v2';
 import { DayView } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
+import { ResourceView, type ResourceRow as RV_Row } from './resource-view';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,9 +73,7 @@ export default async function ProductionBoardPage(props: {
       {mode === 'week' && (
         <Placeholder message={t.productionBoard.weekComingSoon} />
       )}
-      {mode === 'resource' && (
-        <Placeholder message={t.productionBoard.resourceComingSoon} />
-      )}
+      {mode === 'resource' && <ResourceSection session={session} t={t} />}
       {mode === 'mytasks' && (
         <Placeholder message={t.productionBoard.myTasksComingSoon} />
       )}
@@ -178,5 +180,118 @@ function Placeholder({ message }: { message: string }) {
     <div className="rounded-lg border bg-background p-6 text-sm text-muted-foreground">
       {message}
     </div>
+  );
+}
+
+/**
+ * Resource View composer (doc 13 §4.4): 7-day grid of planned vs available
+ * minutes per resource, with approved absences subtracted via the SSoT
+ * `absenceMinutesInDay`. Day window = 09:00–17:00 local (8h baseline) so the
+ * grid is comparable across resource kinds; replace with shift definitions
+ * once Sprint 19 lands. Pure read — no writes here.
+ */
+async function ResourceSection({
+  session,
+  t,
+}: {
+  session: Awaited<ReturnType<typeof getSessionContext>>;
+  t: ReturnType<typeof getDictionary>;
+}) {
+  if (!session) return null;
+  const DAY = 86400000;
+  const SHIFT_START_HOUR = 9;
+  const SHIFT_END_HOUR = 17;
+  const SHIFT_LEN_MIN = (SHIFT_END_HOUR - SHIFT_START_HOUR) * 60;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const rangeStart = today;
+  const rangeEnd = new Date(today.getTime() + 7 * DAY);
+
+  const [resources, planned] = await Promise.all([
+    listResourcesForBoard(session.context),
+    listPlannedSegmentsForRange(session.context, rangeStart, rangeEnd),
+  ]);
+
+  const employeeIds = resources
+    .map((r) => r.employeeId)
+    .filter((id): id is string => id != null);
+  const absenceRows = await listApprovedAbsenceWindowsForEmployees(
+    session.context,
+    employeeIds,
+    rangeStart,
+    rangeEnd,
+  );
+  const absenceByEmployee = new Map<
+    string,
+    Array<{ startMs: number; endMs: number }>
+  >();
+  for (const a of absenceRows) {
+    if (!a.affectsCapacity) continue;
+    const arr = absenceByEmployee.get(a.employeeId) ?? [];
+    arr.push({ startMs: a.startsAt.getTime(), endMs: a.endsAt.getTime() });
+    absenceByEmployee.set(a.employeeId, arr);
+  }
+
+  const dates: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(rangeStart.getTime() + i * DAY);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+
+  const rows: RV_Row[] = resources.map((res) => {
+    const cells = dates.map((iso) => {
+      const dayStart = new Date(`${iso}T00:00:00`);
+      const shiftStart = new Date(dayStart);
+      shiftStart.setHours(SHIFT_START_HOUR, 0, 0, 0);
+      const shiftEnd = new Date(dayStart);
+      shiftEnd.setHours(SHIFT_END_HOUR, 0, 0, 0);
+      let plannedMin = 0;
+      for (const p of planned) {
+        if (p.resourceId !== res.id) continue;
+        if (!p.plannedStartAt || !p.plannedEndAt) continue;
+        const s = Math.max(p.plannedStartAt.getTime(), shiftStart.getTime());
+        const e = Math.min(p.plannedEndAt.getTime(), shiftEnd.getTime());
+        if (e > s) plannedMin += Math.round((e - s) / 60000);
+      }
+      const empAbs = res.employeeId
+        ? (absenceByEmployee.get(res.employeeId) ?? [])
+        : [];
+      const absenceMin = absenceMinutesInDay(
+        shiftStart.getTime(),
+        shiftEnd.getTime(),
+        empAbs,
+      );
+      const availableMin = Math.max(0, SHIFT_LEN_MIN - absenceMin);
+      return {
+        date: iso,
+        plannedMin,
+        availableMin,
+        absenceMin,
+      };
+    });
+    return {
+      resourceId: res.id,
+      resourceName: res.name,
+      resourceKind: res.kind,
+      cells,
+    };
+  });
+
+  return (
+    <ResourceView
+      rows={rows}
+      dates={dates}
+      labels={{
+        heading: t.productionBoard.resourceHeading,
+        empty: t.productionBoard.resourceEmpty,
+        planned: t.productionBoard.resourceColPlanned,
+        available: t.productionBoard.resourceColAvailable,
+        utilization: t.productionBoard.resourceColUtilization,
+        absence: t.productionBoard.resourceColAbsence,
+        legendOk: t.productionBoard.resourceLegendOk,
+        legendTight: t.productionBoard.resourceLegendTight,
+        legendOver: t.productionBoard.resourceLegendOver,
+      }}
+    />
   );
 }

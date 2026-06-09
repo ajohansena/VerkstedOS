@@ -56,7 +56,7 @@ describe('detectPartsDelay', () => {
     expect(hits[0]?.severity).toBe('warning');
     expect(hits[0]?.refType).toBe('part_requirement');
     expect(hits[0]?.actionUrl).toBe('/cases/c1#parts');
-    expect(hits[0]?.payload.days).toBe(4);
+    expect(hits[0]?.payload['days']).toBe(4);
   });
 
   it('does not fire when requirement has progressed', () => {
@@ -166,7 +166,7 @@ describe('detectDeliveryAtRisk', () => {
     expect(hits).toHaveLength(1);
     expect(hits[0]?.ruleCode).toBe('delivery_at_risk');
     expect(hits[0]?.severity).toBe('critical');
-    expect(hits[0]?.payload.slipHours).toBe(48);
+    expect(hits[0]?.payload['slipHours']).toBe(48);
   });
 
   it('does not fire when slip below min', () => {

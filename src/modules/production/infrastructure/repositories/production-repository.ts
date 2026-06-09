@@ -583,3 +583,39 @@ export async function listPlannedSegmentsForRange(
       );
   });
 }
+
+export interface ResourceRow {
+  readonly id: string;
+  readonly name: string;
+  readonly kind: string;
+  readonly employeeId: string | null;
+  readonly workshopId: string | null;
+}
+
+/**
+ * Active resources for the Production Board v3 Resource View (doc 13 §4.4).
+ * One row per planning resource; `employeeId` is populated when `kind='person'`
+ * so the capacity engine can subtract approved absence minutes.
+ */
+export async function listResourcesForBoard(
+  ctx: RequestContext,
+): Promise<ResourceRow[]> {
+  return withTransaction(ctx, async (tx) => {
+    return tx
+      .select({
+        id: resources.id,
+        name: resources.name,
+        kind: resources.kind,
+        employeeId: resources.employeeId,
+        workshopId: resources.workshopId,
+      })
+      .from(resources)
+      .where(
+        and(
+          eq(resources.organizationId, ctx.organizationId),
+          isNull(resources.deletedAt),
+        ),
+      )
+      .orderBy(resources.kind, resources.name);
+  });
+}

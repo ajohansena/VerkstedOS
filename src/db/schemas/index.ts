@@ -101,6 +101,11 @@ export { notifications } from './notifications/notifications';
 export { notificationDeliveries } from './notifications/notification-deliveries';
 export { notificationPreferences } from './notifications/notification-preferences';
 export { portalTokens } from './notifications/portal-tokens';
+// Rental vehicles (Sprint 18)
+export { rentalVehicles } from './rental/rental-vehicles';
+export { rentalReservations } from './rental/rental-reservations';
+export { rentalAgreements } from './rental/rental-agreements';
+export { rentalReturns } from './rental/rental-returns';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

@@ -667,3 +667,35 @@ export const portalTokenScope = pgEnum('portal_token_scope', [
   'case_acceptance', // accept a repair start
   'delivery_signoff', // sign at delivery
 ]);
+
+// --- Absence approval (Sprint 18) -------------------------------------------
+
+export const absenceStatus = pgEnum('absence_status', [
+  'requested',
+  'approved',
+  'declined',
+  'cancelled',
+]);
+
+// --- Rental vehicles (Sprint 18) --------------------------------------------
+
+export const rentalVehicleStatus = pgEnum('rental_vehicle_status', [
+  'available',
+  'in_service',
+  'maintenance',
+  'decommissioned',
+]);
+
+export const rentalReservationStatus = pgEnum('rental_reservation_status', [
+  'planned',
+  'active',
+  'completed',
+  'cancelled',
+]);
+
+export const rentalAgreementStatus = pgEnum('rental_agreement_status', [
+  'draft',
+  'signed',
+  'closed',
+  'cancelled',
+]);

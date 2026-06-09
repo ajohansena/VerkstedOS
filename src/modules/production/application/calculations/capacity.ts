@@ -76,3 +76,55 @@ export function classifyFeasibility(
   if (utilization >= 0.85) return 'tight';
   return 'comfortable';
 }
+
+// --- Absence integration (Sprint 18) ----------------------------------------
+
+export interface AbsenceWindow {
+  /** Inclusive UTC ms. */
+  startMs: number;
+  /** Exclusive UTC ms. */
+  endMs: number;
+}
+
+/**
+ * Compute the minutes a resource is absent during the given day window.
+ * Pure: the caller fetches `approved` absence entries and converts them to
+ * `{startMs,endMs}` windows. Overlapping windows are merged so two absences
+ * on the same day never double-count.
+ *
+ * Used by the capacity engine to derive `totalMinutes` for the day:
+ *   `effectiveTotal = baseTotalMinutes - absenceMinutesInDay(...)`
+ *
+ * Single Source of Truth — no other call site is allowed to subtract
+ * absence minutes by hand.
+ */
+export function absenceMinutesInDay(
+  dayStartMs: number,
+  dayEndMs: number,
+  absences: readonly AbsenceWindow[],
+): number {
+  if (absences.length === 0 || dayEndMs <= dayStartMs) return 0;
+  const clipped: AbsenceWindow[] = [];
+  for (const a of absences) {
+    const start = Math.max(a.startMs, dayStartMs);
+    const end = Math.min(a.endMs, dayEndMs);
+    if (end > start) clipped.push({ startMs: start, endMs: end });
+  }
+  if (clipped.length === 0) return 0;
+  clipped.sort((x, y) => x.startMs - y.startMs);
+  let totalMs = 0;
+  let curStart = clipped[0]!.startMs;
+  let curEnd = clipped[0]!.endMs;
+  for (let i = 1; i < clipped.length; i++) {
+    const w = clipped[i]!;
+    if (w.startMs <= curEnd) {
+      curEnd = Math.max(curEnd, w.endMs);
+    } else {
+      totalMs += curEnd - curStart;
+      curStart = w.startMs;
+      curEnd = w.endMs;
+    }
+  }
+  totalMs += curEnd - curStart;
+  return Math.floor(totalMs / 60000);
+}

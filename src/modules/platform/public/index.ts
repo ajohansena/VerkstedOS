@@ -113,3 +113,16 @@ export {
   type DeliveryRow,
   type RuleRow,
 } from '../infrastructure/repositories/platform-notifications-repository';
+
+export {
+  listPlatformRentalVehicles,
+  listPlatformReservations,
+  listPlatformAgreements,
+  listPlatformReturns,
+  listPlatformAbsences,
+  type PlatformRentalRow,
+  type PlatformReservationRow,
+  type PlatformAgreementRow,
+  type PlatformReturnRow,
+  type PlatformAbsenceRow,
+} from '../infrastructure/repositories/platform-rental-repository';
