@@ -87,6 +87,11 @@ export { supplierInvoices } from './parts/supplier-invoices';
 export { supplierInvoiceLines } from './parts/supplier-invoice-lines';
 export { supplierCreditNotes } from './parts/supplier-credit-notes';
 export { supplierCreditNoteLines } from './parts/supplier-credit-note-lines';
+// Finance (invoice basis & accounting export)
+export { invoiceBasis } from './finance/invoice-basis';
+export { invoiceBasisLines } from './finance/invoice-basis-lines';
+export { accountingExports } from './finance/accounting-exports';
+export { accountingExportLines } from './finance/accounting-export-lines';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

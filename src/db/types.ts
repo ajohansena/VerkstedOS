@@ -56,6 +56,10 @@ import type { supplierInvoices } from './schemas/parts/supplier-invoices';
 import type { supplierInvoiceLines } from './schemas/parts/supplier-invoice-lines';
 import type { supplierCreditNotes } from './schemas/parts/supplier-credit-notes';
 import type { supplierCreditNoteLines } from './schemas/parts/supplier-credit-note-lines';
+import type { invoiceBasis } from './schemas/finance/invoice-basis';
+import type { invoiceBasisLines } from './schemas/finance/invoice-basis-lines';
+import type { accountingExports } from './schemas/finance/accounting-exports';
+import type { accountingExportLines } from './schemas/finance/accounting-export-lines';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -329,6 +333,19 @@ export type SupplierCreditNoteLine = InferSelectModel<
 >;
 export type NewSupplierCreditNoteLine = InferInsertModel<
   typeof supplierCreditNoteLines
+>;
+
+export type InvoiceBasis = InferSelectModel<typeof invoiceBasis>;
+export type NewInvoiceBasis = InferInsertModel<typeof invoiceBasis>;
+export type InvoiceBasisLine = InferSelectModel<typeof invoiceBasisLines>;
+export type NewInvoiceBasisLine = InferInsertModel<typeof invoiceBasisLines>;
+export type AccountingExport = InferSelectModel<typeof accountingExports>;
+export type NewAccountingExport = InferInsertModel<typeof accountingExports>;
+export type AccountingExportLine = InferSelectModel<
+  typeof accountingExportLines
+>;
+export type NewAccountingExportLine = InferInsertModel<
+  typeof accountingExportLines
 >;
 
 export type Document = InferSelectModel<typeof documents>;

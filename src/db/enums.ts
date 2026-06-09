@@ -363,6 +363,43 @@ export const supplierCreditNoteReason = pgEnum('supplier_credit_note_reason', [
   'other',
 ]);
 
+// --- Finance: invoice basis & accounting export (Sprint 15) ------------------
+
+export const invoiceBasisStatus = pgEnum('invoice_basis_status', [
+  'draft', // generated, editable, not yet approved
+  'approved', // owner-approved; locked, ready to export
+  'exported', // sent to the accounting system
+  'settled', // paid / reconciled externally
+  'cancelled',
+]);
+
+export const invoiceBasisKind = pgEnum('invoice_basis_kind', [
+  'standard', // an external invoice basis to a payer (insurance / private / warranty)
+  'deductible', // the carved-out deductible (egenandel) to the deductible payer
+  'internal', // goodwill / internal_rework — flows to accounting as an internal cost, never externally invoiced
+]);
+
+export const invoiceBasisLineKind = pgEnum('invoice_basis_line_kind', [
+  'body_labor',
+  'paint_labor',
+  'paint_material',
+  'parts',
+  'external_work',
+  'deductible', // a deductible transfer line (negative on the insurance basis)
+  'other',
+]);
+
+export const accountingTarget = pgEnum('accounting_target', [
+  'tripletex', // first integration (MVP)
+]);
+
+export const accountingExportStatus = pgEnum('accounting_export_status', [
+  'pending', // queued, not yet sent
+  'sent', // delivered to the accounting system
+  'failed', // delivery failed (retryable)
+  'acknowledged', // accounting system confirmed receipt
+]);
+
 // --- Documents (cross-cutting, docs/04-document-architecture.md) -------------
 
 export const documentKind = pgEnum('document_kind', [

@@ -427,6 +427,8 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 ### Sprint 15 — Invoice basis & accounting export
 
+> **Delivered (2026-06-09).** Invoice basis per funding source with the Norwegian deductible (egenandel) split, approval lifecycle, and an immutable content-hashed accounting export to Tripletex (env-gated adapter, simulated in dev). `/finance` controller surface + per-case finance section. Two SSoT calcs registered (`invoice_line_vat`, `invoice_basis_total`). No new permissions (reused `finance:view/invoice/export`). See `docs/sprint-reviews/sprint-15.md`. Per-case grouped reconciliation UI, `internal_cost_records`, bulk flows, and live Tripletex API wiring are deferred to the next finance iteration.
+
 **Goal:** Invoices generated per funding source. Accounting export to Tripletex working.
 
 **Deliverables:**

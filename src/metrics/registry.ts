@@ -48,6 +48,14 @@ export const metricRegistry = {
     module: 'parts',
     calc: 'calculateInvoiceMatch',
   },
+  invoice_line_vat: {
+    module: 'finance',
+    calc: 'calculateLineVat',
+  },
+  invoice_basis_total: {
+    module: 'finance',
+    calc: 'calculateInvoiceBasisTotals',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

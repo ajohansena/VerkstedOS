@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "branch": "bash scripts/dev-local.sh",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
@@ -18,7 +19,6 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "check:permissions": "tsx scripts/check-permission-catalog.ts",
     "check:metrics": "tsx scripts/check-metric-registry.ts",

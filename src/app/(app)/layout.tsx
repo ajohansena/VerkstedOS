@@ -47,6 +47,7 @@ export default async function AppLayout({
     insights: t.nav.insights,
     admin: t.nav.admin,
     clock: t.nav.clock,
+    finance: t.nav.finance,
   };
 
   const topbarLabels = {

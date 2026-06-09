@@ -8,6 +8,7 @@ import {
   KanbanSquare,
   type LucideIcon,
   Package,
+  Receipt,
   Settings,
   TrendingUp,
   Truck,
@@ -29,6 +30,7 @@ interface NavItem {
     | 'customers'
     | 'yard'
     | 'insights'
+    | 'finance'
     | 'admin'
     | 'clock';
   icon: LucideIcon;
@@ -46,6 +48,7 @@ const PRIMARY: NavItem[] = [
 const SECONDARY: NavItem[] = [
   { href: '/customers', labelKey: 'customers', icon: Users },
   { href: '/vehicles', labelKey: 'vehicles', icon: Boxes },
+  { href: '/finance', labelKey: 'finance', icon: Receipt },
 ];
 
 const SETTINGS: NavItem[] = [
@@ -65,6 +68,7 @@ interface SidebarProps {
     customers: string;
     yard: string;
     insights: string;
+    finance: string;
     admin: string;
     clock: string;
   };

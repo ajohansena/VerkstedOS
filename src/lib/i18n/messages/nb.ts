@@ -45,6 +45,7 @@ export const nb = {
     settings: 'Innstillinger',
     admin: 'Administrasjon',
     yard: 'Plassen',
+    finance: 'Økonomi',
   },
   shell: {
     breadcrumbHome: 'Driftssenter',
@@ -181,6 +182,59 @@ export const nb = {
     summaryMatched: 'Avstemt',
     summaryUnmatched: 'Ikke avstemt',
     summaryCredited: 'Kreditert',
+  },
+  finance: {
+    title: 'Økonomi',
+    description:
+      'Fakturagrunnlag per finansieringskilde og eksport til regnskap.',
+    approvedTitle: 'Klare til eksport',
+    approvedDescription:
+      'Godkjente fakturagrunnlag som venter på overføring til regnskapssystemet.',
+    approvedEmpty: 'Ingen godkjente grunnlag akkurat nå.',
+    exportsTitle: 'Regnskapseksporter',
+    exportsDescription:
+      'Uforanderlig logg over overføringer til regnskap (Tripletex).',
+    exportsEmpty: 'Ingen eksporter ennå.',
+    exportSelected: 'Eksporter valgte',
+    exportAll: 'Eksporter alle godkjente',
+    retry: 'Prøv igjen',
+    basisNumber: 'Grunnlag',
+    payer: 'Betaler',
+    kind: 'Type',
+    net: 'Netto',
+    vat: 'MVA',
+    gross: 'Brutto',
+    status: 'Status',
+    statusDraft: 'Utkast',
+    statusApproved: 'Godkjent',
+    statusExported: 'Eksportert',
+    statusSettled: 'Oppgjort',
+    statusCancelled: 'Kansellert',
+    statusPending: 'Venter',
+    statusSent: 'Sendt',
+    statusFailed: 'Feilet',
+    statusAcknowledged: 'Bekreftet',
+    kindStandard: 'Standard',
+    kindDeductible: 'Egenandel',
+    kindInternal: 'Internkostnad',
+    target: 'System',
+    requestedAt: 'Tidspunkt',
+    externalRef: 'Bilagsref.',
+    attempts: 'Forsøk',
+    tripletexNotConfigured:
+      'Tripletex er ikke konfigurert. Eksport kjøres i simuleringsmodus (dev).',
+    // Case-level finance section
+    caseTitle: 'Fakturagrunnlag',
+    caseDescription:
+      'Ett grunnlag per finansieringskilde. Egenandel skilles ut som eget grunnlag.',
+    generate: 'Generer fakturagrunnlag',
+    generateHint:
+      'Lager grunnlag fra den låste kalkylen og de aktive finansieringskildene.',
+    approve: 'Godkjenn',
+    cancel: 'Kanseller',
+    noBasis: 'Ingen fakturagrunnlag ennå. Generer fra kalkylen.',
+    regenerateHint:
+      'Kanseller eksisterende grunnlag før du genererer på nytt.',
   },
   admin: {
     title: 'Administrasjon',

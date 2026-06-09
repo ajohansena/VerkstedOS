@@ -32,6 +32,7 @@ import {
   remainingWorkMinutes,
 } from '@/modules/production/public';
 import { reconcileCaseParts, listCaseLifecycle } from '@/modules/parts/public';
+import { listInvoiceBasesForCase } from '@/modules/finance/public';
 import {
   listCasePhotos,
   isStorageConfigured,
@@ -72,6 +73,7 @@ import { findCustomerById, findVehicleById } from '@/modules/customer/public';
 import { NORMAL_REPAIR_DAYS } from '@/lib/operations/snapshot';
 import { findCaseProductionState } from '@/modules/production/public';
 import { CaseSidePanel } from './case-side-panel';
+import { CaseFinanceSection } from './case-finance-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,6 +114,8 @@ export default async function CaseDetailPage({
     reconcileCaseParts(session.context, id),
     listCaseLifecycle(session.context, id),
   ]);
+
+  const invoiceBases = await listInvoiceBasesForCase(session.context, id);
 
   const t = getDictionary();
   const photos = await listCasePhotos(session.context, id);
@@ -914,6 +918,46 @@ export default async function CaseDetailPage({
           </form>
         </CardContent>
       </Card>
+
+      <CaseFinanceSection
+        caseId={case_.id}
+        bases={invoiceBases.map((b) => ({
+          id: b.id,
+          basisNumber: b.basisNumber,
+          payerType: b.payerType,
+          kind: b.kind,
+          netAmount: b.netAmount,
+          vatAmount: b.vatAmount,
+          grossAmount: b.grossAmount,
+          currency: b.currency,
+          status: b.status,
+        }))}
+        labels={{
+          caseTitle: t.finance.caseTitle,
+          caseDescription: t.finance.caseDescription,
+          generate: t.finance.generate,
+          generateHint: t.finance.generateHint,
+          approve: t.finance.approve,
+          cancel: t.finance.cancel,
+          noBasis: t.finance.noBasis,
+          regenerateHint: t.finance.regenerateHint,
+          basisNumber: t.finance.basisNumber,
+          payer: t.finance.payer,
+          kind: t.finance.kind,
+          net: t.finance.net,
+          vat: t.finance.vat,
+          gross: t.finance.gross,
+          status: t.finance.status,
+          kindStandard: t.finance.kindStandard,
+          kindDeductible: t.finance.kindDeductible,
+          kindInternal: t.finance.kindInternal,
+          statusDraft: t.finance.statusDraft,
+          statusApproved: t.finance.statusApproved,
+          statusExported: t.finance.statusExported,
+          statusSettled: t.finance.statusSettled,
+          statusCancelled: t.finance.statusCancelled,
+        }}
+      />
 
       {parties.length > 0 ? (
         <Card>

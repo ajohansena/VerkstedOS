@@ -120,6 +120,13 @@
       "when": 1780950817439,
       "tag": "0033_supplier_invoice_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1780954524509,
+      "tag": "0035_finance_invoicing_tables",
+      "breakpoints": true
     }
   ]
 }
