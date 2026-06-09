@@ -60,6 +60,8 @@ import type { invoiceBasis } from './schemas/finance/invoice-basis';
 import type { invoiceBasisLines } from './schemas/finance/invoice-basis-lines';
 import type { accountingExports } from './schemas/finance/accounting-exports';
 import type { accountingExportLines } from './schemas/finance/accounting-export-lines';
+import type { kpiDefinitions } from './schemas/dashboards/kpi-definitions';
+import type { kpiSnapshots } from './schemas/dashboards/kpi-snapshots';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -347,6 +349,11 @@ export type AccountingExportLine = InferSelectModel<
 export type NewAccountingExportLine = InferInsertModel<
   typeof accountingExportLines
 >;
+
+export type KpiDefinition = InferSelectModel<typeof kpiDefinitions>;
+export type NewKpiDefinition = InferInsertModel<typeof kpiDefinitions>;
+export type KpiSnapshot = InferSelectModel<typeof kpiSnapshots>;
+export type NewKpiSnapshot = InferInsertModel<typeof kpiSnapshots>;
 
 export type Document = InferSelectModel<typeof documents>;
 export type NewDocument = InferInsertModel<typeof documents>;

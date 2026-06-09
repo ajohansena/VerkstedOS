@@ -38,6 +38,7 @@ interface NavItem {
 
 const PRIMARY: NavItem[] = [
   { href: '/', labelKey: 'operations', icon: Activity },
+  { href: '/dashboard', labelKey: 'insights', icon: TrendingUp },
   { href: '/production', labelKey: 'production', icon: KanbanSquare },
   { href: '/cases', labelKey: 'cases', icon: ClipboardList },
   { href: '/parts', labelKey: 'parts', icon: Package },

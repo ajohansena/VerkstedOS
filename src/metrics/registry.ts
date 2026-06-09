@@ -56,6 +56,22 @@ export const metricRegistry = {
     module: 'finance',
     calc: 'calculateInvoiceBasisTotals',
   },
+  kpi_throughput: {
+    module: 'production',
+    calc: 'calculateThroughput',
+  },
+  kpi_cycle_time: {
+    module: 'production',
+    calc: 'calculateAverageCycleTime',
+  },
+  kpi_on_time_rate: {
+    module: 'production',
+    calc: 'calculateOnTimeDeliveryRate',
+  },
+  kpi_utilization: {
+    module: 'workforce',
+    calc: 'calculateUtilization',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

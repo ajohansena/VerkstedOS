@@ -92,6 +92,9 @@ export { invoiceBasis } from './finance/invoice-basis';
 export { invoiceBasisLines } from './finance/invoice-basis-lines';
 export { accountingExports } from './finance/accounting-exports';
 export { accountingExportLines } from './finance/accounting-export-lines';
+// Dashboards & KPIs
+export { kpiDefinitions } from './dashboards/kpi-definitions';
+export { kpiSnapshots } from './dashboards/kpi-snapshots';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

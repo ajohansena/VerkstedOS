@@ -453,6 +453,8 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 ### Sprint 16 — Workshop & Workshop Owner dashboards + Production Manager dashboard
 
+> **Delivered (2026-06-09).** Production Manager (`/dashboard/production`) and Workshop Owner (`/dashboard/owner`) dashboards with role auto-routing (`/dashboard`); `kpi_definitions` + `kpi_snapshots` (migrations 0037 + 0038 RLS) written by a nightly Inngest job (`compute-kpi-snapshots`). Four KPIs (throughput, cycle time, on-time rate, utilization) are registered SSoT calculations — the job persists, the dashboards read, no second implementation. See `docs/sprint-reviews/sprint-16.md`. Painter/Body-Technician mobile dashboards, realtime channels + BottleneckDetection/DeliveryForecast projections, and the `/dev/dashboards/*` perf/drift surfaces are deferred to later dashboard increments.
+
 **Goal:** The three operational dashboards (Production Manager, Workshop Owner, plus the Painter & Technician mobile dashboards begun in Sprint 9) reach production quality. Single Source of Truth fully enforced.
 
 **Deliverables:**

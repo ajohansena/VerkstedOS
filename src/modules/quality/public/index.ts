@@ -54,6 +54,14 @@ export {
   type ChecklistRunOutcome,
 } from '../application/calculations/qc-metrics';
 
+// Org-wide reads (dashboards)
+export {
+  listChecklistOutcomesForOrg,
+  reworkCountsForOrg,
+  type OrgChecklistOutcome,
+  type OrgReworkCounts,
+} from '../infrastructure/repositories/quality-read-repository';
+
 // Digital signatures (tamper-evident chain)
 export {
   appendSignature,

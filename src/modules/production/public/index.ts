@@ -63,6 +63,16 @@ export {
   type Feasibility,
 } from '../application/calculations/capacity';
 
+// KPI calculations (SSoT)
+export {
+  calculateThroughput,
+  calculateAverageCycleTime,
+  calculateOnTimeDeliveryRate,
+  type DeliveredCase,
+  type CycleTimeResult,
+  type OnTimeResult,
+} from '../application/calculations/kpi-metrics';
+
 // Reads
 export {
   listProductionBoard,

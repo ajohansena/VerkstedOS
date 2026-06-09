@@ -601,3 +601,24 @@ export const caseTransferMode = pgEnum('case_transfer_mode', [
   'trailer',
   'other',
 ]);
+
+// --- Dashboards & KPIs (docs/11-dashboards.md, Sprint 16) --------------------
+
+export const kpiUnit = pgEnum('kpi_unit', [
+  'count', // a plain number (e.g. cases delivered)
+  'days', // duration in days (e.g. cycle time)
+  'percent', // 0–100 (e.g. on-time rate, utilization)
+  'currency', // money (e.g. revenue)
+  'hours', // duration in hours
+]);
+
+/** Whether a higher value is good (`up`) or bad (`down`) for traffic-lighting. */
+export const kpiDirection = pgEnum('kpi_direction', ['up', 'down']);
+
+/** The aggregation period a KPI snapshot covers. */
+export const kpiPeriod = pgEnum('kpi_period', [
+  'day',
+  'week',
+  'month',
+  'rolling_30',
+]);

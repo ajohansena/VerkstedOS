@@ -38,3 +38,10 @@ export {
   listTimeEntries,
   type WorkingNow,
 } from '../infrastructure/repositories/workforce-repository';
+
+// KPI calculations (SSoT)
+export {
+  calculateUtilization,
+  type UtilizationInput,
+  type UtilizationResult,
+} from '../application/calculations/utilization';

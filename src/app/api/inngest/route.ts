@@ -1,6 +1,7 @@
 import { serve } from 'inngest/next';
 
 import { inngest } from '@/../inngest/client';
+import { computeKpiSnapshots } from '@/../inngest/functions/compute-kpi-snapshots';
 import { publishOutbox } from '@/../inngest/functions/publish-outbox';
 
 /**
@@ -9,5 +10,5 @@ import { publishOutbox } from '@/../inngest/functions/publish-outbox';
  */
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [publishOutbox],
+  functions: [publishOutbox, computeKpiSnapshots],
 });
