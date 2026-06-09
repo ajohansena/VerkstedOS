@@ -524,25 +524,24 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 ---
 
-### Sprint 19 — Yard management & vehicle movements
+### Sprint 19 — Yard management & vehicle movements ✅ Delivered
+
+**Status:** Complete — see [docs/sprint-reviews/sprint-19.md](./sprint-reviews/sprint-19.md).
 
 **Goal:** Physical vehicle tracking is real-time and accurate.
 
-**Deliverables:**
-- `yard_layouts`, `yard_locations` (configurable per workshop)
-- `vehicle_placements` (active placement per case)
-- `vehicle_movements` (append-only history)
-- Mobile yard UI (primary device — phones in pockets)
-- Tablet yard UI (wall-mounted, large screen near reception)
-- Realtime updates of vehicle positions across all yard views
-- QR codes on yard spots (scan to move vehicle, optional)
-- Yard map visual: occupied/free/reserved spots, color-coded by case state
-- "Where is the car?" universal query surfaced everywhere
+**Deliverables — shipped:**
+- `yard_layouts`, `yard_locations`, `vehicle_placements`, `vehicle_movements` (4 tables, migrations 0043 + 0044)
+- 3 new enums (`yard_location_status`, `yard_location_kind`, `vehicle_movement_reason`)
+- `summarizeOccupancy` + `deriveLocationStatus` SSoT — yard occupancy metric registered (`yard_occupancy`, 18 total)
+- Mobile-first `/yard/map` (status-coloured grid per layout, move-by-location form, scan-QR form, ≥44 px touch targets)
+- QR-tag resolution via `moveVehicleByQrTag`; capacity + blocked guards raise typed errors
+- Production Board v3 — **Week View** (doc 13 § 4.3): resource × 5-weekday grid with DEPT LOAD aggregation
+- Three Surfaces: User `/yard/map` + Production → Uke, Admin `/admin/yard` (layout designer), Dev `/dev/yard` (cross-org inspector across layouts/locations/placements/movements)
 
-**Three Surfaces:**
-- User: move vehicles on yard map (mobile or tablet); see at a glance where each car is
-- Admin: yard layout designer (define spots, sections, capacity)
-- Dev: vehicle movement history inspection, stuck-placement repair, yard occupancy reports
+**Tests:** +8 unit (`occupancy` SSoT), +7 integration (`yard-management.test.ts`) — 121 unit / 131 integration total.
+
+**Deferred (D1–D4):** per-org absence-type CRUD UI (Sprint 20), cryptographic chained signature on rental agreements (Sprint 20), drag-to-move on Week View (Sprint 20 with My Tasks), real QR camera capture (Sprint 21 with AI camera flows).
 
 **Demoable:** Body tech scans QR code on a parking spot, taps "Move 4711 here" — manager's dashboard updates instantly.
 

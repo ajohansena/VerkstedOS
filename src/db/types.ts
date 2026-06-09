@@ -71,6 +71,10 @@ import type { rentalVehicles } from './schemas/rental/rental-vehicles';
 import type { rentalReservations } from './schemas/rental/rental-reservations';
 import type { rentalAgreements } from './schemas/rental/rental-agreements';
 import type { rentalReturns } from './schemas/rental/rental-returns';
+import type { yardLayouts } from './schemas/yard/yard-layouts';
+import type { yardLocations } from './schemas/yard/yard-locations';
+import type { vehiclePlacements } from './schemas/yard/vehicle-placements';
+import type { vehicleMovements } from './schemas/yard/vehicle-movements';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -390,6 +394,18 @@ export type NewRentalAgreement = InferInsertModel<typeof rentalAgreements>;
 
 export type RentalReturn = InferSelectModel<typeof rentalReturns>;
 export type NewRentalReturn = InferInsertModel<typeof rentalReturns>;
+
+export type YardLayout = InferSelectModel<typeof yardLayouts>;
+export type NewYardLayout = InferInsertModel<typeof yardLayouts>;
+
+export type YardLocation = InferSelectModel<typeof yardLocations>;
+export type NewYardLocation = InferInsertModel<typeof yardLocations>;
+
+export type VehiclePlacement = InferSelectModel<typeof vehiclePlacements>;
+export type NewVehiclePlacement = InferInsertModel<typeof vehiclePlacements>;
+
+export type VehicleMovement = InferSelectModel<typeof vehicleMovements>;
+export type NewVehicleMovement = InferInsertModel<typeof vehicleMovements>;
 
 export type Document = InferSelectModel<typeof documents>;
 export type NewDocument = InferInsertModel<typeof documents>;

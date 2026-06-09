@@ -699,3 +699,29 @@ export const rentalAgreementStatus = pgEnum('rental_agreement_status', [
   'closed',
   'cancelled',
 ]);
+
+// --- Yard management (Sprint 19) --------------------------------------------
+
+export const yardLocationStatus = pgEnum('yard_location_status', [
+  'available',
+  'occupied',
+  'reserved',
+  'blocked',
+]);
+
+export const yardLocationKind = pgEnum('yard_location_kind', [
+  'parking',
+  'bay',
+  'storage',
+  'temporary',
+]);
+
+export const vehicleMovementReason = pgEnum('vehicle_movement_reason', [
+  'arrival',
+  'reposition',
+  'into_bay',
+  'out_of_bay',
+  'into_storage',
+  'departure',
+  'correction',
+]);

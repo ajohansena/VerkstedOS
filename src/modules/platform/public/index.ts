@@ -126,3 +126,14 @@ export {
   type PlatformReturnRow,
   type PlatformAbsenceRow,
 } from '../infrastructure/repositories/platform-rental-repository';
+
+export {
+  listPlatformYardLayouts,
+  listPlatformYardLocations,
+  listPlatformVehiclePlacements,
+  listPlatformVehicleMovements,
+  type PlatformYardLayoutRow,
+  type PlatformYardLocationRow,
+  type PlatformVehiclePlacementRow,
+  type PlatformVehicleMovementRow,
+} from '../infrastructure/repositories/platform-yard-repository';

@@ -106,6 +106,11 @@ export { rentalVehicles } from './rental/rental-vehicles';
 export { rentalReservations } from './rental/rental-reservations';
 export { rentalAgreements } from './rental/rental-agreements';
 export { rentalReturns } from './rental/rental-returns';
+// Yard management (Sprint 19)
+export { yardLayouts } from './yard/yard-layouts';
+export { yardLocations } from './yard/yard-locations';
+export { vehiclePlacements } from './yard/vehicle-placements';
+export { vehicleMovements } from './yard/vehicle-movements';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

@@ -148,6 +148,13 @@
       "when": 1781018825311,
       "tag": "0041_absence_rental_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1781021386036,
+      "tag": "0043_yard_tables",
+      "breakpoints": true
     }
   ]
 }

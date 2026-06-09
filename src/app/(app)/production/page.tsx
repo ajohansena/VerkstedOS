@@ -17,6 +17,7 @@ import { BoardV2 } from './board-v2';
 import { DayView } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
 import { ResourceView, type ResourceRow as RV_Row } from './resource-view';
+import { WeekView, type WeekRow as WV_Row } from './week-view';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,9 +71,7 @@ export default async function ProductionBoardPage(props: {
         <BoardSection session={session} t={t} />
       )}
       {mode === 'day' && <DaySection session={session} t={t} />}
-      {mode === 'week' && (
-        <Placeholder message={t.productionBoard.weekComingSoon} />
-      )}
+      {mode === 'week' && <WeekSection session={session} t={t} />}
       {mode === 'resource' && <ResourceSection session={session} t={t} />}
       {mode === 'mytasks' && (
         <Placeholder message={t.productionBoard.myTasksComingSoon} />
@@ -291,6 +290,128 @@ async function ResourceSection({
         legendOk: t.productionBoard.resourceLegendOk,
         legendTight: t.productionBoard.resourceLegendTight,
         legendOver: t.productionBoard.resourceLegendOver,
+      }}
+    />
+  );
+}
+
+/**
+ * Week View composer (doc 13 § 4.3): Resource × 5-weekday grid showing
+ * top case + planned hours per day; bottom DEPT LOAD row aggregates the
+ * day's utilization (planned / available). Same data source as Day +
+ * Resource, different lens. Sprint 19.
+ */
+async function WeekSection({
+  session,
+  t,
+}: {
+  session: Awaited<ReturnType<typeof getSessionContext>>;
+  t: ReturnType<typeof getDictionary>;
+}) {
+  if (!session) return null;
+  const DAY = 86400000;
+  const SHIFT_START_HOUR = 9;
+  const SHIFT_END_HOUR = 17;
+  const SHIFT_LEN_MIN = (SHIFT_END_HOUR - SHIFT_START_HOUR) * 60;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  // Start the week on Monday for the planning lens.
+  const dow = today.getDay(); // 0=Sun..6=Sat
+  const daysFromMonday = (dow + 6) % 7;
+  const weekStart = new Date(today.getTime() - daysFromMonday * DAY);
+  const weekEnd = new Date(weekStart.getTime() + 5 * DAY);
+
+  const [resources, planned] = await Promise.all([
+    listResourcesForBoard(session.context),
+    listPlannedSegmentsForRange(session.context, weekStart, weekEnd),
+  ]);
+
+  const employeeIds = resources
+    .map((r) => r.employeeId)
+    .filter((id): id is string => id != null);
+  const absenceRows = await listApprovedAbsenceWindowsForEmployees(
+    session.context,
+    employeeIds,
+    weekStart,
+    weekEnd,
+  );
+  const absenceByEmployee = new Map<
+    string,
+    Array<{ startMs: number; endMs: number }>
+  >();
+  for (const a of absenceRows) {
+    if (!a.affectsCapacity) continue;
+    const arr = absenceByEmployee.get(a.employeeId) ?? [];
+    arr.push({ startMs: a.startsAt.getTime(), endMs: a.endsAt.getTime() });
+    absenceByEmployee.set(a.employeeId, arr);
+  }
+
+  const dates: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(weekStart.getTime() + i * DAY);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+
+  const rows: WV_Row[] = resources.map((res) => {
+    const cells = dates.map((iso) => {
+      const dayStart = new Date(`${iso}T00:00:00`);
+      const shiftStart = new Date(dayStart);
+      shiftStart.setHours(SHIFT_START_HOUR, 0, 0, 0);
+      const shiftEnd = new Date(dayStart);
+      shiftEnd.setHours(SHIFT_END_HOUR, 0, 0, 0);
+      let plannedMin = 0;
+      const caseSet = new Set<string>();
+      let topStartMs = Number.POSITIVE_INFINITY;
+      let topCaseNumber: string | null = null;
+      for (const p of planned) {
+        if (p.resourceId !== res.id) continue;
+        if (!p.plannedStartAt || !p.plannedEndAt) continue;
+        const s = Math.max(p.plannedStartAt.getTime(), shiftStart.getTime());
+        const e = Math.min(p.plannedEndAt.getTime(), shiftEnd.getTime());
+        if (e > s) {
+          plannedMin += Math.round((e - s) / 60000);
+          caseSet.add(p.caseId);
+          if (p.plannedStartAt.getTime() < topStartMs) {
+            topStartMs = p.plannedStartAt.getTime();
+            topCaseNumber = p.caseNumber;
+          }
+        }
+      }
+      const empAbs = res.employeeId
+        ? (absenceByEmployee.get(res.employeeId) ?? [])
+        : [];
+      const absenceMin = absenceMinutesInDay(
+        shiftStart.getTime(),
+        shiftEnd.getTime(),
+        empAbs,
+      );
+      const availableMin = Math.max(0, SHIFT_LEN_MIN - absenceMin);
+      return {
+        date: iso,
+        plannedMin,
+        availableMin,
+        topCaseNumber,
+        caseCount: caseSet.size,
+      };
+    });
+    return {
+      resourceId: res.id,
+      resourceName: res.name,
+      resourceKind: res.kind,
+      cells,
+    };
+  });
+
+  return (
+    <WeekView
+      rows={rows}
+      dates={dates}
+      labels={{
+        heading: t.productionBoard.weekHeading,
+        empty: t.productionBoard.weekEmpty,
+        loadDept: t.productionBoard.weekDeptLoad,
+        hoursSuffix: t.productionBoard.weekHoursSuffix,
+        freeLabel: t.productionBoard.weekFree,
       }}
     />
   );

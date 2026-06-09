@@ -42,9 +42,14 @@ export default async function YardPage() {
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t.transfer.yard}</h1>
-        <Link href="/" className="text-sm underline">
-          {t.common.home}
-        </Link>
+        <div className="flex gap-3 text-sm">
+          <Link href="/yard/map" className="underline">
+            {t.yard.mapTitle}
+          </Link>
+          <Link href="/" className="underline">
+            {t.common.home}
+          </Link>
+        </div>
       </div>
 
       {byWorkshop.map(({ workshop, inbound }) => (
