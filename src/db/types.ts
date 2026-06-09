@@ -62,6 +62,11 @@ import type { accountingExports } from './schemas/finance/accounting-exports';
 import type { accountingExportLines } from './schemas/finance/accounting-export-lines';
 import type { kpiDefinitions } from './schemas/dashboards/kpi-definitions';
 import type { kpiSnapshots } from './schemas/dashboards/kpi-snapshots';
+import type { notificationRules } from './schemas/notifications/notification-rules';
+import type { notifications } from './schemas/notifications/notifications';
+import type { notificationDeliveries } from './schemas/notifications/notification-deliveries';
+import type { notificationPreferences } from './schemas/notifications/notification-preferences';
+import type { portalTokens } from './schemas/notifications/portal-tokens';
 import type { documents } from './schemas/documents/documents';
 import type { documentLinks } from './schemas/documents/document-links';
 import type { documentAccessEvents } from './schemas/documents/document-access-events';
@@ -354,6 +359,21 @@ export type KpiDefinition = InferSelectModel<typeof kpiDefinitions>;
 export type NewKpiDefinition = InferInsertModel<typeof kpiDefinitions>;
 export type KpiSnapshot = InferSelectModel<typeof kpiSnapshots>;
 export type NewKpiSnapshot = InferInsertModel<typeof kpiSnapshots>;
+
+export type NotificationRule = InferSelectModel<typeof notificationRules>;
+export type NewNotificationRule = InferInsertModel<typeof notificationRules>;
+
+export type Notification = InferSelectModel<typeof notifications>;
+export type NewNotification = InferInsertModel<typeof notifications>;
+
+export type NotificationDelivery = InferSelectModel<typeof notificationDeliveries>;
+export type NewNotificationDelivery = InferInsertModel<typeof notificationDeliveries>;
+
+export type NotificationPreference = InferSelectModel<typeof notificationPreferences>;
+export type NewNotificationPreference = InferInsertModel<typeof notificationPreferences>;
+
+export type PortalToken = InferSelectModel<typeof portalTokens>;
+export type NewPortalToken = InferInsertModel<typeof portalTokens>;
 
 export type Document = InferSelectModel<typeof documents>;
 export type NewDocument = InferInsertModel<typeof documents>;

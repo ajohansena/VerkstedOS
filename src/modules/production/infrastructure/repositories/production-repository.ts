@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lt, sql } from 'drizzle-orm';
 
 import { withTransaction } from '@/db/client';
 import { cases } from '@/db/schemas/case/cases';
@@ -516,5 +516,70 @@ export async function listWorkflowAdjacency(
       (out[from] ??= []).push(to);
     }
     return out;
+  });
+}
+
+export interface PlannedSegmentRow {
+  readonly assignmentId: string;
+  readonly segmentId: string;
+  readonly segmentLabel: string | null;
+  readonly caseId: string;
+  readonly caseNumber: string;
+  readonly resourceId: string;
+  readonly resourceName: string;
+  readonly resourceKind: string;
+  readonly plannedStartAt: Date | null;
+  readonly plannedEndAt: Date | null;
+  readonly status: string;
+}
+
+/**
+ * Planned resource assignments whose `plannedStartAt` falls in the given UTC
+ * range. Backs Production Board v3 Day View (doc 13 §4.2): one timeline per
+ * resource, today. Read-only — drag-to-replan ships in a later sprint.
+ */
+export async function listPlannedSegmentsForRange(
+  ctx: RequestContext,
+  rangeStart: Date,
+  rangeEnd: Date,
+): Promise<PlannedSegmentRow[]> {
+  return withTransaction(ctx, async (tx) => {
+    return tx
+      .select({
+        assignmentId: resourceAssignments.id,
+        segmentId: workSegments.id,
+        segmentLabel: workSegments.label,
+        caseId: cases.id,
+        caseNumber: cases.caseNumber,
+        resourceId: resources.id,
+        resourceName: resources.name,
+        resourceKind: resources.kind,
+        plannedStartAt: resourceAssignments.plannedStartAt,
+        plannedEndAt: resourceAssignments.plannedEndAt,
+        status: resourceAssignments.status,
+      })
+      .from(resourceAssignments)
+      .innerJoin(
+        workSegments,
+        eq(workSegments.id, resourceAssignments.workSegmentId),
+      )
+      .innerJoin(
+        productionOrders,
+        eq(productionOrders.id, workSegments.productionOrderId),
+      )
+      .innerJoin(cases, eq(cases.id, productionOrders.caseId))
+      .innerJoin(resources, eq(resources.id, resourceAssignments.resourceId))
+      .where(
+        and(
+          eq(resourceAssignments.organizationId, ctx.organizationId),
+          isNull(resourceAssignments.deletedAt),
+          gte(resourceAssignments.plannedStartAt, rangeStart),
+          lt(resourceAssignments.plannedStartAt, rangeEnd),
+        ),
+      )
+      .orderBy(
+        resources.name,
+        resourceAssignments.plannedStartAt,
+      );
   });
 }

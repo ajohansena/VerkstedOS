@@ -46,6 +46,11 @@ export default async function AdminPage() {
     { href: '/admin/checklists', label: t.admin.checklists, show: true },
     { href: '/admin/employees', label: t.admin.employees, show: true },
     { href: '/admin/workflow', label: t.admin.workflow, show: true },
+    {
+      href: '/admin/notifications',
+      label: t.admin.notifications,
+      show: canConfig,
+    },
   ];
 
   return (

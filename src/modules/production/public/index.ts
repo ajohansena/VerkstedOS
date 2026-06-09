@@ -84,7 +84,9 @@ export {
   listWorkflowStates,
   listWorkflowAdjacency,
   findCaseProductionState,
+  listPlannedSegmentsForRange,
   type BoardItem,
   type RichBoardItem,
   type OrgHold,
+  type PlannedSegmentRow,
 } from '../infrastructure/repositories/production-repository';

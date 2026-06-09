@@ -1,6 +1,7 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { OrgSwitcher } from '@/components/org-switcher';
@@ -14,6 +15,7 @@ interface TopbarProps {
     commandShortcut: string;
     signedInAs: string;
     workshop: string;
+    notifications: string;
     paletteLabels: {
       placeholder: string;
       sectionRecents: string;
@@ -37,6 +39,7 @@ interface TopbarProps {
   organizations: { id: string; name: string }[];
   currentOrgId: string;
   currentWorkshop: string | null;
+  unreadNotificationCount: number;
   recents: { id: string; caseNumber: string; subtitle: string | null }[];
 }
 
@@ -52,6 +55,7 @@ export function AppTopbar({
   organizations,
   currentOrgId,
   currentWorkshop,
+  unreadNotificationCount,
   recents,
 }: TopbarProps) {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -102,6 +106,19 @@ export function AppTopbar({
         </button>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/notifications"
+            aria-label={labels.notifications}
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            title={labels.notifications}
+          >
+            <Bell className="h-4 w-4" aria-hidden />
+            {unreadNotificationCount > 0 && (
+              <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-semibold text-white">
+                {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+              </span>
+            )}
+          </Link>
           <OrgSwitcher
             organizations={organizations}
             currentOrgId={currentOrgId}

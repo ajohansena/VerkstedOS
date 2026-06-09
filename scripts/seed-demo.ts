@@ -38,6 +38,7 @@ import { getRawClient } from '@/db/client';
 import { organizations } from '@/db/schemas/identity/organizations';
 import { roles } from '@/db/schemas/identity/roles';
 import { seedInsuranceCompanies } from '@/lib/seed/insurance-companies';
+import { seedNotificationRules } from '@/lib/seed/notification-rules';
 import type { RequestContext } from '@/lib/tenancy/context';
 
 import {
@@ -422,6 +423,9 @@ async function main(): Promise<void> {
 
   await seedDefaultWorkflow(orgId);
   console.log(`✔ Default production workflow seeded`);
+
+  const ruleCount = await seedNotificationRules(orgId);
+  console.log(`✔ Notification rules seeded (${ruleCount} default)`);
 
   // --- Workshops ------------------------------------------------------------
   const adminSql = postgres(adminUrl, { max: 2 });

@@ -68,6 +68,7 @@ The approved architecture documents are immutable unless explicitly changed by t
 | Production module (cases, segments, workflow, capacity, transfer) | `docs/10-production-domain.md` |
 | Any dashboard or role-specific UI | `docs/11-dashboards.md` |
 | Any UI: navigation, screens, the feel of the product, the Case Workspace, the Operations Center | `docs/12-ux-architecture.md` |
+| Production planning, scheduling, the Production Board (any mode: Board / Day / Week / Resource / My Tasks), drag-to-plan, office tasks | `docs/13-production-planning.md` |
 
 **If a document and this prompt disagree, the document wins.** This prompt is the enforcement layer; the documents are the architecture.
 
@@ -404,7 +405,7 @@ Destructive repair operations (deletes, overwrites, bulk changes) require a two-
 
 ## 7. UX and dashboard rules
 
-All UI implementation must follow **both** the UX architecture in `docs/12-ux-architecture.md` (how the product feels and is navigated) **and** the role information design in `docs/11-dashboards.md` (what each role sees).
+All UI implementation must follow **both** the UX architecture in `docs/12-ux-architecture.md` (how the product feels and is navigated) **and** the role information design in `docs/11-dashboards.md` (what each role sees). Anything that touches production planning or scheduling — the Production Board (any mode), drag-to-plan, capacity & resource views, office tasks — also follows `docs/13-production-planning.md` (Production Board v3: one engine, five visualizations).
 
 ### Experience model (from doc 12 — read this first for any UI work)
 

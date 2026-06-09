@@ -622,3 +622,48 @@ export const kpiPeriod = pgEnum('kpi_period', [
   'month',
   'rolling_30',
 ]);
+
+// --- Notifications (docs/09-roadmap.md Sprint 17) ---------------------------
+
+/** Category drives icon, default severity, default channel routing. */
+export const notificationCategory = pgEnum('notification_category', [
+  'parts_delay',
+  'supplement_pending',
+  'delivery_at_risk',
+  'missing_photos',
+  'capacity_conflict',
+  'customer_pending',
+  'inbound_message',
+  'other',
+]);
+
+export const notificationSeverity = pgEnum('notification_severity', [
+  'info',
+  'warning',
+  'critical',
+]);
+
+export const notificationChannel = pgEnum('notification_channel', [
+  'in_app',
+  'sms',
+  'email',
+]);
+
+export const notificationStatus = pgEnum('notification_status', [
+  'unread',
+  'read',
+  'dismissed',
+]);
+
+export const notificationDeliveryStatus = pgEnum(
+  'notification_delivery_status',
+  ['queued', 'sent', 'failed', 'bounced', 'skipped'],
+);
+
+// --- Customer portal (Sprint 17) --------------------------------------------
+
+export const portalTokenScope = pgEnum('portal_token_scope', [
+  'case_status', // read-only case status view
+  'case_acceptance', // accept a repair start
+  'delivery_signoff', // sign at delivery
+]);

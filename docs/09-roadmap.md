@@ -482,29 +482,21 @@ Validation period: 6-8 weeks in production while sprints 13-20 complete. Lessons
 
 ### Sprint 17 — Estimator dashboard + Notifications & customer comms
 
-**Goal:** Estimator role gets first-class workflow. Proactive notifications drive the workshop.
+**Status:** ✅ Delivered.
 
-**Deliverables:**
-- Estimator dashboard (per [11-dashboards.md](./11-dashboards.md))
-- `notification_rules` (configurable per org with workshop overrides)
-- `notifications`, `notification_deliveries`, `notification_preferences`
-- Notification engine with templates, channels (SMS, email, in-app), and routing
-- Proactive notification triggers:
-  - Missing parts (3-day threshold)
-  - Delayed cases (forecast crosses promised date)
-  - Deadline approaching (3 days out, low confidence)
-  - Missing photos (case ready for delivery without after photos)
-  - Capacity conflicts (overbooking detected)
-  - Supplement pending (>2 days)
-- Customer portal v1 (case status view, document downloads)
-- Customer portal token-based access (single-case scope, time-limited)
+**Demoable (shipped):** Coordinator opens **Varsler** from the topbar and sees `parts_delay` warnings deep-linked into the case Parts tab; admin disables the rule under `/admin/notifications`. The estimator role is auto-routed to a new `/dashboard/estimator` with three queues (arrivals today, awaiting insurer, awaiting customer). The customer opens a tokenized portal at `/portal/[token]` and sees case status, vehicle, workshop and expected ready date — no login. Production opens to a new mode toggle (`Tavle / Dag / Uke / Ressurser / Mine oppgaver`), with **Tavle** and **Dag** live (Day View = per-resource timeline of today's planned segments). The other three modes are placeholders that fill in across Sprints 18–20.
 
-**Three Surfaces:**
-- User: see notifications, customers view their case status portal
-- Admin: notification rules configuration, template editor, workshop-level overrides
-- Dev: notification delivery inspection, replay failed notifications, customer portal access logs
+**Deliverables (shipped):**
+- 5 new tables + 6 enums; migrations `0039_notifications_tables.sql` + `0040_notifications_rls.sql`.
+- Pure trigger detectors (`triggers.ts`, SSoT) for `parts_delay`, `supplement_pending`, `delivery_at_risk`; engine called by Inngest cron (`*/15`) and the Dev "evaluate now" tool.
+- User inbox `/notifications` + topbar bell + unread badge; admin `/admin/notifications` (enable/disable rules); dev `/dev/notifications` (rules + recent + delivery log + manual evaluate).
+- Customer portal v1 `/portal/[token]` — token-gated, scope-aware reads, reuses the Sprint 12 portal token model.
+- Estimator dashboard `/dashboard/estimator` + role auto-routing.
+- Production Board v3 mode tabs + Day View; new repo method `listPlannedSegmentsForRange`.
 
-**Demoable:** Part backorder detected → notification fires → manager sees on dashboard → customer auto-informed via SMS.
+**Deferred (D1–D3):** external channels (email/SMS — provider-gated), per-user notification preferences UI, forecast-driven `delivery_at_risk` precision (joins canonical forecast in Sprint 21).
+
+**Sprint review:** [docs/sprint-reviews/sprint-17.md](./sprint-reviews/sprint-17.md). Tests: 100 unit + 117 integration green. Gates green: `typecheck`, `lint`, `depcruise` (417), `check:metrics` (16), `check:permissions` (24).
 
 ---
 

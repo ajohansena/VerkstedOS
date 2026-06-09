@@ -7,6 +7,7 @@ import { getSessionContext } from '@/lib/auth/session';
 import { getDictionary, resolveLocale } from '@/lib/i18n';
 import { getCurrentOrganization, listWorkshops } from '@/modules/identity/public';
 import { listRecentCases } from '@/modules/case/public';
+import { getMyUnreadCount } from '@/modules/notifications/public';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,10 +24,11 @@ export default async function AppLayout({
     redirect('/login');
   }
 
-  const [organization, workshops, recents] = await Promise.all([
+  const [organization, workshops, recents, unreadCount] = await Promise.all([
     getCurrentOrganization(session.context),
     listWorkshops(session.context),
     listRecentCases(session.context, 5),
+    getMyUnreadCount(session.context).catch(() => 0),
   ]);
 
   const locale = resolveLocale(organization?.settings);
@@ -55,6 +57,7 @@ export default async function AppLayout({
     commandShortcut: t.shell.commandShortcut,
     signedInAs: t.shell.signedInAs,
     workshop: t.shell.workshop,
+    notifications: t.notifications.title,
     paletteLabels: {
       placeholder: t.palette.placeholder,
       sectionRecents: t.palette.sectionRecents,
@@ -88,6 +91,7 @@ export default async function AppLayout({
           organizations={session.availableOrganizations}
           currentOrgId={session.context.organizationId}
           currentWorkshop={currentWorkshopName}
+          unreadNotificationCount={unreadCount}
           recents={recents.map((c) => ({
             id: c.id,
             caseNumber: c.caseNumber,

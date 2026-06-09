@@ -12,19 +12,20 @@ The documents are ordered by abstraction level — start at the top, drill down 
 
 | # | Document | What's in it |
 |---|---|---|
-| ⭐ | [CLAUDE.md](CLAUDE.md) | **Coding Master Prompt** — the governing document for all implementation work. Lives at the repo root; read automatically as project instructions. |
-| 1 | [docs/01-project-overview.md](docs/01-project-overview.md) | Vision, scope, principles, tech stack, what we're replacing |
-| 2 | [docs/02-system-architecture.md](docs/02-system-architecture.md) | Architectural style, bounded contexts, modules, APIs, events, runtime |
-| 3 | [docs/03-data-model.md](docs/03-data-model.md) | Domain entities, funding-source model, vehicle parties, ERD spine, database conventions |
-| 4 | [docs/04-document-architecture.md](docs/04-document-architecture.md) | Storage, metadata, versioning, retention, security, the documents module |
-| 5 | [docs/05-multi-tenant-and-rbac.md](docs/05-multi-tenant-and-rbac.md) | Tenant hierarchy, request lifecycle, RLS strategy, permissions, roles |
-| 6 | [docs/06-developer-control-plane.md](docs/06-developer-control-plane.md) | Owner-only operational cockpit: inspection, impersonation, repair, emergency ops |
-| 7 | [docs/07-governance.md](docs/07-governance.md) | The three non-negotiable rules + PR template + ADR template |
-| 8 | [docs/08-security-deployment-scalability.md](docs/08-security-deployment-scalability.md) | Threat model, environments, observability, scaling targets |
-| 9 | [docs/09-roadmap.md](docs/09-roadmap.md) | 28-sprint comprehensive project plan: foundation → operational MVP → chain MVP → production maturity → platform expansion |
-| 10 | [docs/10-production-domain.md](docs/10-production-domain.md) | **The production domain in depth** — aggregates, work segments, resources, workflow engine, capacity engine, delivery forecasting, bottleneck detection, multi-location, sequence diagrams, edge cases |
-| 11 | [docs/11-dashboards.md](docs/11-dashboards.md) | **Six role-specific dashboards** — Production Manager, Painter, Body Technician, Estimator, Workshop Owner, Executive — with information architecture, actions, permissions, and drill-downs per role (the information inventory) |
-| 12 | [docs/12-ux-architecture.md](docs/12-ux-architecture.md) | **Product Experience & UX Architecture** — how VerkstedOS *feels*: case-centric model, Operations Center, command palette, navigation, role experiences, dashboard strategy, mobile strategy, design principles, anti-patterns (the experiential layer) |
+| ⭐ | [CLAUDE.md](./CLAUDE.md) | **Coding Master Prompt** — the governing document for all implementation work. Paste into Claude Code or place at repo root. |
+| 1 | [01-project-overview.md](./01-project-overview.md) | Vision, scope, principles, tech stack, what we're replacing |
+| 2 | [02-system-architecture.md](./02-system-architecture.md) | Architectural style, bounded contexts, modules, APIs, events, runtime |
+| 3 | [03-data-model.md](./03-data-model.md) | Domain entities, funding-source model, vehicle parties, ERD spine, database conventions |
+| 4 | [04-document-architecture.md](./04-document-architecture.md) | Storage, metadata, versioning, retention, security, the documents module |
+| 5 | [05-multi-tenant-and-rbac.md](./05-multi-tenant-and-rbac.md) | Tenant hierarchy, request lifecycle, RLS strategy, permissions, roles |
+| 6 | [06-developer-control-plane.md](./06-developer-control-plane.md) | Owner-only operational cockpit: inspection, impersonation, repair, emergency ops |
+| 7 | [07-governance.md](./07-governance.md) | The three non-negotiable rules + PR template + ADR template |
+| 8 | [08-security-deployment-scalability.md](./08-security-deployment-scalability.md) | Threat model, environments, observability, scaling targets |
+| 9 | [09-roadmap.md](./09-roadmap.md) | 28-sprint comprehensive project plan: foundation → operational MVP → chain MVP → production maturity → platform expansion |
+| 10 | [10-production-domain.md](./10-production-domain.md) | **The production domain in depth** — aggregates, work segments, resources, workflow engine, capacity engine, delivery forecasting, bottleneck detection, multi-location, sequence diagrams, edge cases |
+| 11 | [11-dashboards.md](./11-dashboards.md) | **Six role-specific dashboards** — Production Manager, Painter, Body Technician, Estimator, Workshop Owner, Executive — with information architecture, actions, permissions, and drill-downs per role (the information inventory) |
+| 12 | [12-ux-architecture.md](./12-ux-architecture.md) | **Product Experience & UX Architecture** — how VerkstedOS *feels*: case-centric model, Operations Center, command palette, navigation, role experiences, dashboard strategy, mobile strategy, design principles, anti-patterns (the experiential layer) |
+| 13 | [13-production-planning.md](./13-production-planning.md) | **Production Planning & Scheduling Domain** — Production Board v3: five planning modes (Board/Day/Week/Resource/My Tasks) as visualizations over one engine, rich cards, quick indicators, drawer-first, drag-and-drop planning, office planning, transfers, flexible flow, plus a full architecture-compatibility validation (§16 flags 4 decisions) |
 
 ---
 
@@ -129,80 +130,45 @@ Everything else: read as needed.
 
 ### For Claude Code (implementation)
 
-`CLAUDE.md` lives at the repository root and is read automatically as the project's governing instructions. The architecture docs live in [`docs/`](docs/).
-
----
-
-## Running locally
-
-**Prerequisites:** Node 22+ and pnpm 9+.
-
 ```bash
-pnpm install                 # install dependencies
-cp .env.example .env.local   # then fill in real values (see Provisioning below)
-pnpm dev                     # start the dev server at http://localhost:3000
+# Place CLAUDE.md at the repository root
+cp CLAUDE.md /path/to/verkstedos/CLAUDE.md
+
+# Also place the docs/ folder in the repo
+cp -r verkstedos-docs/ /path/to/verkstedos/docs/
+
+# Claude Code automatically reads CLAUDE.md as project instructions
+cd /path/to/verkstedos
+claude
 ```
 
-Quality gates (the same checks CI runs):
+Then to begin Sprint 1, say:
 
-```bash
-pnpm typecheck   # tsc --noEmit (strict)
-pnpm lint        # eslint (incl. module-boundary rules)
-pnpm depcruise   # dependency-cruiser module boundary check
-pnpm test        # vitest
-pnpm build       # next build
-```
-
-Database (Drizzle):
-
-```bash
-pnpm db:generate # generate SQL migrations from schema
-pnpm db:migrate  # apply migrations
-```
-
-## Provisioning (project-owner actions)
-
-Sprint 1 ships the code skeleton with placeholder environment variables. Before the
-app can run end-to-end, the project owner provisions the external services and fills
-`.env.local` (local) and the Vercel project env (deployed). See [`.env.example`](.env.example)
-for the full list.
-
-| Service | What to create | Env vars to capture |
-|---|---|---|
-| **Supabase** (EU — Stockholm/Frankfurt) | Project + database | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` |
-| **Inngest** | App + keys | `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` |
-| **Sentry** | Project + auth token | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` |
-| **Vercel** | Project linked to this repo, EU region, env vars set | (deploy target) |
-
-## Deploying
-
-Deployment is via **Vercel** (EU region). `main` deploys to production; every PR gets a
-preview deployment. Environment variables are configured in the Vercel project dashboard
-(never committed). See [docs/08-security-deployment-scalability.md](docs/08-security-deployment-scalability.md)
-for the full deployment and CI/CD pipeline.
+> "Begin Sprint 1 — Project skeleton. Follow CLAUDE.md § 15 step by step. STOP at each major milestone to confirm direction."
 
 ---
 
 ## Package contents
 
-| File | Purpose |
-|---|---|
-| `CLAUDE.md` | Coding Master Prompt — governs all implementation work (repo root) |
-| `README.md` | This file — repo index, quick reference, how to run |
-| `docs/01-project-overview.md` | Vision, scope, principles |
-| `docs/02-system-architecture.md` | Architectural style, modules, APIs, events |
-| `docs/03-data-model.md` | Entity inventory, ERD, RLS, audit tiers |
-| `docs/04-document-architecture.md` | Storage, metadata, versioning, retention |
-| `docs/05-multi-tenant-and-rbac.md` | Tenancy, permissions, roles |
-| `docs/06-developer-control-plane.md` | Owner-only operational cockpit |
-| `docs/07-governance.md` | Three non-negotiable rules + templates |
-| `docs/08-security-deployment-scalability.md` | Threat model, deployment, scaling |
-| `docs/09-roadmap.md` | 28-sprint comprehensive project plan |
-| `docs/10-production-domain.md` | Production domain in depth |
-| `docs/11-dashboards.md` | Six role-specific dashboards (information inventory) |
-| `docs/12-ux-architecture.md` | Product experience & UX architecture (experiential layer) |
-| `docs/adrs/` | Architecture Decision Records |
-| `docs/sprint-reviews/` | Sprint implementation-review documents |
+| File | Size | Purpose |
+|---|---|---|
+| `CLAUDE.md` | ~64 KB | Coding Master Prompt — governs all implementation work |
+| `README.md` | this file | Package index and quick reference |
+| `01-project-overview.md` | ~7 KB | Vision, scope, principles |
+| `02-system-architecture.md` | ~19 KB | Architectural style, modules, APIs, events |
+| `03-data-model.md` | ~28 KB | Entity inventory, ERD, RLS, audit tiers |
+| `04-document-architecture.md` | ~13 KB | Storage, metadata, versioning, retention |
+| `05-multi-tenant-and-rbac.md` | ~12 KB | Tenancy, permissions, roles |
+| `06-developer-control-plane.md` | ~16 KB | Owner-only operational cockpit |
+| `07-governance.md` | ~14 KB | Three non-negotiable rules + templates |
+| `08-security-deployment-scalability.md` | ~13 KB | Threat model, deployment, scaling |
+| `09-roadmap.md` | ~43 KB | 28-sprint comprehensive project plan |
+| `10-production-domain.md` | ~57 KB | Production domain in depth |
+| `11-dashboards.md` | ~61 KB | Six role-specific dashboards (information inventory) |
+| `12-ux-architecture.md` | ~42 KB | Product experience & UX architecture (experiential layer) |
+| `13-production-planning.md` | ~74 KB | Production planning & scheduling — Production Board v3 (planning experience layer) |
+
+Total: 15 markdown files, ~475 KB, ~8,000 lines of architecture and governance documentation.
 
 ---
 

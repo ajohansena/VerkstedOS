@@ -1,3 +1,11 @@
+import { and, desc, eq, gte, isNull, sql } from 'drizzle-orm';
+
+import { withTransaction } from '@/db/client';
+import { cases } from '@/db/schemas/case/cases';
+import { caseFundingSources } from '@/db/schemas/case/case-funding-sources';
+import { customers } from '@/db/schemas/customer/customers';
+import { vehicles } from '@/db/schemas/customer/vehicles';
+import { estimateImports } from '@/db/schemas/estimating/estimate-imports';
 import type { RequestContext } from '@/lib/tenancy/context';
 import { getOpsSnapshot, type OpsSnapshot } from '@/lib/operations/snapshot';
 import { listLatestSnapshots } from '@/modules/dashboards/public';
@@ -181,4 +189,111 @@ export async function getWorkshopOwnerDashboard(
     openParts: openParts.length,
     attentionCount: ops.attention.length,
   };
+}
+
+export interface EstimatorCaseRow {
+  caseId: string;
+  caseNumber: string;
+  registrationNumber: string | null;
+  vehicleLabel: string | null;
+  customerName: string | null;
+  openedAt: string;
+}
+
+export interface EstimatorDashboard {
+  arrivalsToday: EstimatorCaseRow[];
+  awaitingInsurer: EstimatorCaseRow[];
+  awaitingCustomer: EstimatorCaseRow[];
+}
+
+/**
+ * Estimator dashboard (docs/11 §Estimator, Sprint 17). The three queues the
+ * estimator works from: vehicles expected today, cases stuck on an open
+ * insurer supplement, cases waiting on customer acceptance (draft funding
+ * source still unsigned). Read-only — actions live inside the case workspace.
+ */
+export async function getEstimatorDashboard(
+  ctx: RequestContext,
+): Promise<EstimatorDashboard> {
+  return withTransaction(ctx, async (tx) => {
+    const startOfToday = new Date();
+    startOfToday.setUTCHours(0, 0, 0, 0);
+
+    const baseColumns = {
+      caseId: cases.id,
+      caseNumber: cases.caseNumber,
+      registrationNumber: vehicles.registrationNumber,
+      vehicleMake: vehicles.make,
+      vehicleModel: vehicles.model,
+      customerName: customers.name,
+      openedAt: cases.openedAt,
+    };
+
+    const arrivalsRaw = await tx
+      .select(baseColumns)
+      .from(cases)
+      .leftJoin(vehicles, eq(vehicles.id, cases.vehicleId))
+      .leftJoin(customers, eq(customers.id, cases.primaryCustomerId))
+      .where(
+        and(
+          eq(cases.organizationId, ctx.organizationId),
+          isNull(cases.deletedAt),
+          eq(cases.status, 'intake'),
+          gte(cases.openedAt, startOfToday),
+        ),
+      )
+      .orderBy(desc(cases.openedAt))
+      .limit(50);
+
+    const awaitingInsurerRaw = await tx
+      .selectDistinctOn([cases.id], baseColumns)
+      .from(estimateImports)
+      .innerJoin(cases, eq(cases.id, estimateImports.caseId))
+      .leftJoin(vehicles, eq(vehicles.id, cases.vehicleId))
+      .leftJoin(customers, eq(customers.id, cases.primaryCustomerId))
+      .where(
+        and(
+          eq(estimateImports.organizationId, ctx.organizationId),
+          isNull(cases.deletedAt),
+          eq(estimateImports.kind, 'supplement'),
+          eq(estimateImports.status, 'active'),
+        ),
+      )
+      .orderBy(cases.id, desc(estimateImports.createdAt))
+      .limit(50);
+
+    const awaitingCustomerRaw = await tx
+      .selectDistinctOn([cases.id], baseColumns)
+      .from(caseFundingSources)
+      .innerJoin(cases, eq(cases.id, caseFundingSources.caseId))
+      .leftJoin(vehicles, eq(vehicles.id, cases.vehicleId))
+      .leftJoin(customers, eq(customers.id, cases.primaryCustomerId))
+      .where(
+        and(
+          eq(caseFundingSources.organizationId, ctx.organizationId),
+          isNull(cases.deletedAt),
+          eq(caseFundingSources.status, 'draft'),
+          sql`${cases.status} in ('intake', 'active')`,
+        ),
+      )
+      .orderBy(cases.id, desc(cases.openedAt))
+      .limit(50);
+
+    const toRow = (r: typeof arrivalsRaw[number]): EstimatorCaseRow => ({
+      caseId: r.caseId,
+      caseNumber: r.caseNumber,
+      registrationNumber: r.registrationNumber ?? null,
+      vehicleLabel: [r.vehicleMake, r.vehicleModel]
+        .filter(Boolean)
+        .join(' ') || null,
+      customerName: r.customerName ?? null,
+      openedAt: r.openedAt.toISOString(),
+    });
+
+    return {
+      arrivalsToday: arrivalsRaw.map(toRow),
+      awaitingInsurer: awaitingInsurerRaw.map(toRow),
+      awaitingCustomer: awaitingCustomerRaw.map(toRow),
+    };
+  });
 }

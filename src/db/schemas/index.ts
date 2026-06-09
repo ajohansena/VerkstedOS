@@ -95,6 +95,12 @@ export { accountingExportLines } from './finance/accounting-export-lines';
 // Dashboards & KPIs
 export { kpiDefinitions } from './dashboards/kpi-definitions';
 export { kpiSnapshots } from './dashboards/kpi-snapshots';
+// Notifications & customer portal (Sprint 17)
+export { notificationRules } from './notifications/notification-rules';
+export { notifications } from './notifications/notifications';
+export { notificationDeliveries } from './notifications/notification-deliveries';
+export { notificationPreferences } from './notifications/notification-preferences';
+export { portalTokens } from './notifications/portal-tokens';
 // Documents (cross-cutting)
 export { documents } from './documents/documents';
 export { documentLinks } from './documents/document-links';

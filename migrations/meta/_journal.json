@@ -134,6 +134,13 @@
       "when": 1780973716258,
       "tag": "0037_dashboards_kpi_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1781015810915,
+      "tag": "0039_notifications_tables",
+      "breakpoints": true
     }
   ]
 }
