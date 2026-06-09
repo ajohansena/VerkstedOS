@@ -32,7 +32,9 @@ export {
   flagPartRequirement,
   listPartRequirements,
   cancelPartRequirement,
+  materializeRequirementsFromApprovedEstimate,
   type FlagPartInput,
+  type MaterializeRequirementsResult,
 } from '../application/services/part-requirements';
 
 // Procurement

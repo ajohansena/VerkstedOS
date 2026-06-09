@@ -8,6 +8,7 @@ import { cases } from '@/db/schemas/case/cases';
 import type { CaseAcceptance } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 import { requirePermission } from '@/modules/identity/public';
+import { materializeRequirementsFromApprovedEstimate } from '@/modules/parts/public';
 
 import { ensureThread, newToken, sendMessage } from './messaging';
 
@@ -234,7 +235,7 @@ async function applyDecision(
   },
 ): Promise<CaseAcceptance> {
   const ctx = systemContext(organizationId);
-  return withTransaction(ctx, async (tx) => {
+  const row = await withTransaction(ctx, async (tx) => {
     const updated = await tx
       .update(caseAcceptances)
       .set({
@@ -251,8 +252,8 @@ async function applyDecision(
         ),
       )
       .returning();
-    const row = updated[0];
-    if (!row) throw new Error('Acceptance not found');
+    const updatedRow = updated[0];
+    if (!updatedRow) throw new Error('Acceptance not found');
 
     await recordAuditEvent(tx, ctx, {
       action: 'transitioned',
@@ -267,11 +268,21 @@ async function applyDecision(
         input.decision === 'accepted'
           ? 'communication.acceptance.accepted'
           : 'communication.acceptance.declined',
-      payload: { caseId: row.caseId, acceptanceId, method: input.method },
+      payload: { caseId: updatedRow.caseId, acceptanceId, method: input.method },
     });
 
-    return row;
+    return updatedRow;
   });
+
+  // Trigger downstream effects on the "approved" transition. Materialization
+  // is idempotent and runs in its own transaction; failures throw and are
+  // surfaced to the caller (the acceptance itself has already committed). The
+  // Dev surface can re-run via the parts public service if recovery is needed.
+  if (input.decision === 'accepted') {
+    await materializeRequirementsFromApprovedEstimate(ctx, row.caseId);
+  }
+
+  return row;
 }
 
 /** Staff records a verbal/in-person acceptance (`manual`). */
@@ -281,7 +292,7 @@ export async function recordManualAcceptance(
   note: string,
 ): Promise<CaseAcceptance> {
   await requirePermission(ctx, 'case:edit');
-  return withTransaction(ctx, async (tx) => {
+  const row = await withTransaction(ctx, async (tx) => {
     const inserted = await tx
       .insert(caseAcceptances)
       .values({
@@ -297,19 +308,32 @@ export async function recordManualAcceptance(
         updatedBy: ctx.userId,
       })
       .returning();
-    const row = inserted[0];
-    if (!row) throw new Error('Failed to record acceptance');
+    const insertedRow = inserted[0];
+    if (!insertedRow) throw new Error('Failed to record acceptance');
 
     await recordAuditEvent(tx, ctx, {
       action: 'created',
       entityTable: 'case_acceptances',
-      entityId: row.id,
+      entityId: insertedRow.id,
       reason: 'Manual acceptance recorded',
       after: { caseId, method: 'manual' },
     });
 
-    return row;
+    // Emit the same canonical event as the customer-driven paths so any
+    // future consumers (Inngest projections, KPI snapshots) see the manual
+    // approval the same way as a job-card click or SMS reply.
+    await emitEvent(tx, ctx, {
+      eventType: 'communication.acceptance.accepted',
+      payload: { caseId, acceptanceId: insertedRow.id, method: 'manual' },
+    });
+
+    return insertedRow;
   });
+
+  // Materialize part requirements from the approved estimate (idempotent).
+  await materializeRequirementsFromApprovedEstimate(ctx, caseId);
+
+  return row;
 }
 
 export async function listAcceptances(
