@@ -25,8 +25,14 @@ export default async function DevLayout({ children }: { children: ReactNode }) {
             <Link href="/dev/orgs" className="hover:text-foreground">
               Orgs
             </Link>
+            <Link href="/dev/workshops" className="hover:text-foreground">
+              Workshops
+            </Link>
             <Link href="/dev/users" className="hover:text-foreground">
               Users
+            </Link>
+            <Link href="/dev/dashboards" className="hover:text-foreground">
+              Dashboards
             </Link>
             <Link href="/dev/audit" className="hover:text-foreground">
               Audit

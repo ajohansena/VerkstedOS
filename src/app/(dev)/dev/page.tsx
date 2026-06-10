@@ -125,9 +125,19 @@ const INSPECTION_SURFACES: readonly SurfaceLink[] = [
     description: 'List, inspect and (Sprint 20) manage customer organizations.',
   },
   {
+    href: '/dev/workshops',
+    title: 'Workshops',
+    description: 'Cross-org workshop list with member counts.',
+  },
+  {
     href: '/dev/users',
     title: 'Users',
     description: 'Cross-org user inspection and platform-user management.',
+  },
+  {
+    href: '/dev/dashboards',
+    title: 'Dashboards',
+    description: 'KPI snapshot freshness per org.',
   },
   {
     href: '/dev/inspect',

@@ -171,6 +171,18 @@ export {
 } from '../application/services/org-management';
 
 export {
+  listAllWorkshops,
+  type PlatformWorkshopRow,
+} from '../infrastructure/repositories/platform-workshop-repository';
+
+export {
+  listDashboardHealth,
+  inspectDashboardOrg,
+  type DashboardOrgRow,
+  type DashboardOrgDetail,
+} from '../infrastructure/repositories/platform-dashboards-repository';
+
+export {
   type DangerousOperationRow,
   type DangerousOperationKind,
   type DangerousOperationStatus,
