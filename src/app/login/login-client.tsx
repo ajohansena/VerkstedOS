@@ -87,6 +87,30 @@ export default function LoginPageClient() {
               {pending ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
+
+          <div className="mt-6 border-t pt-4">
+            <p className="mb-3 text-center text-xs text-muted-foreground">
+              Not on VerkstedOS yet?
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <a
+                href="mailto:demo@verkstedos.no?subject=Demo%20request%20-%20VerkstedOS&body=Hei%2C%0A%0AJeg%20%C3%B8nsker%20en%20demo%20av%20VerkstedOS.%0A%0AVerksted%2Forganisasjon%3A%20%0AKontaktperson%3A%20%0ATelefon%3A%20%0A%0AMed%20vennlig%20hilsen"
+                className="rounded-md border border-input px-3 py-2 text-center text-sm hover:bg-accent"
+              >
+                Request demo
+              </a>
+              <a
+                href="mailto:sales@verkstedos.no?subject=Sales%20inquiry%20-%20VerkstedOS&body=Hei%2C%0A%0AJeg%20vil%20gjerne%20snakke%20med%20en%20selger.%0A%0AVerksted%2Forganisasjon%3A%20%0AKontaktperson%3A%20%0ATelefon%3A%20%0A%0AMed%20vennlig%20hilsen"
+                className="rounded-md border border-input px-3 py-2 text-center text-sm hover:bg-accent"
+              >
+                Contact sales
+              </a>
+            </div>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              VerkstedOS does not offer self-service signup. Accounts are
+              created by your workshop administrator.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </main>

@@ -61,6 +61,13 @@ export {
 } from '../application/services/manage-access';
 
 export {
+  inviteEmployee,
+  setMembershipStatus,
+  type InviteEmployeeInput,
+  type InviteEmployeeResult,
+} from '../application/services/invite-employee';
+
+export {
   listRoles,
   listOrgMembers,
   getEffectivePermissionCodes,

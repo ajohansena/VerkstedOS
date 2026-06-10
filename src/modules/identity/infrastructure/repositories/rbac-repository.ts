@@ -53,6 +53,7 @@ export interface OrgMember {
   readonly userId: string;
   readonly email: string;
   readonly fullName: string | null;
+  readonly status: 'active' | 'invited' | 'suspended';
   readonly roleNames: string[];
 }
 
@@ -67,6 +68,7 @@ export async function listOrgMembers(
         userId: users.id,
         email: users.email,
         fullName: users.fullName,
+        status: memberships.status,
         roleName: roles.name,
       })
       .from(memberships)
@@ -98,6 +100,7 @@ export async function listOrgMembers(
           userId: row.userId,
           email: row.email,
           fullName: row.fullName,
+          status: row.status as 'active' | 'invited' | 'suspended',
           roleNames: row.roleName ? [row.roleName] : [],
         });
       }
