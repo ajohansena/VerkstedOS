@@ -10,6 +10,7 @@ export type {
   CaseParty,
   CaseNote,
   InsuranceClaim,
+  InsuranceCompany,
   CaseAssignment,
   CaseTransfer,
 } from '@/db/types';
@@ -43,6 +44,9 @@ export {
   countCases,
   type CaseListItem,
 } from '../infrastructure/repositories/case-repository';
+
+// Insurance-company catalog (platform-shared, read-only)
+export { listInsuranceCompanies } from '../infrastructure/repositories/insurance-companies';
 
 // Multi-location: assignments + transfers (Sprint 13)
 export {

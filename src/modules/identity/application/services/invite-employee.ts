@@ -88,7 +88,7 @@ export async function inviteEmployee(
       .limit(1);
 
     let membershipId = existing[0]?.id;
-    let alreadyMember = membershipId !== undefined;
+    const alreadyMember = membershipId !== undefined;
 
     if (!membershipId) {
       const inserted = await tx
