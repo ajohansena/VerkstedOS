@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,6 +10,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { inspectOrganization, type OrgHealth } from '@/modules/platform/public';
+
+import {
+  archiveOrgAction,
+  deactivateOrgAction,
+  reactivateOrgAction,
+  unarchiveOrgAction,
+} from '../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,8 +27,8 @@ const HEALTH_LABEL: Record<OrgHealth, string> = {
 };
 
 /**
- * /dev/orgs/[id] — read-only org inspection with a health badge (Dev surface).
- * Access enforced by the (dev) layout guard.
+ * /dev/orgs/[id] — org inspection + Sprint 20 mutations
+ * (deactivate / reactivate / archive / unarchive). PlatformOwner only.
  */
 export default async function DevOrgInspectPage({
   params,
@@ -32,6 +40,9 @@ export default async function DevOrgInspectPage({
   if (!org) {
     notFound();
   }
+
+  const isArchived = org.organization.deletedAt !== null;
+  const isSuspended = org.organization.status === 'suspended';
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -51,8 +62,8 @@ export default async function DevOrgInspectPage({
             </span>
           </CardTitle>
           <CardDescription>
-            {org.organization.id} · {org.organization.status} ·{' '}
-            {org.memberCount} member(s)
+            {org.organization.id} · {org.organization.status}
+            {isArchived ? ' · archived' : ''} · {org.memberCount} member(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,6 +96,49 @@ export default async function DevOrgInspectPage({
               Audit log
             </Link>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Platform actions</CardTitle>
+          <CardDescription>
+            Mutations performed as PlatformOwner. Status / archive changes
+            apply to the entire org and all its workshops.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {!isArchived && !isSuspended && (
+            <form action={deactivateOrgAction}>
+              <input type="hidden" name="id" value={org.organization.id} />
+              <Button type="submit" variant="outline" size="sm">
+                Deactivate (suspend)
+              </Button>
+            </form>
+          )}
+          {!isArchived && isSuspended && (
+            <form action={reactivateOrgAction}>
+              <input type="hidden" name="id" value={org.organization.id} />
+              <Button type="submit" variant="outline" size="sm">
+                Reactivate
+              </Button>
+            </form>
+          )}
+          {!isArchived ? (
+            <form action={archiveOrgAction}>
+              <input type="hidden" name="id" value={org.organization.id} />
+              <Button type="submit" variant="destructive" size="sm">
+                Archive
+              </Button>
+            </form>
+          ) : (
+            <form action={unarchiveOrgAction}>
+              <input type="hidden" name="id" value={org.organization.id} />
+              <Button type="submit" variant="outline" size="sm">
+                Unarchive
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </main>

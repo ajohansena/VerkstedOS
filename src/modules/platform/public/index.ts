@@ -161,6 +161,16 @@ export {
 } from '../application/services/platform-roles';
 
 export {
+  provisionOrganization,
+  deactivateOrganization,
+  reactivateOrganization,
+  archiveOrganization,
+  unarchiveOrganization,
+  type ProvisionOrganizationInput,
+  type ProvisionOrganizationResult,
+} from '../application/services/org-management';
+
+export {
   type DangerousOperationRow,
   type DangerousOperationKind,
   type DangerousOperationStatus,
