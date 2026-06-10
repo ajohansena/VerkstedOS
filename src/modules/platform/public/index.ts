@@ -152,6 +152,15 @@ export {
 } from '../application/services/two-person';
 
 export {
+  grantPlatformRole,
+  revokePlatformRole,
+  PlatformOwnerSingletonViolationError,
+  PlatformUserNotFoundError,
+  type GrantPlatformRoleInput,
+  type RevokePlatformRoleInput,
+} from '../application/services/platform-roles';
+
+export {
   type DangerousOperationRow,
   type DangerousOperationKind,
   type DangerousOperationStatus,
