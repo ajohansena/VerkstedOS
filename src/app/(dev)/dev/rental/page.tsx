@@ -70,8 +70,12 @@ export default async function DevRentalPage() {
               <tbody className="divide-y">
                 {vehicles.map((v) => (
                   <tr key={v.id}>
-                    <td className="py-2 pr-3 text-xs">{orgName(v.organizationId)}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">{v.registrationNumber}</td>
+                    <td className="py-2 pr-3 text-xs">
+                      {orgName(v.organizationId)}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {v.registrationNumber}
+                    </td>
                     <td className="py-2 pr-3">{v.make ?? '—'}</td>
                     <td className="py-2 pr-3">{v.model ?? '—'}</td>
                     <td className="py-2 pr-3">{v.status}</td>
@@ -87,7 +91,8 @@ export default async function DevRentalPage() {
         <CardHeader>
           <CardTitle className="text-base">Reservations</CardTitle>
           <CardDescription>
-            Recent reservations across all organizations ({reservations.length}).
+            Recent reservations across all organizations ({reservations.length}
+            ).
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -106,8 +111,12 @@ export default async function DevRentalPage() {
               <tbody className="divide-y">
                 {reservations.map((r) => (
                   <tr key={r.id}>
-                    <td className="py-2 pr-3 text-xs">{orgName(r.organizationId)}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">{r.rentalVehicleId}</td>
+                    <td className="py-2 pr-3 text-xs">
+                      {orgName(r.organizationId)}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {r.rentalVehicleId}
+                    </td>
                     <td className="py-2 pr-3 font-mono text-xs">
                       {r.startsAt.toISOString().slice(0, 16)} →{' '}
                       {r.endsAt.toISOString().slice(0, 16)}
@@ -125,8 +134,8 @@ export default async function DevRentalPage() {
         <CardHeader>
           <CardTitle className="text-base">Agreements + signatures</CardTitle>
           <CardDescription>
-            Cross-org signed rental agreements. signatureId points at the Sprint 12
-            digital_signatures chain when wired.
+            Cross-org signed rental agreements. signatureId points at the Sprint
+            12 digital_signatures chain when wired.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -147,8 +156,12 @@ export default async function DevRentalPage() {
               <tbody className="divide-y">
                 {agreements.map((a) => (
                   <tr key={a.id}>
-                    <td className="py-2 pr-3 text-xs">{orgName(a.organizationId)}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">{a.reservationId}</td>
+                    <td className="py-2 pr-3 text-xs">
+                      {orgName(a.organizationId)}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {a.reservationId}
+                    </td>
                     <td className="py-2 pr-3">{a.status}</td>
                     <td className="py-2 pr-3">{a.signedByName ?? '—'}</td>
                     <td className="py-2 pr-3 font-mono text-xs">
@@ -189,13 +202,21 @@ export default async function DevRentalPage() {
               <tbody className="divide-y">
                 {returns.map((r) => (
                   <tr key={r.id}>
-                    <td className="py-2 pr-3 text-xs">{orgName(r.organizationId)}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">{r.agreementId}</td>
+                    <td className="py-2 pr-3 text-xs">
+                      {orgName(r.organizationId)}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {r.agreementId}
+                    </td>
                     <td className="py-2 pr-3 font-mono text-xs">
                       {r.returnedAt.toISOString().slice(0, 16)}
                     </td>
-                    <td className="py-2 pr-3 font-mono text-xs">{r.odometerKm ?? '—'}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">{r.fuelLevelPercent ?? '—'}</td>
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {r.odometerKm ?? '—'}
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-xs">
+                      {r.fuelLevelPercent ?? '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

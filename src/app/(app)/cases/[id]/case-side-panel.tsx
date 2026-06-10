@@ -70,7 +70,7 @@ export function CaseSidePanel({
     ),
   );
   return (
-    <aside className="sticky top-20 self-start space-y-4 rounded-lg border bg-background p-4 shadow-sm">
+    <aside className="sticky top-20 space-y-4 self-start rounded-lg border bg-background p-4 shadow-sm">
       <div>
         <div className="text-xs uppercase tracking-wide text-muted-foreground">
           {caseNumber}

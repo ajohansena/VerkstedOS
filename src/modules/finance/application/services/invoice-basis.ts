@@ -8,10 +8,7 @@ import { recordAuditEvent } from '@/lib/audit/audit-writer';
 import { emitEvent } from '@/lib/events/outbox';
 import type { RequestContext } from '@/lib/tenancy/context';
 import { listFundingSources } from '@/modules/case/public';
-import {
-  getTotals,
-  listImportsForCase,
-} from '@/modules/estimating/public';
+import { getTotals, listImportsForCase } from '@/modules/estimating/public';
 import { requirePermission } from '@/modules/identity/public';
 
 import {

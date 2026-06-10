@@ -1,4 +1,11 @@
-import { index, numeric, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  index,
+  numeric,
+  pgTable,
+  text,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 import { idColumn, lifecycleColumns } from '@/db/schemas/_shared';
 import { accountingExports } from '@/db/schemas/finance/accounting-exports';

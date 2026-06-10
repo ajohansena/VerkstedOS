@@ -19,8 +19,10 @@ import type {
 } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 
-export interface UpsertNotificationInput
-  extends Omit<NewNotification, 'createdBy' | 'updatedBy' | 'organizationId'> {
+export interface UpsertNotificationInput extends Omit<
+  NewNotification,
+  'createdBy' | 'updatedBy' | 'organizationId'
+> {
   readonly organizationId?: string;
 }
 
@@ -100,9 +102,7 @@ export async function listForUser(
   });
 }
 
-export async function unreadCountForUser(
-  ctx: RequestContext,
-): Promise<number> {
+export async function unreadCountForUser(ctx: RequestContext): Promise<number> {
   return withTransaction(ctx, async (tx) => {
     const rows = await tx
       .select({ value: sql<number>`count(*)::int` })
@@ -223,7 +223,10 @@ export async function listPreferencesForUser(
 
 export async function recordDelivery(
   ctx: RequestContext,
-  input: Omit<NewNotificationDelivery, 'createdBy' | 'updatedBy' | 'organizationId'>,
+  input: Omit<
+    NewNotificationDelivery,
+    'createdBy' | 'updatedBy' | 'organizationId'
+  >,
 ): Promise<void> {
   await withTransaction(ctx, async (tx) => {
     await tx.insert(notificationDeliveries).values({

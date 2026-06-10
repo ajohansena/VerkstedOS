@@ -85,7 +85,10 @@ function Queue({
       ) : (
         <ul className="divide-y">
           {rows.map((r) => (
-            <li key={r.caseId} className="flex items-start justify-between gap-2 p-3">
+            <li
+              key={r.caseId}
+              className="flex items-start justify-between gap-2 p-3"
+            >
               <div className="min-w-0 flex-1">
                 <div className="font-medium">
                   {r.caseNumber}

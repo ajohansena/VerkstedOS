@@ -66,7 +66,10 @@ export default async function DevAiModelsPage() {
           <CardTitle className="text-base">{t.ai.registerTitle}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={registerModelAction} className="grid gap-3 sm:grid-cols-2">
+          <form
+            action={registerModelAction}
+            className="grid gap-3 sm:grid-cols-2"
+          >
             <label className="space-y-1 text-sm">
               <span className="text-muted-foreground">{t.ai.modelKey}</span>
               <Input name="key" required placeholder="delay_risk" />
@@ -76,7 +79,9 @@ export default async function DevAiModelsPage() {
               <Input name="version" required placeholder="1.0.0" />
             </label>
             <label className="space-y-1 text-sm">
-              <span className="text-muted-foreground">{t.ai.modelProvider}</span>
+              <span className="text-muted-foreground">
+                {t.ai.modelProvider}
+              </span>
               <select
                 name="provider"
                 defaultValue="internal"
@@ -141,7 +146,10 @@ export default async function DevAiModelsPage() {
                   <tr key={m.id} className="border-b last:border-0">
                     <td className="py-2 font-mono">{m.key}</td>
                     <td className="py-2 font-mono">{m.version}</td>
-                    <td className="py-2">{PROVIDER_LABEL[m.status as never] ?? PROVIDER_LABEL[m.provider]}</td>
+                    <td className="py-2">
+                      {PROVIDER_LABEL[m.status as never] ??
+                        PROVIDER_LABEL[m.provider]}
+                    </td>
                     <td className="py-2">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs ${STATUS_TONE[m.status]}`}
@@ -160,11 +168,7 @@ export default async function DevAiModelsPage() {
                             <form key={s} action={changeStatusAction}>
                               <input type="hidden" name="id" value={m.id} />
                               <input type="hidden" name="status" value={s} />
-                              <Button
-                                type="submit"
-                                size="sm"
-                                variant="outline"
-                              >
+                              <Button type="submit" size="sm" variant="outline">
                                 {s === 'active'
                                   ? t.ai.setActive
                                   : s === 'shadow'

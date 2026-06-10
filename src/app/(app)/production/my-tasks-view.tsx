@@ -27,7 +27,9 @@ interface Props {
  */
 export function MyTasksView({ todays, rest, hasResources, t }: Props) {
   const fmtTime = (d: Date | null): string =>
-    d ? new Intl.DateTimeFormat('nb-NO', { timeStyle: 'short' }).format(d) : '—';
+    d
+      ? new Intl.DateTimeFormat('nb-NO', { timeStyle: 'short' }).format(d)
+      : '—';
 
   const fmtRange = (s: Date, e: Date | null): string =>
     `${fmtTime(s)}–${fmtTime(e)}`;
@@ -123,10 +125,7 @@ function TaskTable({
               <td className="p-3">{r.segmentLabel ?? '—'}</td>
               <td className="p-3 text-muted-foreground">{r.resourceName}</td>
               <td className="p-3 text-right">
-                <Link
-                  href={`/cases/${r.caseId}`}
-                  className="text-xs underline"
-                >
+                <Link href={`/cases/${r.caseId}`} className="text-xs underline">
                   {t.myTasks.openCase}
                 </Link>
               </td>

@@ -130,7 +130,9 @@ export function AppTopbar({
             <div className="font-medium text-foreground">
               {user.email.split('@')[0]}
             </div>
-            <div className="text-muted-foreground">{user.email.split('@')[1] ?? ''}</div>
+            <div className="text-muted-foreground">
+              {user.email.split('@')[1] ?? ''}
+            </div>
           </div>
         </div>
       </header>

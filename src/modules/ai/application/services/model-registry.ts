@@ -34,7 +34,10 @@ export async function registerAiModelVersion(
   if (!input.key.trim()) throw new Error('Model key is required.');
   if (!input.version.trim()) throw new Error('Model version is required.');
 
-  const existing = await getAiModelVersionByKeyVersion(input.key, input.version);
+  const existing = await getAiModelVersionByKeyVersion(
+    input.key,
+    input.version,
+  );
   if (existing) {
     throw new Error(
       `Model version already registered: ${input.key}@${input.version}`,

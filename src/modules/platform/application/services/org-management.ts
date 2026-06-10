@@ -116,7 +116,10 @@ async function updateOrgStatus(
     .update(organizations)
     .set({ status, updatedAt: new Date() })
     .where(
-      and(eq(organizations.id, organizationId), isNull(organizations.deletedAt)),
+      and(
+        eq(organizations.id, organizationId),
+        isNull(organizations.deletedAt),
+      ),
     );
 }
 
@@ -146,7 +149,10 @@ export async function archiveOrganization(
     .update(organizations)
     .set({ deletedAt: new Date(), updatedAt: new Date(), status: 'suspended' })
     .where(
-      and(eq(organizations.id, organizationId), isNull(organizations.deletedAt)),
+      and(
+        eq(organizations.id, organizationId),
+        isNull(organizations.deletedAt),
+      ),
     );
 }
 

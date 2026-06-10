@@ -1,9 +1,4 @@
-import {
-  boolean,
-  pgTable,
-  uniqueIndex,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { boolean, pgTable, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 import { notificationCategory, notificationChannel } from '@/db/enums';
 import { idColumn, lifecycleColumns } from '@/db/schemas/_shared';

@@ -14,7 +14,9 @@ const ESTIMATE = {
   vatRate: 25,
 };
 
-function insurance(over: Partial<PlannerFundingSource> = {}): PlannerFundingSource {
+function insurance(
+  over: Partial<PlannerFundingSource> = {},
+): PlannerFundingSource {
   return {
     id: 'fs-insurance',
     kind: 'insurance',
@@ -27,7 +29,9 @@ function insurance(over: Partial<PlannerFundingSource> = {}): PlannerFundingSour
   };
 }
 
-function privatePay(over: Partial<PlannerFundingSource> = {}): PlannerFundingSource {
+function privatePay(
+  over: Partial<PlannerFundingSource> = {},
+): PlannerFundingSource {
   return {
     id: 'fs-private',
     kind: 'private_pay',

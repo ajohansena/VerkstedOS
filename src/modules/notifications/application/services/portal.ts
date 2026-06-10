@@ -43,7 +43,9 @@ export async function issuePortalToken(
   });
 }
 
-export function resolvePortalToken(token: string): Promise<ResolvedToken | null> {
+export function resolvePortalToken(
+  token: string,
+): Promise<ResolvedToken | null> {
   return lookupInfra(token);
 }
 

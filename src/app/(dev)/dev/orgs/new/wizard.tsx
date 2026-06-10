@@ -157,8 +157,8 @@ export default function ProvisionOrgWizard() {
                   autoComplete="off"
                 />
                 <p className="text-xs text-muted-foreground">
-                  An invite email with a magic link will be sent here. This
-                  user receives the customer-org <code>owner</code> role.
+                  An invite email with a magic link will be sent here. This user
+                  receives the customer-org <code>owner</code> role.
                   <strong> Never </strong>the platform PlatformOwner role.
                 </p>
               </div>
@@ -168,9 +168,7 @@ export default function ProvisionOrgWizard() {
           {step === 4 && (
             <div className="space-y-3 text-sm">
               <SummaryRow label="Organization" value={orgName} />
-              {orgNumber && (
-                <SummaryRow label="Org number" value={orgNumber} />
-              )}
+              {orgNumber && <SummaryRow label="Org number" value={orgNumber} />}
               <SummaryRow label="First workshop" value={workshopName} />
               <SummaryRow label="Owner" value={ownerFullName} />
               <SummaryRow label="Owner email" value={ownerEmail} />
@@ -199,7 +197,7 @@ export default function ProvisionOrgWizard() {
                   (step === 2 && !canNext2) ||
                   (step === 3 && !canNext3)
                 }
-                onClick={() => setStep((s) => ((s + 1) as Step))}
+                onClick={() => setStep((s) => (s + 1) as Step)}
               >
                 Next
               </Button>

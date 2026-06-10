@@ -7,11 +7,7 @@ import { employees } from '@/db/schemas/workforce/employees';
 import type { AbsenceEntry, NewAbsenceEntry } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 
-export type AbsenceStatus =
-  | 'requested'
-  | 'approved'
-  | 'declined'
-  | 'cancelled';
+export type AbsenceStatus = 'requested' | 'approved' | 'declined' | 'cancelled';
 
 export interface AbsenceWithEmployee {
   readonly entry: AbsenceEntry;
@@ -147,7 +143,12 @@ export async function listApprovedAbsenceWindowsForEmployees(
   rangeStart: Date,
   rangeEnd: Date,
 ): Promise<
-  Array<{ employeeId: string; startsAt: Date; endsAt: Date; affectsCapacity: boolean }>
+  Array<{
+    employeeId: string;
+    startsAt: Date;
+    endsAt: Date;
+    affectsCapacity: boolean;
+  }>
 > {
   if (employeeIds.length === 0) return [];
   return withTransaction(ctx, async (tx) => {

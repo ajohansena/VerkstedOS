@@ -89,8 +89,7 @@ export default async function CasesPage({
           <ul className="divide-y">
             {rows.map((c) => {
               const ageDays = Math.floor(
-                (now - new Date(c.openedAt).getTime()) /
-                  (24 * 60 * 60 * 1000),
+                (now - new Date(c.openedAt).getTime()) / (24 * 60 * 60 * 1000),
               );
               const isActive =
                 c.status !== 'delivered' &&
@@ -118,7 +117,8 @@ export default async function CasesPage({
                     <span
                       className={
                         'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ' +
-                        (STATUS_STYLE[c.status] ?? 'bg-slate-100 text-slate-700')
+                        (STATUS_STYLE[c.status] ??
+                          'bg-slate-100 text-slate-700')
                       }
                     >
                       {c.status}

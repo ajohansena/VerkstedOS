@@ -3,10 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { getSessionContext } from '@/lib/auth/session';
-import {
-  createYardLayout,
-  createYardLocation,
-} from '@/modules/yard/public';
+import { createYardLayout, createYardLocation } from '@/modules/yard/public';
 
 type LocationKind = 'parking' | 'bay' | 'storage' | 'temporary';
 const KINDS: ReadonlySet<LocationKind> = new Set([

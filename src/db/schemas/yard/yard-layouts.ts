@@ -1,4 +1,11 @@
-import { index, pgTable, text, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  index,
+  pgTable,
+  text,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 import { idColumn, lifecycleColumns } from '@/db/schemas/_shared';
 import { organizations } from '@/db/schemas/identity/organizations';

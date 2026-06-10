@@ -38,18 +38,19 @@ export async function exportApprovedBases(
 
   return withTransaction(ctx, async (tx) => {
     // Resolve the approved bases to export.
-    const where = basisIds && basisIds.length > 0
-      ? and(
-          eq(invoiceBasis.organizationId, ctx.organizationId),
-          eq(invoiceBasis.status, 'approved'),
-          isNull(invoiceBasis.deletedAt),
-          inArray(invoiceBasis.id, basisIds),
-        )
-      : and(
-          eq(invoiceBasis.organizationId, ctx.organizationId),
-          eq(invoiceBasis.status, 'approved'),
-          isNull(invoiceBasis.deletedAt),
-        );
+    const where =
+      basisIds && basisIds.length > 0
+        ? and(
+            eq(invoiceBasis.organizationId, ctx.organizationId),
+            eq(invoiceBasis.status, 'approved'),
+            isNull(invoiceBasis.deletedAt),
+            inArray(invoiceBasis.id, basisIds),
+          )
+        : and(
+            eq(invoiceBasis.organizationId, ctx.organizationId),
+            eq(invoiceBasis.status, 'approved'),
+            isNull(invoiceBasis.deletedAt),
+          );
     const bases = await tx.select().from(invoiceBasis).where(where);
     if (bases.length === 0) {
       throw new Error('NO_APPROVED_BASES');
@@ -269,10 +270,7 @@ export async function retryExport(
             updatedAt: now,
           })
           .where(
-            and(
-              eq(invoiceBasis.id, id),
-              eq(invoiceBasis.status, 'approved'),
-            ),
+            and(eq(invoiceBasis.id, id), eq(invoiceBasis.status, 'approved')),
           );
       }
     } else {

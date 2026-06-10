@@ -195,8 +195,7 @@ const CONTROL_SURFACES: readonly SurfaceLink[] = [
   {
     href: '/dev/two-person',
     title: 'Two-person approval queue',
-    description:
-      'Dangerous platform operations awaiting approval / execution.',
+    description: 'Dangerous platform operations awaiting approval / execution.',
   },
   {
     href: '/dev/feature-flags',

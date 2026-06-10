@@ -98,7 +98,7 @@ export default async function AdminRentalPage() {
           </label>
           <button
             type="submit"
-            className="md:col-span-1 rounded-md border border-foreground bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90"
+            className="rounded-md border border-foreground bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90 md:col-span-1"
           >
             {t.rental.fleetSubmit}
           </button>
@@ -119,9 +119,7 @@ export default async function AdminRentalPage() {
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted-foreground">
               <tr>
-                <th className="px-4 py-2 font-medium">
-                  {t.rental.fleetRegNo}
-                </th>
+                <th className="px-4 py-2 font-medium">{t.rental.fleetRegNo}</th>
                 <th className="px-4 py-2 font-medium">{t.rental.fleetMake}</th>
                 <th className="px-4 py-2 font-medium">{t.rental.fleetModel}</th>
                 <th className="px-4 py-2 font-medium">

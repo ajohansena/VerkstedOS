@@ -11,7 +11,10 @@ import {
   listWorkflowAdjacency,
   listWorkflowStates,
 } from '@/modules/production/public';
-import { findEmployeeByUserId, listApprovedAbsenceWindowsForEmployees } from '@/modules/workforce/public';
+import {
+  findEmployeeByUserId,
+  listApprovedAbsenceWindowsForEmployees,
+} from '@/modules/workforce/public';
 
 import { BoardV2 } from './board-v2';
 import { DayView } from './day-view';
@@ -22,7 +25,13 @@ import { WeekView, type WeekRow as WV_Row } from './week-view';
 
 export const dynamic = 'force-dynamic';
 
-const VALID_MODES: BoardMode[] = ['board', 'day', 'week', 'resource', 'mytasks'];
+const VALID_MODES: BoardMode[] = [
+  'board',
+  'day',
+  'week',
+  'resource',
+  'mytasks',
+];
 
 /**
  * /production — Production Board v3 (doc 13). One engine, multiple
@@ -68,15 +77,11 @@ export default async function ProductionBoardPage(props: {
         <ModeTabs current={mode} labels={modeLabels} />
       </header>
 
-      {mode === 'board' && (
-        <BoardSection session={session} t={t} />
-      )}
+      {mode === 'board' && <BoardSection session={session} t={t} />}
       {mode === 'day' && <DaySection session={session} t={t} />}
       {mode === 'week' && <WeekSection session={session} t={t} />}
       {mode === 'resource' && <ResourceSection session={session} t={t} />}
-      {mode === 'mytasks' && (
-        <MyTasksSection session={session} t={t} />
-      )}
+      {mode === 'mytasks' && <MyTasksSection session={session} t={t} />}
     </div>
   );
 }

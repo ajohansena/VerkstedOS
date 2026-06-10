@@ -97,7 +97,9 @@ export function WeekView({
                 </td>
                 {row.cells.map((cell) => {
                   const utilization =
-                    cell.availableMin === 0 ? 0 : cell.plannedMin / cell.availableMin;
+                    cell.availableMin === 0
+                      ? 0
+                      : cell.plannedMin / cell.availableMin;
                   return (
                     <td key={cell.date} className="px-3 py-2 align-top">
                       <div className="text-xs font-medium">
@@ -157,6 +159,8 @@ function formatDayHeader(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
   const day = d.getDate();
   const month = d.getMonth() + 1;
-  const weekday = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør'][d.getDay()]!;
+  const weekday = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør'][
+    d.getDay()
+  ]!;
   return `${weekday} ${day}/${month}`;
 }

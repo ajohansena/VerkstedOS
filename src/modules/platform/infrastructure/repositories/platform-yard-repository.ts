@@ -102,9 +102,7 @@ export async function listPlatformVehiclePlacements(
       .orderBy(desc(vehiclePlacements.placedAt))
       .limit(limit);
   }
-  return base
-    .orderBy(desc(vehiclePlacements.placedAt))
-    .limit(limit);
+  return base.orderBy(desc(vehiclePlacements.placedAt)).limit(limit);
 }
 
 export interface PlatformVehicleMovementRow {

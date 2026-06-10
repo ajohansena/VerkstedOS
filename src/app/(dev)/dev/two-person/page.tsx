@@ -81,7 +81,9 @@ export default async function DevTwoPersonPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t.twoPerson.requestTitle}</CardTitle>
+          <CardTitle className="text-base">
+            {t.twoPerson.requestTitle}
+          </CardTitle>
           <CardDescription>
             {KIND_LABEL.data_delete} · {KIND_LABEL.org_lock} ·{' '}
             {KIND_LABEL.maintenance_mode_on}
@@ -172,7 +174,12 @@ function OperationCard({
     op.status === 'pending_approval' || op.status === 'approved';
 
   const fmt = (d: Date | null): string =>
-    d ? new Intl.DateTimeFormat('nb-NO', { dateStyle: 'short', timeStyle: 'short' }).format(d) : '—';
+    d
+      ? new Intl.DateTimeFormat('nb-NO', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        }).format(d)
+      : '—';
 
   return (
     <div className="rounded-lg border bg-background p-4">
@@ -180,7 +187,9 @@ function OperationCard({
         <div>
           <div className="flex items-center gap-2">
             <span className="font-semibold">{kindLabel}</span>
-            <span className={`rounded px-2 py-0.5 text-xs font-medium ${statusTone}`}>
+            <span
+              className={`rounded px-2 py-0.5 text-xs font-medium ${statusTone}`}
+            >
               {statusLabel}
             </span>
             {op.organizationId && (
@@ -235,7 +244,10 @@ function OperationCard({
             </form>
           )}
           {canReject && (
-            <form action={rejectDangerousOpAction} className="flex items-center gap-1">
+            <form
+              action={rejectDangerousOpAction}
+              className="flex items-center gap-1"
+            >
               <input type="hidden" name="id" value={op.id} />
               <Input
                 name="outcome"
@@ -248,7 +260,10 @@ function OperationCard({
             </form>
           )}
           {canExecute && (
-            <form action={executeDangerousOpAction} className="flex items-center gap-1">
+            <form
+              action={executeDangerousOpAction}
+              className="flex items-center gap-1"
+            >
               <input type="hidden" name="id" value={op.id} />
               <Input
                 name="outcome"

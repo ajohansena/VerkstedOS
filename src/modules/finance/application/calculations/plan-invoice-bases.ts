@@ -173,8 +173,7 @@ export function planInvoiceBases(input: PlanInput): PlannedBasis[] {
   const bases: PlannedBasis[] = [];
 
   const deductible = primary.deductibleAmount ?? 0;
-  const hasDeductible =
-    primary.kind === 'insurance' && deductible > 0;
+  const hasDeductible = primary.kind === 'insurance' && deductible > 0;
 
   if (hasDeductible) {
     // Negative transfer line on the insurance basis.
@@ -204,9 +203,7 @@ export function planInvoiceBases(input: PlanInput): PlannedBasis[] {
         payerCustomerId: primary.deductiblePayerCustomerId,
         payerInsuranceId: null,
         deductibleOfFundingSourceId: primary.id,
-        lines: [
-          buildLine('deductible', 'Egenandel', deductible, vatRate),
-        ],
+        lines: [buildLine('deductible', 'Egenandel', deductible, vatRate)],
       }),
     );
   }

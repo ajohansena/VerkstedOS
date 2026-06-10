@@ -58,7 +58,10 @@ export async function grantPlatformRole(
     .select({ id: platformUsers.id })
     .from(platformUsers)
     .where(
-      and(eq(platformUsers.id, input.platformUserId), eq(platformUsers.status, 'active')),
+      and(
+        eq(platformUsers.id, input.platformUserId),
+        eq(platformUsers.status, 'active'),
+      ),
     )
     .limit(1);
   if (targetRows.length === 0) {
@@ -77,8 +80,13 @@ export async function grantPlatformRole(
         ),
       )
       .limit(1);
-    if (existing.length > 0 && existing[0]!.platformUserId !== input.platformUserId) {
-      throw new PlatformOwnerSingletonViolationError(existing[0]!.platformUserId);
+    if (
+      existing.length > 0 &&
+      existing[0]!.platformUserId !== input.platformUserId
+    ) {
+      throw new PlatformOwnerSingletonViolationError(
+        existing[0]!.platformUserId,
+      );
     }
   }
 
