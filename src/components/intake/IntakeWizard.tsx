@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,10 +12,11 @@ import {
   type CreateCaseFromWizardInput,
   type IntakeSearchResult,
 } from '@/app/actions/intake';
-import type {
-  FundingSourceInput,
-  FundingSourceKind,
-  InsuranceCompany,
+import {
+  validateFundingSet,
+  type FundingSourceInput,
+  type FundingSourceKind,
+  type InsuranceCompany,
 } from '@/modules/case/public';
 import type {
   PhoneLookupResult,
@@ -166,7 +166,6 @@ export function IntakeWizard({
   insuranceCompanies: InsuranceCompany[];
   legacyHref: string;
 }) {
-  const router = useRouter();
   const [step, setStep] = useState<StepIndex>(0);
   const [vehicle, setVehicle] = useState<VehicleSelection>({ kind: 'pending' });
   const [customer, setCustomer] = useState<CustomerSelection>({
@@ -174,7 +173,7 @@ export function IntakeWizard({
   });
   const [incidentTag, setIncidentTag] = useState('');
   const [fundingSources, setFundingSources] = useState<FundingSourceInput[]>([
-    blankFunding(),
+    blankFunding('insurance', labels),
   ]);
   const [submitting, startSubmit] = useTransition();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -182,6 +181,28 @@ export function IntakeWizard({
     caseId: string;
     caseNumber: string;
   } | null>(null);
+
+  // Per-funding-source problems (label + per-kind invariants). Reused on
+  // step 3 (block Next) and step 4 (block Submit, show inline).
+  const fundingProblems = useMemo<string[]>(() => {
+    const problems: string[] = [];
+    fundingSources.forEach((fs, i) => {
+      if (!fs.label.trim()) {
+        problems.push(`Funding #${i + 1}: Label is required.`);
+      }
+    });
+    // Defer payer_customer_id check: the server backfills private_pay to the
+    // primary customer when the wizard didn't capture it. Other invariants
+    // still apply.
+    const serverSide = validateFundingSet(
+      fundingSources.map((fs) =>
+        fs.kind === 'private_pay' && !fs.payerCustomerId
+          ? { ...fs, payerCustomerId: '00000000-0000-0000-0000-000000000000' }
+          : fs,
+      ),
+    );
+    return [...problems, ...serverSide];
+  }, [fundingSources]);
 
   const canAdvance = useMemo(() => {
     switch (step) {
@@ -192,13 +213,13 @@ export function IntakeWizard({
       case 2:
         return true; // incident is optional
       case 3:
-        return fundingSources.length > 0;
+        return fundingSources.length > 0 && fundingProblems.length === 0;
       case 4:
-        return true;
+        return fundingProblems.length === 0;
       default:
         return false;
     }
-  }, [step, vehicle, customer, fundingSources]);
+  }, [step, vehicle, customer, fundingSources, fundingProblems]);
 
   if (createdCase) {
     return (
@@ -250,11 +271,19 @@ export function IntakeWizard({
     startSubmit(async () => {
       try {
         const result = await createCaseFromWizardAction(input);
-        setCreatedCase(result);
-        router.refresh();
+        if (result.ok) {
+          setCreatedCase({
+            caseId: result.caseId,
+            caseNumber: result.caseNumber,
+          });
+        } else {
+          setSubmitError(result.message || labels.reviewError);
+        }
       } catch (err) {
+        // Network / unexpected runtime failures only — the action itself never
+        // throws (returns a tagged union). Fall back to a generic message.
         setSubmitError(
-          err instanceof Error ? err.message : labels.reviewError,
+          err instanceof Error && err.message ? err.message : labels.reviewError,
         );
       }
     });
@@ -294,6 +323,7 @@ export function IntakeWizard({
           sources={fundingSources}
           onChange={setFundingSources}
           insuranceCompanies={insuranceCompanies}
+          problems={fundingProblems}
         />
       )}
       {step === 4 && (
@@ -306,6 +336,14 @@ export function IntakeWizard({
           insuranceCompanies={insuranceCompanies}
         />
       )}
+
+      {step === 4 && fundingProblems.length > 0 ? (
+        <ul className="space-y-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          {fundingProblems.map((p, i) => (
+            <li key={i}>• {p}</li>
+          ))}
+        </ul>
+      ) : null}
 
       {submitError ? (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -906,14 +944,35 @@ function FundingStep({
   sources,
   onChange,
   insuranceCompanies,
+  problems,
 }: {
   labels: WizardLabels;
   sources: FundingSourceInput[];
   onChange: (s: FundingSourceInput[]) => void;
   insuranceCompanies: InsuranceCompany[];
+  problems: string[];
 }) {
   const update = (i: number, patch: Partial<FundingSourceInput>) => {
-    onChange(sources.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+    onChange(
+      sources.map((s, idx) => {
+        if (idx !== i) return s;
+        // When the user changes kind, re-default the label IF the current
+        // label is empty or is the previous kind's default — so an empty row
+        // can never reach the server (Zod min(1) on label).
+        if (patch.kind && patch.kind !== s.kind) {
+          const prevDefault = defaultLabelForKind(s.kind, labels);
+          const labelIsDefault = !s.label.trim() || s.label === prevDefault;
+          return {
+            ...s,
+            ...patch,
+            label: labelIsDefault
+              ? defaultLabelForKind(patch.kind, labels)
+              : s.label,
+          };
+        }
+        return { ...s, ...patch };
+      }),
+    );
   };
   const remove = (i: number) => {
     onChange(sources.filter((_, idx) => idx !== i));
@@ -938,11 +997,21 @@ function FundingStep({
         ))}
       </div>
 
+      {problems.length > 0 ? (
+        <ul className="space-y-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          {problems.map((p, i) => (
+            <li key={i}>• {p}</li>
+          ))}
+        </ul>
+      ) : null}
+
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => onChange([...sources, blankFunding()])}
+        onClick={() =>
+          onChange([...sources, blankFunding('insurance', labels)])
+        }
       >
         + {labels.fundingAdd}
       </Button>
@@ -1157,8 +1226,18 @@ function PostCreate({
 
 // ───────────────────────────── Helpers ───────────────────────────────────
 
-function blankFunding(): FundingSourceInput {
-  return { kind: 'insurance', label: '' };
+function defaultLabelForKind(
+  kind: FundingSourceKind,
+  labels: WizardLabels,
+): string {
+  return kindLabel(kind, labels);
+}
+
+function blankFunding(
+  kind: FundingSourceKind,
+  labels: WizardLabels,
+): FundingSourceInput {
+  return { kind, label: defaultLabelForKind(kind, labels) };
 }
 
 function summarizeVehicleSelection(s: VehicleSelection): string {

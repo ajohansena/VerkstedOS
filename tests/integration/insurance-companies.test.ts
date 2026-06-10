@@ -75,6 +75,7 @@ describe('listInsuranceCompanies', () => {
   const ctxFor = (orgId: string, userId: string) => ({
     userId,
     organizationId: orgId,
+    workshopId: null,
     accessibleWorkshopIds: [] as string[],
     correlationId: '00000000-0000-0000-0000-0000000000ee',
   });

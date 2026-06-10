@@ -229,78 +229,118 @@ export interface CreateCaseFromWizardInput {
   fundingSources: FundingSourceInput[];
 }
 
-export interface CreateCaseFromWizardResult {
-  caseId: string;
-  caseNumber: string;
+export type CreateCaseFromWizardResult =
+  | { ok: true; caseId: string; caseNumber: string }
+  | { ok: false; message: string };
+
+function normalizeError(err: unknown): string {
+  if (err instanceof Error) {
+    // Zod errors carry a JSON-array `message`; turn it into something readable.
+    if (err.name === 'ZodError') {
+      try {
+        const issues = JSON.parse(err.message) as Array<{
+          path: (string | number)[];
+          message: string;
+        }>;
+        return issues
+          .map((i) => `${i.path.join('.') || 'input'}: ${i.message}`)
+          .join(' | ');
+      } catch {
+        return err.message;
+      }
+    }
+    return err.message;
+  }
+  return 'UNKNOWN_ERROR';
 }
 
 /**
  * End-to-end wizard submit. Each create call is permission-checked + audited
- * by its own service; this action is the orchestrator. Validation problems are
- * raised eagerly so the wizard can show them inline (no half-created data).
+ * by its own service; this action is the orchestrator. Returns a tagged union
+ * — never throws to the client — so production renders friendly messages
+ * instead of the generic Server Components digest screen.
  */
 export async function createCaseFromWizardAction(
   input: CreateCaseFromWizardInput,
 ): Promise<CreateCaseFromWizardResult> {
-  const session = await getSessionContext();
-  if (!session) {
-    throw new Error('NOT_AUTHENTICATED');
-  }
+  try {
+    const session = await getSessionContext();
+    if (!session) {
+      return { ok: false, message: 'NOT_AUTHENTICATED' };
+    }
 
-  // Validate funding sources up front (we don't want to create a customer
-  // and vehicle and THEN discover the funding is malformed).
-  const fundingProblems = validateFundingSet(input.fundingSources);
-  if (fundingProblems.length > 0) {
-    throw new Error(`INVALID_FUNDING:${fundingProblems.join(' | ')}`);
-  }
+    // Validate funding sources up front (we don't want to create a customer
+    // and vehicle and THEN discover the funding is malformed).
+    const fundingProblems = validateFundingSet(input.fundingSources);
+    if (fundingProblems.length > 0) {
+      return {
+        ok: false,
+        message: `INVALID_FUNDING: ${fundingProblems.join(' | ')}`,
+      };
+    }
 
-  // 1. Customer.
-  let primaryCustomerId: string | undefined;
-  if (input.customer.kind === 'existing') {
-    primaryCustomerId = input.customer.customerId;
-  } else if (input.customer.kind === 'new') {
-    const customer = await createCustomer(session.context, {
-      kind: input.customer.customerKind,
-      name: input.customer.name,
-      ...(input.customer.primaryPhone
-        ? { primaryPhone: input.customer.primaryPhone }
-        : {}),
-      ...(input.customer.primaryEmail
-        ? { primaryEmail: input.customer.primaryEmail }
-        : {}),
+    // 1. Customer.
+    let primaryCustomerId: string | undefined;
+    if (input.customer.kind === 'existing') {
+      primaryCustomerId = input.customer.customerId;
+    } else if (input.customer.kind === 'new') {
+      const customer = await createCustomer(session.context, {
+        kind: input.customer.customerKind,
+        name: input.customer.name,
+        ...(input.customer.primaryPhone
+          ? { primaryPhone: input.customer.primaryPhone }
+          : {}),
+        ...(input.customer.primaryEmail
+          ? { primaryEmail: input.customer.primaryEmail }
+          : {}),
+      });
+      primaryCustomerId = customer.id;
+    }
+
+    // 2. Vehicle.
+    let vehicleId: string | undefined;
+    if (input.vehicle.kind === 'existing') {
+      vehicleId = input.vehicle.vehicleId;
+    } else {
+      const v = input.vehicle;
+      const vehicle = await createVehicle(session.context, {
+        ...(v.registrationNumber
+          ? { registrationNumber: v.registrationNumber }
+          : {}),
+        ...(v.vin ? { vin: v.vin } : {}),
+        ...(v.make ? { make: v.make } : {}),
+        ...(v.model ? { model: v.model } : {}),
+        ...(v.year ? { year: v.year } : {}),
+        ...(v.colour ? { colour: v.colour } : {}),
+        ownershipType: 'unknown',
+        ...(primaryCustomerId ? { ownerCustomerId: primaryCustomerId } : {}),
+      });
+      vehicleId = vehicle.id;
+    }
+
+    // 3. Backfill funding sources that need a payer context but the wizard
+    //    can't ask for it in-line (avoid surprising the user with errors that
+    //    the UI doesn't expose a field for).
+    const fundingSources = input.fundingSources.map((fs) => {
+      if (fs.kind === 'private_pay' && !fs.payerCustomerId && primaryCustomerId) {
+        return { ...fs, payerCustomerId: primaryCustomerId };
+      }
+      return fs;
     });
-    primaryCustomerId = customer.id;
-  }
 
-  // 2. Vehicle.
-  let vehicleId: string | undefined;
-  if (input.vehicle.kind === 'existing') {
-    vehicleId = input.vehicle.vehicleId;
-  } else {
-    const v = input.vehicle;
-    const vehicle = await createVehicle(session.context, {
-      ...(v.registrationNumber
-        ? { registrationNumber: v.registrationNumber }
-        : {}),
-      ...(v.vin ? { vin: v.vin } : {}),
-      ...(v.make ? { make: v.make } : {}),
-      ...(v.model ? { model: v.model } : {}),
-      ...(v.year ? { year: v.year } : {}),
-      ...(v.colour ? { colour: v.colour } : {}),
-      ownershipType: 'unknown',
-      ...(primaryCustomerId ? { ownerCustomerId: primaryCustomerId } : {}),
+    // 4. Case (multi-funding supported — `validateFundingSet` runs again inside
+    //    `createCase` as a defense-in-depth check).
+    const created = await createCase(session.context, {
+      ...(primaryCustomerId ? { primaryCustomerId } : {}),
+      ...(vehicleId ? { vehicleId } : {}),
+      ...(input.incidentTag ? { incidentTag: input.incidentTag } : {}),
+      fundingSources,
     });
-    vehicleId = vehicle.id;
+
+    return { ok: true, caseId: created.id, caseNumber: created.caseNumber };
+  } catch (err) {
+    // Server-side log preserved (Next.js console); client gets a clean message.
+    console.error('createCaseFromWizardAction failed', err);
+    return { ok: false, message: normalizeError(err) };
   }
-
-  // 3. Case (multi-funding supported — `validateFundingSet` runs again inside
-  //    `createCase` as a defense-in-depth check).
-  const created = await createCase(session.context, {
-    ...(primaryCustomerId ? { primaryCustomerId } : {}),
-    ...(vehicleId ? { vehicleId } : {}),
-    ...(input.incidentTag ? { incidentTag: input.incidentTag } : {}),
-    fundingSources: input.fundingSources,
-  });
-
-  return { caseId: created.id, caseNumber: created.caseNumber };
 }
