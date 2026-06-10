@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, count, desc, eq, isNull } from 'drizzle-orm';
 
 import { getRawClient } from '@/db/client';
 import { effectivePermissionsCache } from '@/db/schemas/identity/effective-permissions-cache';
@@ -7,6 +7,7 @@ import { organizations } from '@/db/schemas/identity/organizations';
 import { roleAssignments } from '@/db/schemas/identity/role-assignments';
 import { roles } from '@/db/schemas/identity/roles';
 import { users } from '@/db/schemas/identity/users';
+import { platformUsers } from '@/db/schemas/platform/platform-users';
 
 /**
  * Platform user inspection (Dev surface). Cross-org by nature → service-role
@@ -93,4 +94,55 @@ export async function inspectUser(
     status: user.status,
     memberships: result,
   };
+}
+
+/**
+ * Cross-org user list (Sprint 20). Returns every user with membership count
+ * and whether they are also a platform user.
+ */
+
+export interface PlatformUserListRow {
+  readonly userId: string;
+  readonly email: string;
+  readonly fullName: string | null;
+  readonly status: string;
+  readonly membershipCount: number;
+  readonly isPlatformUser: boolean;
+}
+
+export async function listAllUsers(): Promise<PlatformUserListRow[]> {
+  const db = getRawClient({ as: 'platform-inspector' });
+
+  const userRows = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      fullName: users.fullName,
+      status: users.status,
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt))
+    .limit(500);
+
+  const memCounts = await db
+    .select({ userId: memberships.userId, n: count() })
+    .from(memberships)
+    .where(isNull(memberships.deletedAt))
+    .groupBy(memberships.userId);
+  const byUser = new Map<string, number>();
+  for (const r of memCounts) byUser.set(r.userId, Number(r.n));
+
+  const platRows = await db
+    .select({ userId: platformUsers.userId })
+    .from(platformUsers);
+  const platformUserIds = new Set(platRows.map((r) => r.userId));
+
+  return userRows.map((u) => ({
+    userId: u.id,
+    email: u.email,
+    fullName: u.fullName,
+    status: u.status,
+    membershipCount: byUser.get(u.id) ?? 0,
+    isPlatformUser: platformUserIds.has(u.id),
+  }));
 }

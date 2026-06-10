@@ -47,6 +47,9 @@ jobs:
       - name: Metric registry coverage check
         run: pnpm check:metrics
 
+      - name: Route inventory (no broken /dev hrefs)
+        run: pnpm check:routes
+
       - name: Unit tests
         run: pnpm test
 

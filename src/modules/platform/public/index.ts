@@ -12,8 +12,10 @@ export {
 
 export {
   inspectUser,
+  listAllUsers,
   type UserInspection,
   type UserMembershipInspection,
+  type PlatformUserListRow,
 } from '../infrastructure/repositories/platform-user-repository';
 
 export {

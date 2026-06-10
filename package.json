@@ -22,6 +22,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "check:permissions": "tsx scripts/check-permission-catalog.ts",
     "check:metrics": "tsx scripts/check-metric-registry.ts",
+    "check:routes": "tsx scripts/route-audit.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
