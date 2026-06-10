@@ -375,11 +375,19 @@ export type NewNotificationRule = InferInsertModel<typeof notificationRules>;
 export type Notification = InferSelectModel<typeof notifications>;
 export type NewNotification = InferInsertModel<typeof notifications>;
 
-export type NotificationDelivery = InferSelectModel<typeof notificationDeliveries>;
-export type NewNotificationDelivery = InferInsertModel<typeof notificationDeliveries>;
+export type NotificationDelivery = InferSelectModel<
+  typeof notificationDeliveries
+>;
+export type NewNotificationDelivery = InferInsertModel<
+  typeof notificationDeliveries
+>;
 
-export type NotificationPreference = InferSelectModel<typeof notificationPreferences>;
-export type NewNotificationPreference = InferInsertModel<typeof notificationPreferences>;
+export type NotificationPreference = InferSelectModel<
+  typeof notificationPreferences
+>;
+export type NewNotificationPreference = InferInsertModel<
+  typeof notificationPreferences
+>;
 
 export type PortalToken = InferSelectModel<typeof portalTokens>;
 export type NewPortalToken = InferInsertModel<typeof portalTokens>;
@@ -409,7 +417,9 @@ export type VehicleMovement = InferSelectModel<typeof vehicleMovements>;
 export type NewVehicleMovement = InferInsertModel<typeof vehicleMovements>;
 
 export type DangerousOperation = InferSelectModel<typeof dangerousOperations>;
-export type NewDangerousOperation = InferInsertModel<typeof dangerousOperations>;
+export type NewDangerousOperation = InferInsertModel<
+  typeof dangerousOperations
+>;
 
 export type Document = InferSelectModel<typeof documents>;
 export type NewDocument = InferInsertModel<typeof documents>;

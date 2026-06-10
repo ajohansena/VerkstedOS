@@ -114,7 +114,9 @@ export function ResourceView({
                   >
                     {r.resourceName}
                   </Link>
-                  <div className="text-xs text-muted-foreground">{r.resourceKind}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {r.resourceKind}
+                  </div>
                 </td>
                 {r.cells.map((c) => (
                   <td

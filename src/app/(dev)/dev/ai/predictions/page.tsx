@@ -84,9 +84,7 @@ export default async function DevAiPredictionsPage() {
                     <td className="py-2 font-mono text-xs">
                       {p.subjectType}/{p.subjectId.slice(0, 8)}
                     </td>
-                    <td className="py-2 text-right">
-                      {p.confidence ?? '—'}
-                    </td>
+                    <td className="py-2 text-right">{p.confidence ?? '—'}</td>
                     <td className="py-2 text-right">{p.latencyMs ?? '—'}</td>
                   </tr>
                 ))}

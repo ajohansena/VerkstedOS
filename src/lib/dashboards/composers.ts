@@ -148,16 +148,15 @@ export async function getWorkshopOwnerDashboard(
   );
 
   const health: OwnerHealthTile[] = [
-    ...kpis
+    ...(kpis
       .filter((k) => k.code === 'on_time_rate' || k.code === 'utilization')
       .map((k) => ({
         code: k.code,
         label: k.code,
         value: k.value,
         unit: k.unit,
-        health:
-          k.value >= 80 ? 'green' : k.value >= 60 ? 'yellow' : 'red',
-      })) as OwnerHealthTile[],
+        health: k.value >= 80 ? 'green' : k.value >= 60 ? 'yellow' : 'red',
+      })) as OwnerHealthTile[]),
     {
       code: 'qc_failure_rate',
       label: 'qc_failure_rate',
@@ -279,13 +278,12 @@ export async function getEstimatorDashboard(
       .orderBy(cases.id, desc(cases.openedAt))
       .limit(50);
 
-    const toRow = (r: typeof arrivalsRaw[number]): EstimatorCaseRow => ({
+    const toRow = (r: (typeof arrivalsRaw)[number]): EstimatorCaseRow => ({
       caseId: r.caseId,
       caseNumber: r.caseNumber,
       registrationNumber: r.registrationNumber ?? null,
-      vehicleLabel: [r.vehicleMake, r.vehicleModel]
-        .filter(Boolean)
-        .join(' ') || null,
+      vehicleLabel:
+        [r.vehicleMake, r.vehicleModel].filter(Boolean).join(' ') || null,
       customerName: r.customerName ?? null,
       openedAt: r.openedAt.toISOString(),
     });

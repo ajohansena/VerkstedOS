@@ -197,11 +197,7 @@ describe('yard management', () => {
 
   it('resolves a QR tag and moves the vehicle there', async () => {
     const caseE = await caseModule.createCase(ctx(), { fundingSources: [] });
-    const result = await yard.moveVehicleByQrTag(
-      ctx(),
-      caseE.id,
-      'QR-P1-19',
-    );
+    const result = await yard.moveVehicleByQrTag(ctx(), caseE.id, 'QR-P1-19');
     expect(result.placement.locationId).toBe(qrLocationId);
 
     const loc = await yard.findYardLocationById(ctx(), qrLocationId);

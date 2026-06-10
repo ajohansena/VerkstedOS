@@ -7,10 +7,7 @@ import {
   getCurrentOrganization,
   listWorkshops,
 } from '@/modules/identity/public';
-import {
-  listLayouts,
-  listYardLocationsForLayout,
-} from '@/modules/yard/public';
+import { listLayouts, listYardLocationsForLayout } from '@/modules/yard/public';
 
 import { createLayoutAction, createLocationAction } from './actions';
 
@@ -56,7 +53,7 @@ export default async function AdminYardPage() {
           </h1>
           <p className="text-sm text-muted-foreground">{t.yard.description}</p>
         </div>
-        <Link href="/admin" className="text-sm underline text-muted-foreground">
+        <Link href="/admin" className="text-sm text-muted-foreground underline">
           {t.admin.title}
         </Link>
       </header>
@@ -210,7 +207,7 @@ export default async function AdminYardPage() {
               <input
                 type="text"
                 name="qrTag"
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm font-mono"
+                className="w-full rounded-md border bg-background px-3 py-2 font-mono text-sm"
               />
             </label>
             <div className="col-span-1 self-end">

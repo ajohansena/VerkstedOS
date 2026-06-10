@@ -1,10 +1,4 @@
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 import { notificationChannel, notificationDeliveryStatus } from '@/db/enums';
 import { idColumn, lifecycleColumns } from '@/db/schemas/_shared';

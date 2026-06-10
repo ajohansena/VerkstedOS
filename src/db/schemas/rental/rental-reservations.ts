@@ -1,10 +1,4 @@
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 import { idColumn, lifecycleColumns } from '@/db/schemas/_shared';
 import { rentalReservationStatus } from '@/db/enums';

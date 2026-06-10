@@ -23,7 +23,9 @@ export async function inviteEmployeeAction(
 ): Promise<InviteState> {
   const auth = await getAuthorizedSession();
   if (!auth) return { ok: false, message: 'Not authorised.' };
-  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase();
   const fullName = String(formData.get('fullName') ?? '').trim();
   const roleId = String(formData.get('roleId') ?? '');
   const workshopIdRaw = String(formData.get('workshopId') ?? '').trim();

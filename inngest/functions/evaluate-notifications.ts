@@ -58,6 +58,10 @@ export const evaluateNotifications = inngest.createFunction(
       totalFired += result.fired;
     }
 
-    return { orgs: orgIds.length, evaluated: totalEvaluated, fired: totalFired };
+    return {
+      orgs: orgIds.length,
+      evaluated: totalEvaluated,
+      fired: totalFired,
+    };
   },
 );

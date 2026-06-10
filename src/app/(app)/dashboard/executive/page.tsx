@@ -96,7 +96,9 @@ export default async function ExecutiveDashboardPage() {
         <p className="text-sm text-muted-foreground">
           {t.executive.description}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">{t.executive.period}</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t.executive.period}
+        </p>
       </header>
 
       {!hasData ? (
@@ -118,9 +120,7 @@ export default async function ExecutiveDashboardPage() {
                   <th className="p-3 text-right">
                     {t.executive.cycleTimeColumn}
                   </th>
-                  <th className="p-3 text-right">
-                    {t.executive.onTimeColumn}
-                  </th>
+                  <th className="p-3 text-right">{t.executive.onTimeColumn}</th>
                   <th className="p-3 text-right">
                     {t.executive.utilizationColumn}
                   </th>

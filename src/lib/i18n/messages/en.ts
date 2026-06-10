@@ -63,8 +63,7 @@ export const en = {
     sectionCases: 'Cases',
     sectionVehicles: 'Vehicles',
     sectionCustomers: 'Customers',
-    empty:
-      'No matches. Search by case number, reg, phone or customer name.',
+    empty: 'No matches. Search by case number, reg, phone or customer name.',
     actionNewCase: 'New case',
     actionClockIn: 'Clock in',
     actionInbound: 'Inbound cases (yard)',
@@ -125,7 +124,8 @@ export const en = {
   },
   production: {
     title: 'Production board',
-    description: 'All cases by production state. Click a card to open the case.',
+    description:
+      'All cases by production state. Click a card to open the case.',
     cardEta: 'Promised',
     cardAssigned: 'Assigned',
     cardTech: 'Technician',
@@ -184,15 +184,13 @@ export const en = {
   },
   finance: {
     title: 'Finance',
-    description:
-      'Invoice basis per funding source and export to accounting.',
+    description: 'Invoice basis per funding source and export to accounting.',
     approvedTitle: 'Ready to export',
     approvedDescription:
       'Approved invoice bases awaiting transfer to the accounting system.',
     approvedEmpty: 'No approved bases right now.',
     exportsTitle: 'Accounting exports',
-    exportsDescription:
-      'Immutable log of transfers to accounting (Tripletex).',
+    exportsDescription: 'Immutable log of transfers to accounting (Tripletex).',
     exportsEmpty: 'No exports yet.',
     exportSelected: 'Export selected',
     exportAll: 'Export all approved',
@@ -735,11 +733,11 @@ export const en = {
   },
   portalSignature: {
     sectionTitle: 'Accept and sign',
-    description:
-      'Confirm you have read the terms and approve the repair.',
+    description: 'Confirm you have read the terms and approve the repair.',
     nameLabel: 'Full name',
     namePlaceholder: 'Jane Doe',
-    consentLabel: 'I confirm I am the vehicle owner or authorised to approve the repair.',
+    consentLabel:
+      'I confirm I am the vehicle owner or authorised to approve the repair.',
     submit: 'Sign',
     signed: 'Thank you. The signature has been recorded.',
     alreadySigned: 'This case has already been signed.',

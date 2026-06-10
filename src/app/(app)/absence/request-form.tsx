@@ -98,7 +98,7 @@ export function AbsenceRequestForm({
       <button
         type="submit"
         disabled={pending}
-        className="md:col-span-1 rounded-md border border-foreground bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+        className="rounded-md border border-foreground bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50 md:col-span-1"
       >
         {labels.submit}
       </button>

@@ -56,9 +56,17 @@ export default async function OperationsCenterPage() {
             label={t.ops.quickIntake}
             primary
           />
-          <QuickActionLink href="/clock" icon={Clock} label={t.ops.quickClock} />
+          <QuickActionLink
+            href="/clock"
+            icon={Clock}
+            label={t.ops.quickClock}
+          />
           <QuickActionLink href="/yard" icon={Truck} label={t.ops.quickYard} />
-          <QuickActionLink href="/parts" icon={Boxes} label={t.ops.quickParts} />
+          <QuickActionLink
+            href="/parts"
+            icon={Boxes}
+            label={t.ops.quickParts}
+          />
         </div>
       </header>
 

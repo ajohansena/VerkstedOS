@@ -137,7 +137,7 @@ export default async function RentalPage() {
           </label>
           <button
             type="submit"
-            className="md:col-span-1 rounded-md border border-foreground bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90"
+            className="rounded-md border border-foreground bg-foreground px-3 py-2 text-sm font-medium text-background hover:opacity-90 md:col-span-1"
           >
             {t.rental.fleetSubmit}
           </button>

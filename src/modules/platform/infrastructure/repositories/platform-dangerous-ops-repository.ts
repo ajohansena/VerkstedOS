@@ -65,7 +65,8 @@ export async function listDangerousOperations(filter?: {
 }): Promise<DangerousOperationRow[]> {
   const db = getRawClient({ as: 'platform-inspector' });
   const wheres = [];
-  if (filter?.status) wheres.push(eq(dangerousOperations.status, filter.status));
+  if (filter?.status)
+    wheres.push(eq(dangerousOperations.status, filter.status));
   if (filter?.organizationId === null) {
     wheres.push(isNull(dangerousOperations.organizationId));
   } else if (filter?.organizationId) {

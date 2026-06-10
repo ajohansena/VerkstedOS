@@ -22,7 +22,9 @@ function parseDate(value: FormDataEntryValue | null): Date {
 export async function registerVehicleAction(formData: FormData): Promise<void> {
   const session = await getSessionContext();
   if (!session) return;
-  const registrationNumber = String(formData.get('registrationNumber') ?? '').trim();
+  const registrationNumber = String(
+    formData.get('registrationNumber') ?? '',
+  ).trim();
   if (!registrationNumber) return;
   await registerRentalVehicle(session.context, {
     registrationNumber,
@@ -34,7 +36,9 @@ export async function registerVehicleAction(formData: FormData): Promise<void> {
   revalidatePath('/rental');
 }
 
-export async function createReservationAction(formData: FormData): Promise<void> {
+export async function createReservationAction(
+  formData: FormData,
+): Promise<void> {
   const session = await getSessionContext();
   if (!session) return;
   const rentalVehicleId = String(formData.get('rentalVehicleId') ?? '').trim();
@@ -43,7 +47,8 @@ export async function createReservationAction(formData: FormData): Promise<void>
     rentalVehicleId,
     caseId: String(formData.get('caseId') ?? '').trim() || null,
     customerId: String(formData.get('customerId') ?? '').trim() || null,
-    fundingSourceId: String(formData.get('fundingSourceId') ?? '').trim() || null,
+    fundingSourceId:
+      String(formData.get('fundingSourceId') ?? '').trim() || null,
     startsAt: parseDate(formData.get('startsAt')),
     endsAt: parseDate(formData.get('endsAt')),
     notes: String(formData.get('notes') ?? '').trim() || null,

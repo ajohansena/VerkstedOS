@@ -59,12 +59,15 @@ export async function readPortalCase(
 
   const row = rows[0];
   if (!row) return null;
-  const expected = new Date(row.openedAt.getTime() + NORMAL_REPAIR_DAYS * DAY_MS);
+  const expected = new Date(
+    row.openedAt.getTime() + NORMAL_REPAIR_DAYS * DAY_MS,
+  );
   return {
     caseNumber: row.caseNumber,
     status: row.status,
     workshopName: row.workshopName ?? null,
-    vehicleLabel: [row.vehicleMake, row.vehicleModel].filter(Boolean).join(' ') || null,
+    vehicleLabel:
+      [row.vehicleMake, row.vehicleModel].filter(Boolean).join(' ') || null,
     registrationNumber: row.registrationNumber ?? null,
     productionStateLabel: row.stateLabel ?? null,
     openedAt: row.openedAt.toISOString(),

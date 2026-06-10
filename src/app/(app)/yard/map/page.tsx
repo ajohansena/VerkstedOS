@@ -132,10 +132,7 @@ export default async function YardMapPage() {
           </h1>
           <p className="text-sm text-muted-foreground">{t.yard.description}</p>
         </div>
-        <Link
-          href="/yard"
-          className="text-sm underline text-muted-foreground"
-        >
+        <Link href="/yard" className="text-sm text-muted-foreground underline">
           {t.transfer.yard}
         </Link>
       </header>
@@ -222,7 +219,7 @@ export default async function YardMapPage() {
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <form
           action={moveVehicleAction}
-          className="rounded-lg border bg-background p-4 space-y-3"
+          className="space-y-3 rounded-lg border bg-background p-4"
         >
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             {t.yard.moveTitle}
@@ -303,7 +300,7 @@ export default async function YardMapPage() {
 
         <form
           action={moveByQrAction}
-          className="rounded-lg border bg-background p-4 space-y-3"
+          className="space-y-3 rounded-lg border bg-background p-4"
         >
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             {t.yard.scanTitle}
@@ -336,7 +333,7 @@ export default async function YardMapPage() {
               inputMode="text"
               autoComplete="off"
               required
-              className="min-h-[44px] w-full rounded-md border bg-background px-3 py-2 text-sm font-mono"
+              className="min-h-[44px] w-full rounded-md border bg-background px-3 py-2 font-mono text-sm"
             />
           </label>
           <button

@@ -84,7 +84,10 @@ export async function approveDangerousOp(input: {
   if (op.requestedByUserId === input.approvedByUserId) {
     throw new TwoPersonRuleViolationError();
   }
-  return markApproved({ id: input.id, approvedByUserId: input.approvedByUserId });
+  return markApproved({
+    id: input.id,
+    approvedByUserId: input.approvedByUserId,
+  });
 }
 
 export async function rejectDangerousOp(input: {
@@ -140,7 +143,11 @@ export async function cancelDangerousOp(input: {
   const op = await getDangerousOperationById(input.id);
   if (!op) throw new DangerousOperationNotFoundError(input.id);
   if (op.status === 'executed') {
-    throw new DangerousOperationStateError(input.id, 'pending_approval', op.status);
+    throw new DangerousOperationStateError(
+      input.id,
+      'pending_approval',
+      op.status,
+    );
   }
   return markCancelled({
     id: input.id,

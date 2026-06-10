@@ -115,8 +115,7 @@ export const nb = {
       '{count} sak(er) venter på deler — produksjonen står',
     attentionLongOpen:
       'Sak {caseNumber} har vært åpen i {days} dager (over normaltid)',
-    attentionPendingAcceptance:
-      'Sak {caseNumber} venter på kundegodkjenning',
+    attentionPendingAcceptance: 'Sak {caseNumber} venter på kundegodkjenning',
     role: 'Rolle',
     roleOwner: 'Verksteder',
     roleManager: 'Produksjonsleder',
@@ -233,8 +232,7 @@ export const nb = {
     approve: 'Godkjenn',
     cancel: 'Kanseller',
     noBasis: 'Ingen fakturagrunnlag ennå. Generer fra kalkylen.',
-    regenerateHint:
-      'Kanseller eksisterende grunnlag før du genererer på nytt.',
+    regenerateHint: 'Kanseller eksisterende grunnlag før du genererer på nytt.',
   },
   dashboard: {
     title: 'Dashbord',
@@ -711,10 +709,12 @@ export const nb = {
     kindMaintenanceOff: 'Vedlikeholdsmodus av',
     kindDataDelete: 'Slett data',
     kindDataRestore: 'Gjenopprett data',
-    twoPersonRuleViolation: 'Du kan ikke godkjenne eller utføre din egen forespørsel.',
+    twoPersonRuleViolation:
+      'Du kan ikke godkjenne eller utføre din egen forespørsel.',
     reasonTooShort: 'Begrunnelsen må være minst 8 tegn.',
     notFound: 'Operasjonen finnes ikke.',
-    invalidState: 'Operasjonen er ikke i en tilstand som tillater denne handlingen.',
+    invalidState:
+      'Operasjonen er ikke i en tilstand som tillater denne handlingen.',
     requestedBy: 'Forespurt av',
     approvedBy: 'Godkjent av',
     requestedAt: 'Forespurt',
@@ -742,7 +742,8 @@ export const nb = {
       'Bekreft at du har lest forutsetningene og godkjenner gjennomføringen.',
     nameLabel: 'Fullt navn',
     namePlaceholder: 'Ola Nordmann',
-    consentLabel: 'Jeg bekrefter at jeg er kjøretøyets eier eller har fullmakt til å godkjenne reparasjonen.',
+    consentLabel:
+      'Jeg bekrefter at jeg er kjøretøyets eier eller har fullmakt til å godkjenne reparasjonen.',
     submit: 'Signer',
     signed: 'Takk! Signaturen er registrert.',
     alreadySigned: 'Saken er allerede signert.',

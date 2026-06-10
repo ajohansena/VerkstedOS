@@ -26,7 +26,8 @@ interface Props {
  * `{ ok, reason }` shape so the customer sees inline validation.
  */
 export function PortalSignSection(props: Props) {
-  const { token, alreadySigned, signedAtIso, sequenceNo, signerName, t } = props;
+  const { token, alreadySigned, signedAtIso, sequenceNo, signerName, t } =
+    props;
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<boolean>(alreadySigned);
@@ -74,8 +75,10 @@ export function PortalSignSection(props: Props) {
               setDone(true);
             } else {
               const reason = result.reason ?? 'token_invalid';
-              if (reason === 'name_required') setError(t.portalSignature.nameRequired);
-              else if (reason === 'consent_required') setError(t.portalSignature.consentRequired);
+              if (reason === 'name_required')
+                setError(t.portalSignature.nameRequired);
+              else if (reason === 'consent_required')
+                setError(t.portalSignature.consentRequired);
               else if (reason === 'already_signed') {
                 setError(t.portalSignature.alreadySigned);
                 setDone(true);

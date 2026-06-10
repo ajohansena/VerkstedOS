@@ -43,10 +43,7 @@ export const yardLocations = pgTable(
     ...lifecycleColumns,
   },
   (table) => [
-    uniqueIndex('yard_locations_layout_code_uq').on(
-      table.layoutId,
-      table.code,
-    ),
+    uniqueIndex('yard_locations_layout_code_uq').on(table.layoutId, table.code),
     uniqueIndex('yard_locations_org_qr_uq').on(
       table.organizationId,
       table.qrTag,

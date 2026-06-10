@@ -91,7 +91,9 @@ export async function insertAiModelVersion(input: {
       version: input.version,
       provider: input.provider,
       ...(input.status ? { status: input.status } : {}),
-      ...(input.description !== undefined ? { description: input.description } : {}),
+      ...(input.description !== undefined
+        ? { description: input.description }
+        : {}),
       ...(input.config !== undefined ? { config: input.config as object } : {}),
       ...(input.registeredByPlatformUserId
         ? { registeredByPlatformUserId: input.registeredByPlatformUserId }

@@ -577,10 +577,7 @@ export async function listPlannedSegmentsForRange(
           lt(resourceAssignments.plannedStartAt, rangeEnd),
         ),
       )
-      .orderBy(
-        resources.name,
-        resourceAssignments.plannedStartAt,
-      );
+      .orderBy(resources.name, resourceAssignments.plannedStartAt);
   });
 }
 

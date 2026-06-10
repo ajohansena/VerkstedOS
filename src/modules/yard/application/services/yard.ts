@@ -160,8 +160,7 @@ export async function moveVehicleToLocation(
 
   const dest = await findYardLocationById(ctx, input.toLocationId);
   if (!dest) throw new Error('YARD_LOCATION_NOT_FOUND');
-  if (dest.status === 'blocked')
-    throw new YardLocationBlockedError(dest.id);
+  if (dest.status === 'blocked') throw new YardLocationBlockedError(dest.id);
 
   const previousPlacement = await findActivePlacementForCase(ctx, input.caseId);
   const previousLocationId = previousPlacement?.locationId ?? null;
@@ -183,7 +182,8 @@ export async function moveVehicleToLocation(
     note: input.note ?? null,
   });
 
-  const reason = input.reason ?? (previousLocationId ? 'reposition' : 'arrival');
+  const reason =
+    input.reason ?? (previousLocationId ? 'reposition' : 'arrival');
 
   const movement = await insertVehicleMovement(ctx, {
     organizationId: ctx.organizationId,

@@ -11,9 +11,9 @@ describe('hasConflict', () => {
   const baseEnd = new Date('2026-07-01T16:00:00Z');
 
   it('rejects degenerate window', () => {
-    expect(
-      hasConflict({ startsAt: baseEnd, endsAt: baseStart }, []),
-    ).toBe(true);
+    expect(hasConflict({ startsAt: baseEnd, endsAt: baseStart }, [])).toBe(
+      true,
+    );
   });
 
   it('allows non-overlapping reservations', () => {

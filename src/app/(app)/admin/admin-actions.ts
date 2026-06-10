@@ -19,9 +19,7 @@ export async function updateOrgSettingsAction(
     const session = await getSessionContext();
     if (!session) return { ok: false, error: 'NOT_AUTHENTICATED' };
     await updateOrganizationSettings(session.context, {
-      ...(formData.get('name')
-        ? { name: String(formData.get('name')) }
-        : {}),
+      ...(formData.get('name') ? { name: String(formData.get('name')) } : {}),
       ...(formData.has('orgNumber')
         ? { orgNumber: String(formData.get('orgNumber')) || null }
         : {}),

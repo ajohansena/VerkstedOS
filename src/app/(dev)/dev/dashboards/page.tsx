@@ -68,8 +68,8 @@ export default async function DevDashboardsPage() {
                         {r.organizationName}
                       </Link>
                       <div className="text-xs text-muted-foreground">
-                        {r.kpiDefinitionCount} definitions ·{' '}
-                        {r.snapshotCount} snapshots
+                        {r.kpiDefinitionCount} definitions · {r.snapshotCount}{' '}
+                        snapshots
                       </div>
                     </div>
                     <span

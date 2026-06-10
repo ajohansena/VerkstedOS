@@ -33,7 +33,11 @@ export function PulseZone({
     href: string;
     accent?: 'red' | 'amber';
   }[] = [
-    { label: labels.pulseActive, value: pulse.activeCases, href: '/production' },
+    {
+      label: labels.pulseActive,
+      value: pulse.activeCases,
+      href: '/production',
+    },
     {
       label: labels.pulseDueToday,
       value: pulse.dueToday,

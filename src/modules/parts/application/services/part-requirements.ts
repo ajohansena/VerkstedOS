@@ -291,7 +291,10 @@ export async function materializeRequirementsFromApprovedEstimate(
     const inserted = await tx
       .insert(partRequirements)
       .values(values)
-      .returning({ id: partRequirements.id, description: partRequirements.description });
+      .returning({
+        id: partRequirements.id,
+        description: partRequirements.description,
+      });
 
     // ── 5. Per-line lifecycle + outbox events ──────────────────────────────
     for (const req of inserted) {

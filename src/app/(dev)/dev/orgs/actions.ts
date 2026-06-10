@@ -35,7 +35,9 @@ export async function provisionOrganizationAction(
   const orgNumber = String(formData.get('orgNumber') ?? '').trim();
   const workshopName = String(formData.get('workshopName') ?? '').trim();
   const ownerFullName = String(formData.get('ownerFullName') ?? '').trim();
-  const ownerEmail = String(formData.get('ownerEmail') ?? '').trim().toLowerCase();
+  const ownerEmail = String(formData.get('ownerEmail') ?? '')
+    .trim()
+    .toLowerCase();
 
   if (!orgName || !workshopName || !ownerFullName || !ownerEmail) {
     return { ok: false, message: 'All fields are required.' };
