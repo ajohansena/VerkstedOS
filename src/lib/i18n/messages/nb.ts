@@ -345,6 +345,18 @@ export const nb = {
     bookFromIntakeSuccess: 'Booking opprettet for sak {caseNumber}.',
     bookFromIntakeOpenCase: 'Åpne sak',
     bookFromIntakeError: 'Booking feilet',
+    bookedLaneHeading: 'Booket – ikke planlagt',
+    bookedLaneEmpty: 'Ingen ubekreftede bookinger akkurat nå.',
+    bookedBadge: 'Booket',
+    bookedStatusTentative: 'Tentativ',
+    bookedStatusConfirmed: 'Bekreftet',
+    bookedStatusArrived: 'Ankommet',
+    bookedNeedsPlanning: 'Venter på planlegging',
+    bookedPlanAction: 'Planlegg',
+    bookedBannerOne:
+      '1 booket kjøretøy er ikke planlagt og inngår derfor ikke i kapasitetsberegningen.',
+    bookedBannerMany:
+      '{count} bookede kjøretøy er ikke planlagt og inngår derfor ikke i kapasitetsberegningen.',
   },
   portal: {
     headline: 'Status på reparasjonen',

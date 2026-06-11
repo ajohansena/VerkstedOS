@@ -10,6 +10,7 @@ import {
 import {
   absenceMinutesInDay,
   listPlannedSegmentsForRange,
+  listPlannerRowsForRange,
   listProductionBoardRich,
   listResourcesForBoard,
   listWorkflowAdjacency,
@@ -24,7 +25,7 @@ import {
 
 import { BoardV2 } from './board-v2';
 import { BookFromIntakeBanner } from './book-from-intake-banner';
-import { DayView, type DayOfficeTask } from './day-view';
+import { DayView, type DayOfficeTask, type DayBookedRow } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
 import {
   MyTasksView,
@@ -36,6 +37,7 @@ import {
   WeekView,
   type WeekRow as WV_Row,
   type WeekOfficeTaskCell,
+  type WeekBookedCell,
 } from './week-view';
 
 export const dynamic = 'force-dynamic';
@@ -206,10 +208,48 @@ async function DaySection({
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
-  const [rows, allOffice] = await Promise.all([
-    listPlannedSegmentsForRange(session.context, startOfToday, endOfToday),
+  const [plannerRows, allOffice] = await Promise.all([
+    listPlannerRowsForRange(session.context, startOfToday, endOfToday),
     listOpenOfficeTasksForOrg(session.context, 100),
   ]);
+
+  // Unified planner read model (doc 13 § 20.4): one row per case. Cases with
+  // segments today flatten into the per-resource lanes; cases that are only
+  // booked today render in the "Booked – ikke planlagt" lane above. Card
+  // never disappears across the morph — caseId is the stable identity.
+  const rows = plannerRows
+    .filter((p) => p.lifecycle === 'in_progress')
+    .flatMap((p) =>
+      p.segments.map((s) => ({
+        assignmentId: s.assignmentId,
+        segmentId: s.segmentId,
+        segmentLabel: s.segmentLabel,
+        caseId: p.caseId,
+        caseNumber: p.caseNumber,
+        resourceId: s.resourceId,
+        resourceName: s.resourceName,
+        resourceKind: s.resourceKind,
+        plannedStartAt: s.plannedStartAt
+          ? s.plannedStartAt.toISOString()
+          : null,
+        plannedEndAt: s.plannedEndAt ? s.plannedEndAt.toISOString() : null,
+        status: s.status,
+      })),
+    );
+  const bookedRows: DayBookedRow[] = plannerRows
+    .filter((p) => p.lifecycle === 'booked' && p.booking !== null)
+    .map((p) => ({
+      caseId: p.caseId,
+      caseNumber: p.caseNumber,
+      bookingStatus: p.booking!.status,
+      expectedArrivalAt: p.booking!.expectedArrivalAt
+        ? p.booking!.expectedArrivalAt.toISOString()
+        : null,
+      promisedDeliveryAt: p.booking!.promisedDeliveryAt
+        ? p.booking!.promisedDeliveryAt.toISOString()
+        : null,
+    }));
+
   const todaysOffice = allOffice.filter(
     (t) => t.dueAt !== null && t.dueAt < endOfToday,
   );
@@ -228,22 +268,9 @@ async function DaySection({
   }));
   return (
     <DayView
-      rows={rows.map((r) => ({
-        assignmentId: r.assignmentId,
-        segmentId: r.segmentId,
-        segmentLabel: r.segmentLabel,
-        caseId: r.caseId,
-        caseNumber: r.caseNumber,
-        resourceId: r.resourceId,
-        resourceName: r.resourceName,
-        resourceKind: r.resourceKind,
-        plannedStartAt: r.plannedStartAt
-          ? r.plannedStartAt.toISOString()
-          : null,
-        plannedEndAt: r.plannedEndAt ? r.plannedEndAt.toISOString() : null,
-        status: r.status,
-      }))}
+      rows={rows}
       officeTasks={officeTasks}
+      bookedRows={bookedRows}
       labels={{
         heading: t.productionBoard.dayHeading,
         empty: t.productionBoard.dayEmpty,
@@ -252,6 +279,16 @@ async function DaySection({
         resourceColumn: t.productionBoard.dayResourceColumn,
         officeLaneHeading: t.productionBoard.officeLaneHeading,
         officeLaneEmpty: t.productionBoard.officeLaneEmpty,
+        bookedLaneHeading: t.productionBoard.bookedLaneHeading,
+        bookedLaneEmpty: t.productionBoard.bookedLaneEmpty,
+        bookedBadge: t.productionBoard.bookedBadge,
+        bookedStatusTentative: t.productionBoard.bookedStatusTentative,
+        bookedStatusConfirmed: t.productionBoard.bookedStatusConfirmed,
+        bookedStatusArrived: t.productionBoard.bookedStatusArrived,
+        bookedNeedsPlanning: t.productionBoard.bookedNeedsPlanning,
+        bookedPlanAction: t.productionBoard.bookedPlanAction,
+        bookedBannerOne: t.productionBoard.bookedBannerOne,
+        bookedBannerMany: t.productionBoard.bookedBannerMany,
       }}
     />
   );
@@ -515,10 +552,11 @@ async function WeekSection({
   const weekStart = new Date(today.getTime() - daysFromMonday * DAY);
   const weekEnd = new Date(weekStart.getTime() + 5 * DAY);
 
-  const [resources, planned, officeAll] = await Promise.all([
+  const [resources, planned, officeAll, plannerRows] = await Promise.all([
     listResourcesForBoard(session.context),
     listPlannedSegmentsForRange(session.context, weekStart, weekEnd),
     listOpenOfficeTasksForOrg(session.context, 500),
+    listPlannerRowsForRange(session.context, weekStart, weekEnd),
   ]);
 
   const employeeIds = resources
@@ -597,6 +635,20 @@ async function WeekSection({
     };
   });
 
+  // Booked-only cases (lifecycle === 'booked') counted per day for the
+  // Week View's "Booked" lane + the unplanned-bookings banner total.
+  const bookedOnly = plannerRows.filter((p) => p.lifecycle === 'booked');
+  const bookedByDate: WeekBookedCell[] = dates.map((iso) => {
+    const dayStart = new Date(`${iso}T00:00:00`);
+    const dayEnd = new Date(dayStart.getTime() + DAY);
+    const count = bookedOnly.filter((p) => {
+      const at = p.booking?.expectedArrivalAt ?? null;
+      return at !== null && at >= dayStart && at < dayEnd;
+    }).length;
+    return { date: iso, count };
+  });
+  const bookedUnplannedTotal = bookedOnly.length;
+
   return (
     <WeekView
       rows={rows}
@@ -609,6 +661,8 @@ async function WeekSection({
         ).length;
         return { date: iso, count } satisfies WeekOfficeTaskCell;
       })}
+      bookedByDate={bookedByDate}
+      bookedUnplannedTotal={bookedUnplannedTotal}
       labels={{
         heading: t.productionBoard.weekHeading,
         empty: t.productionBoard.weekEmpty,
@@ -617,6 +671,9 @@ async function WeekSection({
         freeLabel: t.productionBoard.weekFree,
         officeLaneHeading: t.productionBoard.officeLaneHeading,
         officeLaneEmpty: t.productionBoard.officeLaneEmpty,
+        bookedLaneHeading: t.productionBoard.bookedLaneHeading,
+        bookedBannerOne: t.productionBoard.bookedBannerOne,
+        bookedBannerMany: t.productionBoard.bookedBannerMany,
       }}
     />
   );

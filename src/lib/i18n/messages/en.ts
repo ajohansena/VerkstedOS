@@ -342,6 +342,18 @@ export const en = {
     bookFromIntakeSuccess: 'Booking created for case {caseNumber}.',
     bookFromIntakeOpenCase: 'Open case',
     bookFromIntakeError: 'Booking failed',
+    bookedLaneHeading: 'Booked – not yet planned',
+    bookedLaneEmpty: 'No unplanned bookings right now.',
+    bookedBadge: 'Booked',
+    bookedStatusTentative: 'Tentative',
+    bookedStatusConfirmed: 'Confirmed',
+    bookedStatusArrived: 'Arrived',
+    bookedNeedsPlanning: 'Awaiting planning',
+    bookedPlanAction: 'Plan',
+    bookedBannerOne:
+      '1 booked vehicle is not yet planned and is therefore not included in capacity calculations.',
+    bookedBannerMany:
+      '{count} booked vehicles are not yet planned and are therefore not included in capacity calculations.',
   },
   portal: {
     headline: 'Repair status',

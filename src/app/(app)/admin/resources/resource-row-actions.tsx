@@ -42,9 +42,7 @@ export function ResourceRowActions({
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(currentStatus);
-  const [workshopId, setWorkshopId] = useState<string>(
-    currentWorkshopId ?? '',
-  );
+  const [workshopId, setWorkshopId] = useState<string>(currentWorkshopId ?? '');
 
   function update(values: {
     status?: 'active' | 'inactive' | 'maintenance';

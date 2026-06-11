@@ -389,3 +389,65 @@ export async function listBookingsForWorkshopInRange(
       .orderBy(asc(caseBookings.expectedArrivalAt)),
   );
 }
+
+/**
+ * List active bookings (tentative/confirmed/arrived) across the whole
+ * organization whose `expected_arrival_at` falls inside [from, to), joined
+ * with the case so the planner composer can render the case number without
+ * a second round-trip. Org-scoped (not workshop-scoped) because the planner
+ * Day/Week views are org-scoped today — workshop filter can be layered on
+ * later without changing this query's contract.
+ *
+ * Drives the unified planner-row composer (doc 13 § 20.4) — a case that
+ * has a booking but no segments yet must be visible in Day/Week as a
+ * "Booked – ikke planlagt" row, not invisible until a segment exists.
+ */
+export interface ActiveBookingForPlanner {
+  bookingId: string;
+  caseId: string;
+  caseNumber: string;
+  workshopId: string;
+  status: 'tentative' | 'confirmed' | 'arrived';
+  expectedArrivalAt: Date | null;
+  promisedDeliveryAt: Date | null;
+}
+
+export async function listActiveBookingsForOrgInRange(
+  ctx: RequestContext,
+  range: { from: Date; to: Date },
+): Promise<ActiveBookingForPlanner[]> {
+  return withTransaction(ctx, async (tx) => {
+    const rows = await tx
+      .select({
+        bookingId: caseBookings.id,
+        caseId: caseBookings.caseId,
+        caseNumber: cases.caseNumber,
+        workshopId: caseBookings.workshopId,
+        status: caseBookings.status,
+        expectedArrivalAt: caseBookings.expectedArrivalAt,
+        promisedDeliveryAt: caseBookings.promisedDeliveryAt,
+      })
+      .from(caseBookings)
+      .innerJoin(cases, eq(cases.id, caseBookings.caseId))
+      .where(
+        and(
+          eq(caseBookings.organizationId, ctx.organizationId),
+          inArray(caseBookings.status, ['tentative', 'confirmed', 'arrived']),
+          isNull(caseBookings.deletedAt),
+          gte(caseBookings.expectedArrivalAt, range.from),
+          lte(caseBookings.expectedArrivalAt, range.to),
+        ),
+      )
+      .orderBy(asc(caseBookings.expectedArrivalAt));
+    return rows.map((r) => ({
+      bookingId: r.bookingId,
+      caseId: r.caseId,
+      caseNumber: r.caseNumber,
+      workshopId: r.workshopId,
+      // Safe narrowing: the WHERE clause restricts to these three statuses.
+      status: r.status as 'tentative' | 'confirmed' | 'arrived',
+      expectedArrivalAt: r.expectedArrivalAt,
+      promisedDeliveryAt: r.promisedDeliveryAt,
+    }));
+  });
+}

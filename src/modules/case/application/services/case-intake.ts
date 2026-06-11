@@ -4,7 +4,7 @@ import { emitEvent } from '@/lib/events/outbox';
 import type { Case } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 import { requirePermission } from '@/modules/identity/public';
-import { ensureProductionOrderInTx } from '@/modules/production/public';
+import { ensureProductionOrderInTx } from '@/modules/production/public/transitions';
 
 import {
   createCaseSchema,

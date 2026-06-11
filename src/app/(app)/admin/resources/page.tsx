@@ -16,10 +16,7 @@ import {
   getCurrentOrganization,
   listWorkshops,
 } from '@/modules/identity/public';
-import {
-  listEmployees,
-  listResources,
-} from '@/modules/workforce/public';
+import { listEmployees, listResources } from '@/modules/workforce/public';
 
 import { CreateResourceForm } from './create-resource-form';
 import { ResourceRowActions } from './resource-row-actions';

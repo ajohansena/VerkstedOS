@@ -95,3 +95,14 @@ export {
   type PlannedSegmentRow,
   type ResourceRow,
 } from '../infrastructure/repositories/production-repository';
+
+// Planner read model — unified case-lifecycle composer (Sprint 22 Phase D,
+// doc 13 § 20.4). Day, Week and other planner views consume `PlannerRow`
+// instead of reading bookings + segments separately.
+export {
+  listPlannerRowsForRange,
+  type PlannerRow,
+  type PlannerLifecycle,
+  type PlannerSegmentSummary,
+  type PlannerBookingSummary,
+} from '../application/queries/list-planner-rows';

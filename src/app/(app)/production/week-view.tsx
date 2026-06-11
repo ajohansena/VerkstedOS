@@ -39,9 +39,18 @@ export interface WeekLabels {
   freeLabel: string;
   officeLaneHeading: string;
   officeLaneEmpty: string;
+  bookedLaneHeading: string;
+  bookedBannerOne: string;
+  bookedBannerMany: string;
 }
 
 export interface WeekOfficeTaskCell {
+  /** YYYY-MM-DD */
+  date: string;
+  count: number;
+}
+
+export interface WeekBookedCell {
   /** YYYY-MM-DD */
   date: string;
   count: number;
@@ -51,11 +60,15 @@ export function WeekView({
   rows,
   dates,
   officeTasksByDate = [],
+  bookedByDate = [],
+  bookedUnplannedTotal = 0,
   labels,
 }: {
   rows: WeekRow[];
   dates: string[];
   officeTasksByDate?: WeekOfficeTaskCell[];
+  bookedByDate?: WeekBookedCell[];
+  bookedUnplannedTotal?: number;
   labels: WeekLabels;
 }) {
   if (rows.length === 0) {
@@ -79,9 +92,24 @@ export function WeekView({
     return { date: iso, plannedMin, availableMin, utilization };
   });
 
+  const bookedBanner =
+    bookedUnplannedTotal === 1
+      ? labels.bookedBannerOne
+      : bookedUnplannedTotal > 1
+        ? labels.bookedBannerMany.replace(
+            '{count}',
+            String(bookedUnplannedTotal),
+          )
+        : null;
+
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-medium">{labels.heading}</h2>
+      {bookedBanner ? (
+        <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
+          {bookedBanner}
+        </div>
+      ) : null}
       <div className="overflow-x-auto rounded-lg border bg-background">
         <table className="w-full min-w-[800px] table-fixed border-collapse text-sm">
           <thead className="bg-muted/50">
@@ -97,6 +125,28 @@ export function WeekView({
             </tr>
           </thead>
           <tbody>
+            <tr className="border-t bg-sky-50/60">
+              <td className="px-3 py-2 text-xs uppercase tracking-wide text-sky-900">
+                {labels.bookedLaneHeading}
+              </td>
+              {dates.map((iso) => {
+                const cell = bookedByDate.find((c) => c.date === iso);
+                const count = cell?.count ?? 0;
+                return (
+                  <td key={iso} className="px-3 py-2 align-top">
+                    {count > 0 ? (
+                      <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-sky-200 px-1 text-[11px] font-medium text-sky-900">
+                        {count}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">
+                        —
+                      </span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
             <tr className="border-t bg-amber-50/40">
               <td className="px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground">
                 {labels.officeLaneHeading}
