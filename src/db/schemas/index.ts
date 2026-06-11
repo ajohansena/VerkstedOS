@@ -35,6 +35,7 @@ export { caseParties } from './case/case-parties';
 export { caseNotes } from './case/case-notes';
 export { caseAssignments } from './case/case-assignments';
 export { caseTransfers } from './case/case-transfers';
+export { caseBookings } from './case/case-bookings';
 
 // Estimating & Integration
 export { integrationInbox } from './estimating/integration-inbox';

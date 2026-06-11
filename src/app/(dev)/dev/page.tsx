@@ -175,6 +175,11 @@ const INSPECTION_SURFACES: readonly SurfaceLink[] = [
     description: 'Inter-workshop case transfers and stuck-transfer repair.',
   },
   {
+    href: '/dev/bookings',
+    title: 'Bookings',
+    description: 'Case bookings per org and force-cancel for stuck bookings.',
+  },
+  {
     href: '/dev/communication',
     title: 'Communication',
     description: 'Customer acceptances and queued outbound messages.',

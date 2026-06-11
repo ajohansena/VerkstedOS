@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 
 import { getSessionContext } from '@/lib/auth/session';
 import { getDictionary, resolveLocale } from '@/lib/i18n';
-import { getCurrentOrganization } from '@/modules/identity/public';
+import { findCaseById } from '@/modules/case/public';
+import { getCurrentOrganization, listWorkshops } from '@/modules/identity/public';
 import {
   absenceMinutesInDay,
   listPlannedSegmentsForRange,
@@ -14,6 +15,7 @@ import {
 import { findEmployeeByUserId, listApprovedAbsenceWindowsForEmployees } from '@/modules/workforce/public';
 
 import { BoardV2 } from './board-v2';
+import { BookFromIntakeBanner } from './book-from-intake-banner';
 import { DayView } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
 import { MyTasksView, type MyTasksRow } from './my-tasks-view';
@@ -31,12 +33,12 @@ const VALID_MODES: BoardMode[] = ['board', 'day', 'week', 'resource', 'mytasks']
  * / My Tasks land in later sprints (placeholder copy until then).
  */
 export default async function ProductionBoardPage(props: {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; openBooking?: string }>;
 }) {
   const session = await getSessionContext();
   if (!session) redirect('/login');
 
-  const { mode: modeParam } = await props.searchParams;
+  const { mode: modeParam, openBooking } = await props.searchParams;
   const mode: BoardMode =
     modeParam && (VALID_MODES as string[]).includes(modeParam)
       ? (modeParam as BoardMode)
@@ -45,6 +47,28 @@ export default async function ProductionBoardPage(props: {
   const organization = await getCurrentOrganization(session.context);
   const locale = resolveLocale(organization?.settings);
   const t = getDictionary(locale);
+
+  // Optional book-from-intake handoff (D2). When the wizard CTA lands here
+  // with `?openBooking=<caseId>`, pre-fetch the case + workshops so a small
+  // banner lets the receptionist book without leaving the planner.
+  let intakeBanner: {
+    caseId: string;
+    caseNumber: string;
+    workshops: Array<{ id: string; name: string }>;
+  } | null = null;
+  if (openBooking) {
+    const [caseRow, workshops] = await Promise.all([
+      findCaseById(session.context, openBooking),
+      listWorkshops(session.context),
+    ]);
+    if (caseRow) {
+      intakeBanner = {
+        caseId: caseRow.id,
+        caseNumber: caseRow.caseNumber,
+        workshops: workshops.map((w) => ({ id: w.id, name: w.name })),
+      };
+    }
+  }
 
   const modeLabels = {
     board: t.productionBoard.modeBoard,
@@ -67,6 +91,28 @@ export default async function ProductionBoardPage(props: {
         </div>
         <ModeTabs current={mode} labels={modeLabels} />
       </header>
+
+      {intakeBanner ? (
+        <BookFromIntakeBanner
+          caseId={intakeBanner.caseId}
+          caseNumber={intakeBanner.caseNumber}
+          workshops={intakeBanner.workshops}
+          labels={{
+            title: t.productionBoard.bookFromIntakeTitle,
+            subtitle: t.productionBoard.bookFromIntakeSubtitle,
+            workshop: t.productionBoard.bookFromIntakeWorkshop,
+            arrival: t.productionBoard.bookFromIntakeArrival,
+            delivery: t.productionBoard.bookFromIntakeDelivery,
+            notes: t.productionBoard.bookFromIntakeNotes,
+            confirm: t.productionBoard.bookFromIntakeConfirm,
+            create: t.productionBoard.bookFromIntakeCreate,
+            dismiss: t.productionBoard.bookFromIntakeDismiss,
+            successTitle: t.productionBoard.bookFromIntakeSuccess,
+            successOpenCase: t.productionBoard.bookFromIntakeOpenCase,
+            errorPrefix: t.productionBoard.bookFromIntakeError,
+          }}
+        />
+      ) : null}
 
       {mode === 'board' && (
         <BoardSection session={session} t={t} />

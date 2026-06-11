@@ -51,6 +51,11 @@ export default async function AdminPage() {
       label: t.admin.notifications,
       show: canConfig,
     },
+    {
+      href: '/admin/booking-policy',
+      label: t.admin.bookingPolicy,
+      show: canConfig,
+    },
     { href: '/admin/absence', label: t.absence.queueTitle, show: canConfig },
     { href: '/admin/rental', label: t.rental.fleetTitle, show: canConfig },
     { href: '/admin/yard', label: t.yard.designerTitle, show: canConfig },

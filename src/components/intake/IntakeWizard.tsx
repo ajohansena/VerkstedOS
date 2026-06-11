@@ -16,8 +16,8 @@ import {
   validateFundingSet,
   type FundingSourceInput,
   type FundingSourceKind,
-  type InsuranceCompany,
-} from '@/modules/case/public';
+} from '@/modules/case/domain/case';
+import type { InsuranceCompany } from '@/db/types';
 import type {
   PhoneLookupResult,
   VehicleLookupResult,
@@ -116,6 +116,15 @@ export interface WizardLabels {
   reviewCustomer: string;
   reviewIncident: string;
   reviewFunding: string;
+  bookingTitle: string;
+  bookingHint: string;
+  bookingWorkshop: string;
+  bookingArrival: string;
+  bookingDelivery: string;
+  bookingNotes: string;
+  bookingConfirm: string;
+  bookingSkip: string;
+  bookingDateError: string;
   reviewSubmit: string;
   reviewSubmitting: string;
   reviewError: string;
@@ -157,13 +166,25 @@ type CustomerSelection =
     }
   | { kind: 'none' };
 
+/** Local-only booking draft (transient until Review-step submit). */
+interface BookingDraft {
+  workshopId: string;
+  expectedArrivalAt: string; // datetime-local string, '' = empty
+  promisedDeliveryAt: string;
+  notes: string;
+  confirmImmediately: boolean;
+  skip: boolean;
+}
+
 export function IntakeWizard({
   labels,
   insuranceCompanies,
+  workshops,
   legacyHref,
 }: {
   labels: WizardLabels;
   insuranceCompanies: InsuranceCompany[];
+  workshops: Array<{ id: string; name: string }>;
   legacyHref: string;
 }) {
   const [step, setStep] = useState<StepIndex>(0);
@@ -181,6 +202,28 @@ export function IntakeWizard({
     caseId: string;
     caseNumber: string;
   } | null>(null);
+
+  // Optional booking captured on the Review step. `workshopId` empty means
+  // "skip booking". Dates blank means no commitment yet.
+  const [booking, setBooking] = useState<BookingDraft>(() => ({
+    workshopId: workshops[0]?.id ?? '',
+    expectedArrivalAt: '',
+    promisedDeliveryAt: '',
+    notes: '',
+    confirmImmediately: false,
+    skip: workshops.length === 0,
+  }));
+
+  const bookingProblems = useMemo<string[]>(() => {
+    if (booking.skip) return [];
+    if (!booking.expectedArrivalAt && !booking.promisedDeliveryAt) return [];
+    if (booking.expectedArrivalAt && booking.promisedDeliveryAt) {
+      const a = new Date(booking.expectedArrivalAt);
+      const d = new Date(booking.promisedDeliveryAt);
+      if (d.getTime() < a.getTime()) return [labels.bookingDateError];
+    }
+    return [];
+  }, [booking, labels.bookingDateError]);
 
   // Per-funding-source problems (label + per-kind invariants). Reused on
   // step 3 (block Next) and step 4 (block Submit, show inline).
@@ -215,11 +258,11 @@ export function IntakeWizard({
       case 3:
         return fundingSources.length > 0 && fundingProblems.length === 0;
       case 4:
-        return fundingProblems.length === 0;
+        return fundingProblems.length === 0 && bookingProblems.length === 0;
       default:
         return false;
     }
-  }, [step, vehicle, customer, fundingSources, fundingProblems]);
+  }, [step, vehicle, customer, fundingSources, fundingProblems, bookingProblems]);
 
   if (createdCase) {
     return (
@@ -267,6 +310,25 @@ export function IntakeWizard({
             : { kind: 'none' },
       ...(incidentTag.trim() ? { incidentTag: incidentTag.trim() } : {}),
       fundingSources,
+      ...(booking.skip || !booking.workshopId
+        ? {}
+        : booking.expectedArrivalAt || booking.promisedDeliveryAt
+          ? {
+              booking: {
+                workshopId: booking.workshopId,
+                ...(booking.expectedArrivalAt
+                  ? { expectedArrivalAt: booking.expectedArrivalAt }
+                  : {}),
+                ...(booking.promisedDeliveryAt
+                  ? { promisedDeliveryAt: booking.promisedDeliveryAt }
+                  : {}),
+                ...(booking.notes.trim() ? { notes: booking.notes.trim() } : {}),
+                ...(booking.confirmImmediately
+                  ? { confirmImmediately: true }
+                  : {}),
+              },
+            }
+          : {}),
     };
     startSubmit(async () => {
       try {
@@ -327,14 +389,23 @@ export function IntakeWizard({
         />
       )}
       {step === 4 && (
-        <ReviewStep
-          labels={labels}
-          vehicle={vehicle}
-          customer={customer}
-          incidentTag={incidentTag}
-          fundingSources={fundingSources}
-          insuranceCompanies={insuranceCompanies}
-        />
+        <>
+          <ReviewStep
+            labels={labels}
+            vehicle={vehicle}
+            customer={customer}
+            incidentTag={incidentTag}
+            fundingSources={fundingSources}
+            insuranceCompanies={insuranceCompanies}
+          />
+          <BookingSection
+            labels={labels}
+            workshops={workshops}
+            value={booking}
+            onChange={setBooking}
+            problems={bookingProblems}
+          />
+        </>
       )}
 
       {step === 4 && fundingProblems.length > 0 ? (
@@ -1185,6 +1256,113 @@ function ReviewStep({
           </dd>
         </div>
       </dl>
+    </section>
+  );
+}
+
+// ──────────────────────────── Booking section ────────────────────────────
+
+function BookingSection({
+  labels,
+  workshops,
+  value,
+  onChange,
+  problems,
+}: {
+  labels: WizardLabels;
+  workshops: Array<{ id: string; name: string }>;
+  value: BookingDraft;
+  onChange: (next: BookingDraft) => void;
+  problems: string[];
+}) {
+  // When the user has no workshops to book against, hide the section entirely
+  // (the action will simply not create a booking).
+  if (workshops.length === 0) return null;
+
+  const update = (patch: Partial<BookingDraft>) => onChange({ ...value, ...patch });
+
+  return (
+    <section className="space-y-3 rounded-md border p-4">
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold">{labels.bookingTitle}</h2>
+          <p className="text-xs text-muted-foreground">{labels.bookingHint}</p>
+        </div>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={value.skip}
+            onChange={(e) => update({ skip: e.target.checked })}
+          />
+          {labels.bookingSkip}
+        </label>
+      </header>
+
+      {value.skip ? null : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="sm:col-span-2 space-y-1">
+            <label className="text-xs font-medium">{labels.bookingWorkshop}</label>
+            <select
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              value={value.workshopId}
+              onChange={(e) => update({ workshopId: e.target.value })}
+            >
+              {workshops.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium" htmlFor="booking-arrival">
+              {labels.bookingArrival}
+            </label>
+            <Input
+              id="booking-arrival"
+              type="datetime-local"
+              value={value.expectedArrivalAt}
+              onChange={(e) => update({ expectedArrivalAt: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium" htmlFor="booking-delivery">
+              {labels.bookingDelivery}
+            </label>
+            <Input
+              id="booking-delivery"
+              type="datetime-local"
+              value={value.promisedDeliveryAt}
+              onChange={(e) => update({ promisedDeliveryAt: e.target.value })}
+            />
+          </div>
+          <div className="sm:col-span-2 space-y-1">
+            <label className="text-xs font-medium" htmlFor="booking-notes">
+              {labels.bookingNotes}
+            </label>
+            <Input
+              id="booking-notes"
+              value={value.notes}
+              onChange={(e) => update({ notes: e.target.value })}
+            />
+          </div>
+          <label className="sm:col-span-2 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={value.confirmImmediately}
+              onChange={(e) => update({ confirmImmediately: e.target.checked })}
+            />
+            {labels.bookingConfirm}
+          </label>
+          {problems.length > 0 ? (
+            <ul className="sm:col-span-2 space-y-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {problems.map((p, i) => (
+                <li key={i}>• {p}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }

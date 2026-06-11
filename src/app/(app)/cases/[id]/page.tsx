@@ -24,6 +24,7 @@ import {
   listFundingSources,
   listTransfers,
   listAssignments,
+  listBookingsForCase,
 } from '@/modules/case/public';
 import {
   listAvailableTransitions,
@@ -74,6 +75,7 @@ import { NORMAL_REPAIR_DAYS } from '@/lib/operations/snapshot';
 import { findCaseProductionState } from '@/modules/production/public';
 import { CaseSidePanel } from './case-side-panel';
 import { CaseFinanceSection } from './case-finance-section';
+import { CaseBookingsSection } from './case-bookings-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,6 +181,7 @@ export default async function CaseDetailPage({
   const transferTargets = allWorkshops.filter(
     (w) => w.id !== currentWorkshopId,
   );
+  const bookings = await listBookingsForCase(session.context, id);
 
   const acceptance = await latestAcceptance(session.context, id);
   const threads = await listThreads(session.context, id);
@@ -446,6 +449,35 @@ export default async function CaseDetailPage({
           </CardContent>
         </Card>
       ) : null}
+
+      <CaseBookingsSection
+        caseId={case_.id}
+        workshops={allWorkshops.map((w) => ({ id: w.id, name: w.name }))}
+        bookings={bookings}
+        labels={{
+          title: t.booking.title,
+          description: t.booking.description,
+          activeNone: t.booking.activeNone,
+          statusTentative: t.booking.statusTentative,
+          statusConfirmed: t.booking.statusConfirmed,
+          statusArrived: t.booking.statusArrived,
+          statusCancelled: t.booking.statusCancelled,
+          arrival: t.booking.arrival,
+          delivery: t.booking.delivery,
+          workshop: t.booking.workshop,
+          notes: t.booking.notes,
+          cancelReason: t.booking.cancelReason,
+          cancelReasonRequired: t.booking.cancelReasonRequired,
+          create: t.booking.create,
+          confirm: t.booking.confirm,
+          markArrived: t.booking.markArrived,
+          cancel: t.booking.cancel,
+          replace: t.booking.replace,
+          historyTitle: t.booking.historyTitle,
+          historyEmpty: t.booking.historyEmpty,
+          dateError: t.booking.dateError,
+        }}
+      />
 
       <Card>
         <CardHeader>

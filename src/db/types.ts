@@ -12,6 +12,7 @@ import type { caseParties } from './schemas/case/case-parties';
 import type { caseNotes } from './schemas/case/case-notes';
 import type { caseAssignments } from './schemas/case/case-assignments';
 import type { caseTransfers } from './schemas/case/case-transfers';
+import type { caseBookings } from './schemas/case/case-bookings';
 import type { integrationInbox } from './schemas/estimating/integration-inbox';
 import type { estimateImports } from './schemas/estimating/estimate-imports';
 import type { estimateDocuments } from './schemas/estimating/estimate-documents';
@@ -187,6 +188,9 @@ export type NewCaseAssignment = InferInsertModel<typeof caseAssignments>;
 
 export type CaseTransfer = InferSelectModel<typeof caseTransfers>;
 export type NewCaseTransfer = InferInsertModel<typeof caseTransfers>;
+
+export type CaseBooking = InferSelectModel<typeof caseBookings>;
+export type NewCaseBooking = InferInsertModel<typeof caseBookings>;
 
 export type IntegrationInbox = InferSelectModel<typeof integrationInbox>;
 export type NewIntegrationInbox = InferInsertModel<typeof integrationInbox>;

@@ -16,6 +16,7 @@ import { IntakeWizard } from '@/components/intake/IntakeWizard';
 import { getSessionContext } from '@/lib/auth/session';
 import { listInsuranceCompanies } from '@/modules/case/public';
 import { listRecentCustomers } from '@/modules/customer/public';
+import { listWorkshops } from '@/modules/identity/public';
 import { getDictionary } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
@@ -173,7 +174,10 @@ export default async function NewCasePage({ searchParams }: PageProps) {
   }
 
   // ─────────────── New default: the Intake Wizard ────────────────────────
-  const insuranceCompanies = await listInsuranceCompanies(session.context);
+  const [insuranceCompanies, workshops] = await Promise.all([
+    listInsuranceCompanies(session.context),
+    listWorkshops(session.context),
+  ]);
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 p-4 md:p-6">
@@ -192,6 +196,7 @@ export default async function NewCasePage({ searchParams }: PageProps) {
           <IntakeWizard
             labels={t.intakeWizard}
             insuranceCompanies={insuranceCompanies}
+            workshops={workshops.map((w) => ({ id: w.id, name: w.name }))}
             legacyHref="/cases/new?legacy=1"
           />
         </CardContent>

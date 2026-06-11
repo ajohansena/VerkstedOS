@@ -22,6 +22,10 @@ export interface UpdateOrgSettingsInput {
   orgNumber?: string | null;
   locale?: string;
   caseNumberFormat?: string;
+  bookingPolicy?: {
+    defaultBookingWindowDays: number;
+    overbookingTolerancePercent: number;
+  };
 }
 
 export async function updateOrganizationSettings(
@@ -43,6 +47,9 @@ export async function updateOrganizationSettings(
       ...(input.locale !== undefined ? { locale: input.locale } : {}),
       ...(input.caseNumberFormat !== undefined
         ? { caseNumberFormat: input.caseNumberFormat }
+        : {}),
+      ...(input.bookingPolicy !== undefined
+        ? { bookingPolicy: input.bookingPolicy }
         : {}),
     };
 

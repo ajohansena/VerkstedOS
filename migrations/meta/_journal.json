@@ -169,6 +169,13 @@
       "when": 1781028405191,
       "tag": "0046_ai_foundation_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1781125489566,
+      "tag": "0049_case_bookings_tables",
+      "breakpoints": true
     }
   ]
 }

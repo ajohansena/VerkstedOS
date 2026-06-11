@@ -602,6 +602,18 @@ export const caseTransferMode = pgEnum('case_transfer_mode', [
   'other',
 ]);
 
+/**
+ * Case booking lifecycle (doc 10 § Booking; doc 13 § 20.4).
+ *   tentative → confirmed → arrived
+ *   any      → cancelled
+ */
+export const caseBookingStatus = pgEnum('case_booking_status', [
+  'tentative',
+  'confirmed',
+  'arrived',
+  'cancelled',
+]);
+
 // --- Dashboards & KPIs (docs/11-dashboards.md, Sprint 16) --------------------
 
 export const kpiUnit = pgEnum('kpi_unit', [

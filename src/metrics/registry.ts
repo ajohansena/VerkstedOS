@@ -80,6 +80,10 @@ export const metricRegistry = {
     module: 'yard',
     calc: 'summarizeOccupancy',
   },
+  booking_date_validation: {
+    module: 'case',
+    calc: 'validateBookingDates',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

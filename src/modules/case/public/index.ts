@@ -13,6 +13,7 @@ export type {
   InsuranceCompany,
   CaseAssignment,
   CaseTransfer,
+  CaseBooking,
 } from '@/db/types';
 
 // Case intake & funding
@@ -65,3 +66,17 @@ export {
   type InitiateTransferInput,
   type InboundTransfer,
 } from '../application/services/transfers';
+
+// Bookings (D2)
+export {
+  createBooking,
+  confirmBooking,
+  markArrived,
+  cancelBooking,
+  findActiveBookingForCase,
+  listBookingsForCase,
+  listBookingsForWorkshopInRange,
+  BookingValidationError,
+  type CreateBookingInput,
+} from '../application/services/bookings';
+export { validateBookingDates } from '../application/calculations/bookings';

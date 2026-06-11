@@ -4,8 +4,10 @@ import { redirect } from 'next/navigation';
 
 import { getSessionContext } from '@/lib/auth/session';
 import {
+  createBooking,
   createCase,
   findCaseById,
+  validateBookingDates,
   validateFundingSet,
   type FundingSourceInput,
 } from '@/modules/case/public';
@@ -227,6 +229,19 @@ export interface CreateCaseFromWizardInput {
       };
   incidentTag?: string;
   fundingSources: FundingSourceInput[];
+  /**
+   * Optional arrival/promise commitments captured at intake. When provided,
+   * a `case_booking` row is created in the same orchestration so the new case
+   * shows up on the Production Planner immediately (doc 13 § 20.4).
+   * `workshopId` is REQUIRED when either date is set — booking is workshop-scoped.
+   */
+  booking?: {
+    workshopId: string;
+    expectedArrivalAt?: string; // ISO datetime
+    promisedDeliveryAt?: string; // ISO datetime
+    notes?: string;
+    confirmImmediately?: boolean;
+  };
 }
 
 export type CreateCaseFromWizardResult =
@@ -328,6 +343,26 @@ export async function createCaseFromWizardAction(
       return fs;
     });
 
+    // 3b. Validate booking dates EARLY so we don't half-create state.
+    if (input.booking) {
+      const arrival = input.booking.expectedArrivalAt
+        ? new Date(input.booking.expectedArrivalAt)
+        : null;
+      const delivery = input.booking.promisedDeliveryAt
+        ? new Date(input.booking.promisedDeliveryAt)
+        : null;
+      const dateProblems = validateBookingDates({
+        expectedArrivalAt: arrival,
+        promisedDeliveryAt: delivery,
+      });
+      if (dateProblems.length > 0) {
+        return {
+          ok: false,
+          message: `INVALID_BOOKING: ${dateProblems.join(' | ')}`,
+        };
+      }
+    }
+
     // 4. Case (multi-funding supported — `validateFundingSet` runs again inside
     //    `createCase` as a defense-in-depth check).
     const created = await createCase(session.context, {
@@ -336,6 +371,35 @@ export async function createCaseFromWizardAction(
       ...(input.incidentTag ? { incidentTag: input.incidentTag } : {}),
       fundingSources,
     });
+
+    // 5. Optional booking. The case-creation tx already committed; the booking
+    //    tx is independent (both are audited). If booking creation fails after
+    //    case creation, the case still exists — better than throwing away the
+    //    customer/vehicle work. The error message names the partial state.
+    if (input.booking) {
+      try {
+        await createBooking(session.context, {
+          caseId: created.id,
+          workshopId: input.booking.workshopId,
+          expectedArrivalAt: input.booking.expectedArrivalAt
+            ? new Date(input.booking.expectedArrivalAt)
+            : null,
+          promisedDeliveryAt: input.booking.promisedDeliveryAt
+            ? new Date(input.booking.promisedDeliveryAt)
+            : null,
+          ...(input.booking.notes ? { notes: input.booking.notes } : {}),
+          ...(input.booking.confirmImmediately
+            ? { confirmImmediately: true }
+            : {}),
+        });
+      } catch (bookingErr) {
+        console.error('createBooking failed after case create', bookingErr);
+        return {
+          ok: false,
+          message: `CASE_CREATED_BOOKING_FAILED: ${normalizeError(bookingErr)}. Sak ${created.caseNumber} ble opprettet, men booking feilet. Du kan opprette booking fra sak-siden.`,
+        };
+      }
+    }
 
     return { ok: true, caseId: created.id, caseNumber: created.caseNumber };
   } catch (err) {
