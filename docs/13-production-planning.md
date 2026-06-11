@@ -1089,10 +1089,11 @@ The intake flow must surface planning context **inline** — the same data the P
 
 **Binding rules:**
 
-- Capacity at intake is driven by the **existing planning engine** (doc 10 Capacity engine) and `ResourceAssignment` records — never a parallel "intake calendar" calculation.
-- Bookings created at intake are normal `ResourceAssignment` rows; they appear immediately in Day / Week / Resource modes (§ 2).
+- Capacity at intake is driven by the **existing planning engine** (doc 10 Capacity engine), `ResourceAssignment` records, and `WorkSegment` records — never a parallel "intake calendar" calculation.
+- Bookings created at intake are stored as `CaseBooking` rows (`case_bookings`), not as `ResourceAssignment` rows. A booking represents a customer-facing commitment ("the car will arrive on Tuesday at 09:00"); a `ResourceAssignment` represents an internally scheduled hand-off of a specific resource to a specific work segment. The two are distinct entities — see ADR-0011.
+- Even though `CaseBooking` and `ResourceAssignment` are distinct entities, the Planner presents them as **one continuous lifecycle**: a booking appears in the Day / Week views (§ 2) immediately upon creation in a **Booked** lane, and as production starts the same case continues to appear in the **In Progress** lane backed by its segments + assignments. Operators must not see a "gap" where a booked case disappears from the planner until segments are added — the unified read model (doc 10 `PlannerRow`) projects both states together.
 - The intake flow remains fast (doc 12 § 8 "under 90 seconds"); booking widgets are progressive — quick-book defaults, advanced controls behind a disclosure.
-- Permissions: intake booking requires both `case:edit` and `production:plan`. A receptionist without `production:plan` can capture customer-desired dates but cannot commit `ResourceAssignment` rows; a planner reviews and confirms (configurable per org).
+- Permissions: intake booking requires `case:edit` plus `case:book` (for the `CaseBooking` itself). Committing `ResourceAssignment` rows additionally requires `production:plan`. A receptionist with `case:book` but without `production:plan` can commit the customer-facing booking; a planner reviews and assigns resources (configurable per org).
 
 ### 20.5 — Tasks are schedulable directly from case intake & edit
 

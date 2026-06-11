@@ -179,11 +179,12 @@ as "spike — not for merge" to validate the analysis.
 
 The production domain is the heart of VerkstedOS. Protect these aggregates:
 
-- `ProductionOrder` — 1:1 with `Case`, survives transfers and pauses
+- `ProductionOrder` — 1:1 with `Case`, survives transfers and pauses. **Intrinsic to the Case**: created in the same transaction as the Case (`createCaseInTx` always creates the matching `ProductionOrder`); never deferred to a separate "promote case to production" step. A Case without a `ProductionOrder` is an inconsistent state.
 - `WorkSegment` — the planning unit; do not collapse into "tasks" or "tickets"
 - `Capacity` — computed from resources + calendars + assignments; never stored as a flat number
-- `Resource` — includes people, equipment, AND facilities. Equipment is not a derived concept.
+- `Resource` — includes people, equipment, AND facilities. Equipment is not a derived concept. **Person resources are intrinsic to Employees**: `createEmployeeInTx` always creates the matching `kind='person'` Resource in the same transaction (`ensurePersonResourceForEmployeeInTx`); an Employee without a person Resource cannot be assigned to work segments.
 - `ResourceAssignment` — explicit; conflicts surfaced, never silently overwritten
+- `CaseBooking` — customer-facing arrival commitment, distinct from `ResourceAssignment` (see ADR-0011). Both feed the unified `PlannerRow` read model so the planner shows one continuous lifecycle from booked → in-progress.
 - `CaseTransfer` / `CaseAssignment` — the multi-location spine; cases move, never get copied
 - `WorkflowEngine` — workflow states and transitions are DATA, configurable per org
 
@@ -193,8 +194,10 @@ You may NOT:
 - Make a Case workshop-scoped (it is org-scoped; current workshop is denormalized)
 - Skip the `case_funding_sources` model for "easy MVP" — multi-funding is core
 - Combine `WorkSegment` and `Task` into one concept
+- Combine `CaseBooking` and `ResourceAssignment` into one concept
 - Bypass `production_holds` and represent waiting via status strings only
 - Compute delivery dates inline in a component or page (must go through canonical `calculateDeliveryForecast`)
+- Create a `Case` without its `ProductionOrder` or an `Employee` without its person `Resource` in the same transaction
 
 ### 4.5 Single Source of Truth (SSoT)
 
