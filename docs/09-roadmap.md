@@ -605,27 +605,34 @@ The platform is ready to onboard paying chain customers.
 
 ---
 
-### Sprint 22 — Advanced capacity & delivery forecasting
+### Sprint 22 — Office tasks + task templates + planner-as-heart (D2 + D3) ✅ Delivered
 
-**Goal:** Forecasts are dramatically more accurate. Historical-variance learning operational.
+**Status:** ✅ Complete (2026-06-11) — see [sprint-reviews/sprint-22.md](sprint-reviews/sprint-22.md). The binding directive (D2 + D3) reframed Sprint 22 around doc 13 (Production Board v3: one engine, five visualizations) — the planner became the heart of the product. **Advanced capacity & delivery forecasting (the original Sprint 22 spec) is deferred** to Sprint 24 (performance + observability hardening) so the forecast model V2 can build on the now-live office-task signal.
 
-**Deliverables:**
-- Historical variance tracking per segment_code per workshop per technician
-- Forecast model V2: incorporates historical variance, applies confidence intervals more accurately
-- "Delay risk" categorization (low / medium / high) with explanations
-- Critical-path computation per case (which segments are on the critical path right now)
-- `delivery_forecast_history` exposed in UI for trust-building ("here's how our forecast evolved over time")
-- Customer-facing promised delivery vs internal forecast separation; configurable buffer
-- Automatic at-risk events (`delivery.commitment_at_risk`) with notification routing
-- Cure time profiles per paint type (configurable per org)
-- Paint booth slot scheduling improvements (cure-time-aware planning)
+**What shipped (D3 — three phases):**
 
-**Three Surfaces:**
-- User: forecast confidence is more nuanced; delay-risk badges meaningful; planning UI shows critical path
-- Admin: paint cure profiles, historical-variance feedback exposure, confidence-band tuning
-- Dev: forecast accuracy retrospective (predicted vs actual), historical variance tables, model debug
+- **Phase B — `office_tasks` entity** (migrations [0051](../migrations/0051_office_tasks_tables.sql) + [0052](../migrations/0052_office_tasks_rls.sql)) with the full lifecycle service (create / assign / start / complete / cancel), gated by `case:edit` / `admin:config` / `production:plan`. Six kinds: `customer_call`, `parts_followup`, `insurance_followup`, `rental_booking`, `invoice_prep`, `other`. **Excluded from capacity-engine calculations** (TakstKontroll preservation rule 4.7 — office work and shop floor work must remain cost-separable). Admin surface `/admin/office-tasks`; Dev cross-org inspector `/dev/office-tasks`. New SSoT metric: `open_office_tasks_for_case` (metric registry now 20).
+- **Phase E — planner integration (the heart):** Day View gains a **Kontor lane** (amber), Week View gains an **office row** with per-day count badges, **My Tasks** splits into "Today" / "Later" sections including office tasks. Case detail integrates an inline office-task form + per-row actions (start / complete / cancel). The planner now answers "what should I do next?" across both segments and office work in one surface — the doc 12 / doc 13 promise.
+- **Phase F — `task_templates` + Inngest generator** (migrations [0053](../migrations/0053_task_templates_tables.sql) + [0054](../migrations/0054_task_templates_rls.sql)). Event-driven template engine: an Inngest cron (every 5 min, 30-min lookback) walks the outbox and generates office tasks via `createOfficeTaskSystem`. Idempotency is enforced by the partial unique index `office_tasks_template_event_unique` — re-running the function over the same window is a no-op. Five default Norwegian templates seeded via `/admin/task-templates` (order parts, call customer day-before, prepare invoice, book rental, follow-up after delivery). Cross-org inspector + force-disable repair at `/dev/task-templates`. Reused `admin:config` permission (catalog still frozen at 24).
 
-**Demoable:** Forecast for a case starts at 0.9 confidence; supplement discovered drops it to 0.5; parts delay drops to 0.35; recovery actions bring back to 0.7; complete forecast history visible.
+**Also shipped (D2 cleanup follow-through):** removed the legacy `IntakeSearch` component, `quickIntakeAction` server action, and the `?legacy=1` escape hatch — the intake wizard is now the only intake path.
+
+**Three Surfaces (all phases):**
+- User: Day / Week / My Tasks lanes for office work; inline office-task management on case detail
+- Admin: `/admin/office-tasks` (kind/priority configuration), `/admin/task-templates` (template CRUD + seed-defaults button)
+- Dev: `/dev/office-tasks` (cross-org inspector), `/dev/task-templates` (cross-org inspector + force-disable repair via `recordPlatformAudit('data_repaired')`)
+
+**Architecture invariants preserved:**
+- `createOfficeTaskSystem` is a named bypass of the user permission gate (only callable from the template generator) — documented in JSDoc; not exported from the module's `public/` barrel
+- Audit tier: office-task lifecycle uses full-audit via the repository wrapper with mandatory `reason` on `cancelled`
+- Outbox events flow with the same transaction as mutations (no split-transaction event emission)
+- Permission catalog frozen at 24 (no new permissions introduced)
+
+**Gates:** typecheck / lint / depcruise (530 modules / 2711 deps), check:metrics (20), check:permissions (24), unit 139 / 139, integration 175 / 175 (incl. 5 office-tasks + 3 planner-office-tasks + 4 task-templates), `pnpm build` green. ADR [0010](./adrs/0010-office-tasks-and-task-templates.md) (first ADR).
+
+**Demoable (shipped):** Owner seeds the 5 default Norwegian templates at `/admin/task-templates`. A test outbox event `case.booking.confirmed` lands; within 5 minutes the Inngest cron generates "Ring kunde dagen før" + "Bestill deler" against that case; the planner shows them in Day View's Kontor lane and My Tasks "Today" section; replaying the same event creates no duplicates (unique index absorbs); `/dev/task-templates` force-disable hides a misbehaving template org-wide without code deploy.
+
+**Deferred to Sprint 24 (originally Sprint 22):** historical variance tracking per segment_code / workshop / technician, forecast model V2 with sharper confidence intervals, delay-risk categorization, critical-path computation, `delivery_forecast_history` UI, customer-promise vs internal-forecast separation, automatic `delivery.commitment_at_risk` events, paint cure profiles + cure-time-aware planning. Office-task signal (now flowing) feeds that model when it lands.
 
 ---
 

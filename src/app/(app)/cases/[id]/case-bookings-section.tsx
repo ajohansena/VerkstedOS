@@ -217,7 +217,9 @@ function ActiveBookingPanel({
             type="button"
             size="sm"
             disabled={pending}
-            onClick={() => onAction(markBookingArrivedAction(active.id, caseId))}
+            onClick={() =>
+              onAction(markBookingArrivedAction(active.id, caseId))
+            }
           >
             {labels.markArrived}
           </Button>
@@ -274,7 +276,9 @@ function CreateBookingForm({
   labels: BookingSectionLabels;
   pending: boolean;
   onSubmit: (
-    promise: Promise<{ ok: true; data: { bookingId: string } } | { ok: false; message: string }>,
+    promise: Promise<
+      { ok: true; data: { bookingId: string } } | { ok: false; message: string }
+    >,
   ) => void;
 }) {
   const [workshopId, setWorkshopId] = useState(workshops[0]?.id ?? '');
@@ -328,7 +332,7 @@ function CreateBookingForm({
         {replaceActive ? labels.replace : labels.create}
       </h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="sm:col-span-2 space-y-1">
+        <div className="space-y-1 sm:col-span-2">
           <label className="text-xs font-medium">{labels.workshop}</label>
           <select
             className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -358,11 +362,11 @@ function CreateBookingForm({
             onChange={(e) => setDelivery(e.target.value)}
           />
         </div>
-        <div className="sm:col-span-2 space-y-1">
+        <div className="space-y-1 sm:col-span-2">
           <label className="text-xs font-medium">{labels.notes}</label>
           <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
-        <label className="sm:col-span-2 flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm sm:col-span-2">
           <input
             type="checkbox"
             checked={confirmImmediately}
@@ -371,7 +375,7 @@ function CreateBookingForm({
           {labels.confirm}
         </label>
         {replaceActive ? (
-          <div className="sm:col-span-2 space-y-1">
+          <div className="space-y-1 sm:col-span-2">
             <label className="text-xs font-medium">{labels.cancelReason}</label>
             <Input
               value={replaceReason}

@@ -36,7 +36,10 @@ export const aiModelVersions = pgTable(
     ...lifecycleColumns,
   },
   (table) => [
-    uniqueIndex('ai_model_versions_key_version_uq').on(table.key, table.version),
+    uniqueIndex('ai_model_versions_key_version_uq').on(
+      table.key,
+      table.version,
+    ),
     index('ai_model_versions_status_idx').on(table.status),
   ],
 );

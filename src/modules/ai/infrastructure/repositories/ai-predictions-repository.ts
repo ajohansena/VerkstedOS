@@ -93,11 +93,15 @@ export async function insertPrediction(
         subjectId: input.subjectId,
         inputs: input.inputs as object,
         output: input.output as object,
-        ...(input.rationale !== undefined ? { rationale: input.rationale } : {}),
+        ...(input.rationale !== undefined
+          ? { rationale: input.rationale }
+          : {}),
         ...(input.confidence !== undefined && input.confidence !== null
           ? { confidence: String(input.confidence) }
           : {}),
-        ...(input.latencyMs !== undefined ? { latencyMs: input.latencyMs } : {}),
+        ...(input.latencyMs !== undefined
+          ? { latencyMs: input.latencyMs }
+          : {}),
         ...(input.costMicroUsd !== undefined
           ? { costMicroUsd: input.costMicroUsd }
           : {}),
@@ -162,7 +166,8 @@ export async function listPlatformPredictions(filter?: {
   const db = getRawClient({ as: 'platform-inspector' });
   const wheres = [isNull(aiPredictions.deletedAt)];
   if (filter?.kind) wheres.push(eq(aiPredictions.kind, filter.kind));
-  if (filter?.modelKey) wheres.push(eq(aiPredictions.modelKey, filter.modelKey));
+  if (filter?.modelKey)
+    wheres.push(eq(aiPredictions.modelKey, filter.modelKey));
   if (filter?.organizationId)
     wheres.push(eq(aiPredictions.organizationId, filter.organizationId));
   const rows = await db

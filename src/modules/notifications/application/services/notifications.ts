@@ -42,9 +42,7 @@ export function markMyNotificationRead(
   return markReadInfra(ctx, id);
 }
 
-export function markAllMyNotificationsRead(
-  ctx: RequestContext,
-): Promise<void> {
+export function markAllMyNotificationsRead(ctx: RequestContext): Promise<void> {
   return markAllReadInfra(ctx);
 }
 

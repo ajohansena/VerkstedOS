@@ -2,10 +2,7 @@
 
 import { useState, useTransition } from 'react';
 
-import {
-  createWorkshopAction,
-  updateOrgSettingsAction,
-} from './admin-actions';
+import { createWorkshopAction, updateOrgSettingsAction } from './admin-actions';
 
 interface Labels {
   organization: string;

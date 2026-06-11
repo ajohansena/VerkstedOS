@@ -57,9 +57,7 @@ export const generateOfficeTasksFromEvents = inngest.createFunction(
         };
         try {
           const db = getRawClient({ as: 'admin' });
-          const cutoff = new Date(
-            Date.now() - LOOKBACK_MINUTES * 60_000,
-          );
+          const cutoff = new Date(Date.now() - LOOKBACK_MINUTES * 60_000);
           const events = await db
             .select({
               id: outboxEvents.id,
@@ -101,10 +99,7 @@ export const generateOfficeTasksFromEvents = inngest.createFunction(
             duplicatesSkipped,
           };
         } catch (err) {
-          console.error(
-            `[office-task-gen] failed for ${organizationId}`,
-            err,
-          );
+          console.error(`[office-task-gen] failed for ${organizationId}`, err);
           return { eventsProcessed: 0, tasksCreated: 0, duplicatesSkipped: 0 };
         }
       });

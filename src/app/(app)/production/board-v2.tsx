@@ -127,9 +127,7 @@ export function BoardV2({
   }
 
   if (items.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">{labels.boardEmpty}</p>
-    );
+    return <p className="text-sm text-muted-foreground">{labels.boardEmpty}</p>;
   }
 
   return (
@@ -143,7 +141,7 @@ export function BoardV2({
         </div>
       ) : null}
       <div
-        className={`grid grid-flow-col auto-cols-[minmax(280px,1fr)] gap-3 overflow-x-auto pb-2 ${pending ? 'opacity-90' : ''}`}
+        className={`grid auto-cols-[minmax(280px,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2 ${pending ? 'opacity-90' : ''}`}
       >
         {columns.columns.map(({ state, items: colItems }) => (
           <Column
@@ -268,10 +266,7 @@ function BoardCard({
   const partsBadge =
     item.openPartsCount === 0
       ? labels.cardPartsOk
-      : labels.cardPartsWaiting.replace(
-          '{count}',
-          String(item.openPartsCount),
-        );
+      : labels.cardPartsWaiting.replace('{count}', String(item.openPartsCount));
   const openedLine = labels.cardOpenedDays.replace('{days}', String(ageDays));
   return (
     <li
@@ -300,7 +295,9 @@ function BoardCard({
                   : labels.cardRiskGreen
             }
           />
-          <span className="font-semibold tracking-tight">{item.caseNumber}</span>
+          <span className="font-semibold tracking-tight">
+            {item.caseNumber}
+          </span>
           {item.registrationNumber ? (
             <span className="ml-auto rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-wide">
               {item.registrationNumber}

@@ -93,8 +93,7 @@ export default async function DevTaskTemplatesPage({
                       <span className="font-mono text-xs text-muted-foreground">
                         {tpl.id.slice(0, 8)}
                       </span>{' '}
-                      · <span className="font-medium">{tpl.name}</span>{' '}
-                      ·{' '}
+                      · <span className="font-medium">{tpl.name}</span> ·{' '}
                       <span className="text-xs text-muted-foreground">
                         {tpl.triggerEventType} · {tpl.taskKind} ·{' '}
                         {tpl.dueOffsetMinutes}m / {tpl.dueReference} ·{' '}
@@ -108,11 +107,7 @@ export default async function DevTaskTemplatesPage({
                           name="organizationId"
                           value={org}
                         />
-                        <input
-                          type="hidden"
-                          name="templateId"
-                          value={tpl.id}
-                        />
+                        <input type="hidden" name="templateId" value={tpl.id} />
                         <button
                           type="submit"
                           className="rounded-md border px-2 py-1 text-xs"

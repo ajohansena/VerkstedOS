@@ -158,7 +158,11 @@ type CustomerSelection =
   | { kind: 'existing'; customerId: string; summary: string }
   | {
       kind: 'new';
-      customerKind: 'individual' | 'company' | 'leasing_company' | 'fleet_operator';
+      customerKind:
+        | 'individual'
+        | 'company'
+        | 'leasing_company'
+        | 'fleet_operator';
       name: string;
       primaryPhone?: string;
       primaryEmail?: string;
@@ -259,7 +263,14 @@ export function IntakeWizard({
       default:
         return false;
     }
-  }, [step, vehicle, customer, fundingSources, fundingProblems, bookingProblems]);
+  }, [
+    step,
+    vehicle,
+    customer,
+    fundingSources,
+    fundingProblems,
+    bookingProblems,
+  ]);
 
   if (createdCase) {
     return (
@@ -319,7 +330,9 @@ export function IntakeWizard({
                 ...(booking.promisedDeliveryAt
                   ? { promisedDeliveryAt: booking.promisedDeliveryAt }
                   : {}),
-                ...(booking.notes.trim() ? { notes: booking.notes.trim() } : {}),
+                ...(booking.notes.trim()
+                  ? { notes: booking.notes.trim() }
+                  : {}),
                 ...(booking.confirmImmediately
                   ? { confirmImmediately: true }
                   : {}),
@@ -342,7 +355,9 @@ export function IntakeWizard({
         // Network / unexpected runtime failures only — the action itself never
         // throws (returns a tagged union). Fall back to a generic message.
         setSubmitError(
-          err instanceof Error && err.message ? err.message : labels.reviewError,
+          err instanceof Error && err.message
+            ? err.message
+            : labels.reviewError,
         );
       }
     });
@@ -425,7 +440,9 @@ export function IntakeWizard({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setStep((s) => (s > 0 ? ((s - 1) as StepIndex) : s))}
+              onClick={() =>
+                setStep((s) => (s > 0 ? ((s - 1) as StepIndex) : s))
+              }
               disabled={submitting}
             >
               {labels.previous}
@@ -436,7 +453,7 @@ export function IntakeWizard({
           {step < 4 ? (
             <Button
               type="button"
-              onClick={() => setStep((s) => ((s + 1) as StepIndex))}
+              onClick={() => setStep((s) => (s + 1) as StepIndex)}
               disabled={!canAdvance}
             >
               {labels.next}
@@ -582,7 +599,8 @@ function VehicleStep({
                     onSelect({
                       kind: 'existing',
                       vehicleId: v.id,
-                      summary: `${v.registrationNumber ?? ''} ${[v.make, v.model].filter(Boolean).join(' ')}`.trim(),
+                      summary:
+                        `${v.registrationNumber ?? ''} ${[v.make, v.model].filter(Boolean).join(' ')}`.trim(),
                       ownerCustomerId: v.ownerCustomerId,
                     })
                   }
@@ -686,7 +704,7 @@ function VehicleStep({
             placeholder={labels.vehicleVin}
             value={manual.vin}
             onChange={(e) => setManual({ ...manual, vin: e.target.value })}
-            className="sm:col-span-2 font-mono"
+            className="font-mono sm:col-span-2"
           />
           <Button
             type="button"
@@ -871,7 +889,9 @@ function CustomerStep({
         </div>
       ) : null}
 
-      {phone1881 && !phone1881.found && phone1881.source === 'not_configured' ? (
+      {phone1881 &&
+      !phone1881.found &&
+      phone1881.source === 'not_configured' ? (
         <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
           {labels.customerNotConfigured}
         </p>
@@ -1269,7 +1289,8 @@ function BookingSection({
   // (the action will simply not create a booking).
   if (workshops.length === 0) return null;
 
-  const update = (patch: Partial<BookingDraft>) => onChange({ ...value, ...patch });
+  const update = (patch: Partial<BookingDraft>) =>
+    onChange({ ...value, ...patch });
 
   return (
     <section className="space-y-3 rounded-md border p-4">
@@ -1290,8 +1311,10 @@ function BookingSection({
 
       {value.skip ? null : (
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="sm:col-span-2 space-y-1">
-            <label className="text-xs font-medium">{labels.bookingWorkshop}</label>
+          <div className="space-y-1 sm:col-span-2">
+            <label className="text-xs font-medium">
+              {labels.bookingWorkshop}
+            </label>
             <select
               className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               value={value.workshopId}
@@ -1326,7 +1349,7 @@ function BookingSection({
               onChange={(e) => update({ promisedDeliveryAt: e.target.value })}
             />
           </div>
-          <div className="sm:col-span-2 space-y-1">
+          <div className="space-y-1 sm:col-span-2">
             <label className="text-xs font-medium" htmlFor="booking-notes">
               {labels.bookingNotes}
             </label>
@@ -1336,7 +1359,7 @@ function BookingSection({
               onChange={(e) => update({ notes: e.target.value })}
             />
           </div>
-          <label className="sm:col-span-2 flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-sm sm:col-span-2">
             <input
               type="checkbox"
               checked={value.confirmImmediately}
@@ -1345,7 +1368,7 @@ function BookingSection({
             {labels.bookingConfirm}
           </label>
           {problems.length > 0 ? (
-            <ul className="sm:col-span-2 space-y-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <ul className="space-y-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 sm:col-span-2">
               {problems.map((p, i) => (
                 <li key={i}>• {p}</li>
               ))}
@@ -1411,9 +1434,11 @@ function blankFunding(
 function summarizeVehicleSelection(s: VehicleSelection): string {
   if (s.kind === 'existing') return s.summary || s.vehicleId;
   if (s.kind === 'new') {
-    return [s.registrationNumber, s.make, s.model, s.year]
-      .filter(Boolean)
-      .join(' ') || '—';
+    return (
+      [s.registrationNumber, s.make, s.model, s.year]
+        .filter(Boolean)
+        .join(' ') || '—'
+    );
   }
   return '—';
 }
@@ -1423,7 +1448,8 @@ function summarizeCustomerSelection(
   labels: WizardLabels,
 ): string {
   if (s.kind === 'existing') return s.summary;
-  if (s.kind === 'new') return `${s.name}${s.primaryPhone ? ` · ${s.primaryPhone}` : ''}`;
+  if (s.kind === 'new')
+    return `${s.name}${s.primaryPhone ? ` · ${s.primaryPhone}` : ''}`;
   if (s.kind === 'none') return labels.customerNone;
   return '—';
 }

@@ -5,7 +5,10 @@ import { AppSidebar } from '@/components/app-shell/sidebar';
 import { AppTopbar } from '@/components/app-shell/topbar';
 import { getSessionContext } from '@/lib/auth/session';
 import { getDictionary, resolveLocale } from '@/lib/i18n';
-import { getCurrentOrganization, listWorkshops } from '@/modules/identity/public';
+import {
+  getCurrentOrganization,
+  listWorkshops,
+} from '@/modules/identity/public';
 import { listRecentCases } from '@/modules/case/public';
 import { getMyUnreadCount } from '@/modules/notifications/public';
 

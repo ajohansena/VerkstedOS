@@ -9,7 +9,10 @@ import { validateBookingDates } from './bookings';
 describe('validateBookingDates', () => {
   it('returns no problems when both dates are null', () => {
     expect(
-      validateBookingDates({ expectedArrivalAt: null, promisedDeliveryAt: null }),
+      validateBookingDates({
+        expectedArrivalAt: null,
+        promisedDeliveryAt: null,
+      }),
     ).toEqual([]);
   });
 

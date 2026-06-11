@@ -5,7 +5,12 @@ import { deriveLocationStatus, summarizeOccupancy } from './occupancy';
 describe('summarizeOccupancy', () => {
   it('returns zero utilization for an empty layout', () => {
     const summary = summarizeOccupancy([]);
-    expect(summary).toEqual({ capacity: 0, occupied: 0, utilization: 0, free: 0 });
+    expect(summary).toEqual({
+      capacity: 0,
+      occupied: 0,
+      utilization: 0,
+      free: 0,
+    });
   });
 
   it('aggregates capacity and occupancy across lines', () => {
@@ -32,9 +37,9 @@ describe('deriveLocationStatus', () => {
     expect(
       deriveLocationStatus({ capacity: 1, occupied: 0 }, true, false),
     ).toBe('blocked');
-    expect(
-      deriveLocationStatus({ capacity: 1, occupied: 1 }, true, true),
-    ).toBe('blocked');
+    expect(deriveLocationStatus({ capacity: 1, occupied: 1 }, true, true)).toBe(
+      'blocked',
+    );
   });
 
   it('occupied wins over reserved when capacity is filled', () => {

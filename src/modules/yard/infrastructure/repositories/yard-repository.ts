@@ -201,9 +201,7 @@ export async function upsertActivePlacement(
   });
 }
 
-export async function listActivePlacementsForOrg(
-  ctx: RequestContext,
-): Promise<
+export async function listActivePlacementsForOrg(ctx: RequestContext): Promise<
   Array<{
     placement: VehiclePlacement;
     locationCode: string;
@@ -222,7 +220,10 @@ export async function listActivePlacementsForOrg(
         registrationNumber: vehicles.registrationNumber,
       })
       .from(vehiclePlacements)
-      .innerJoin(yardLocations, eq(yardLocations.id, vehiclePlacements.locationId))
+      .innerJoin(
+        yardLocations,
+        eq(yardLocations.id, vehiclePlacements.locationId),
+      )
       .innerJoin(cases, eq(cases.id, vehiclePlacements.caseId))
       .leftJoin(vehicles, eq(vehicles.id, cases.vehicleId))
       .where(

@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache';
 
 import { getSessionContext } from '@/lib/auth/session';
-import { moveVehicleByQrTag, moveVehicleToLocation } from '@/modules/yard/public';
+import {
+  moveVehicleByQrTag,
+  moveVehicleToLocation,
+} from '@/modules/yard/public';
 
 type MoveReason =
   | 'arrival'

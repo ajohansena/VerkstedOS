@@ -112,8 +112,8 @@ export async function createTaskTemplate(
         workshopId: input.workshopId ?? null,
         name,
         triggerEventType: trigger,
-        triggerEventFilter:
-          (input.triggerEventFilter ?? null) as unknown as never,
+        triggerEventFilter: (input.triggerEventFilter ??
+          null) as unknown as never,
         taskKind: input.taskKind,
         taskTitleTemplate: titleTpl,
         taskDescriptionTemplate: input.taskDescriptionTemplate ?? null,
@@ -349,9 +349,10 @@ export async function evaluateAndGenerate(
   );
 
   for (const template of templates) {
-    const filter = template.triggerEventFilter as
-      | Record<string, unknown>
-      | null;
+    const filter = template.triggerEventFilter as Record<
+      string,
+      unknown
+    > | null;
     if (!matchesFilter(filter, event.payload)) continue;
 
     const refTime = resolveReferenceTime(

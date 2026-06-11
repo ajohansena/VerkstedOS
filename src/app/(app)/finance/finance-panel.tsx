@@ -155,8 +155,12 @@ export function FinancePanel({
                 <th className="px-4 py-2 font-medium">{labels.basisNumber}</th>
                 <th className="px-4 py-2 font-medium">{labels.payer}</th>
                 <th className="px-4 py-2 font-medium">{labels.kind}</th>
-                <th className="px-4 py-2 text-right font-medium">{labels.net}</th>
-                <th className="px-4 py-2 text-right font-medium">{labels.vat}</th>
+                <th className="px-4 py-2 text-right font-medium">
+                  {labels.net}
+                </th>
+                <th className="px-4 py-2 text-right font-medium">
+                  {labels.vat}
+                </th>
                 <th className="px-4 py-2 text-right font-medium">
                   {labels.gross}
                 </th>

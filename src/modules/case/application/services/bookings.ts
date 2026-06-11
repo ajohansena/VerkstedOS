@@ -340,9 +340,7 @@ export async function findActiveBookingForCase(
   ctx: RequestContext,
   caseId: string,
 ): Promise<CaseBooking | null> {
-  return withTransaction(ctx, async (tx) =>
-    loadActiveBooking(tx, ctx, caseId),
-  );
+  return withTransaction(ctx, async (tx) => loadActiveBooking(tx, ctx, caseId));
 }
 
 /** Full booking history for a case (newest first). */

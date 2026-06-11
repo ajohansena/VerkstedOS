@@ -103,7 +103,9 @@ export default async function DevNotificationsPage({
                   <tbody className="divide-y">
                     {rules.map((r) => (
                       <tr key={r.id}>
-                        <td className="px-2 py-1 font-mono text-xs">{r.code}</td>
+                        <td className="px-2 py-1 font-mono text-xs">
+                          {r.code}
+                        </td>
                         <td className="px-2 py-1">{r.category}</td>
                         <td className="px-2 py-1">{r.severity}</td>
                         <td className="px-2 py-1">{r.enabled ? '✓' : '—'}</td>
@@ -139,14 +141,19 @@ export default async function DevNotificationsPage({
                     {notifications.map((n) => (
                       <tr key={n.id}>
                         <td className="whitespace-nowrap px-2 py-1 font-mono text-xs">
-                          {n.createdAt.toISOString().replace('T', ' ').slice(0, 16)}
+                          {n.createdAt
+                            .toISOString()
+                            .replace('T', ' ')
+                            .slice(0, 16)}
                         </td>
                         <td className="px-2 py-1 font-mono text-xs">
                           {n.ruleCode}
                         </td>
                         <td className="px-2 py-1">{n.severity}</td>
                         <td className="px-2 py-1">{n.status}</td>
-                        <td className="px-2 py-1 max-w-md truncate">{n.body}</td>
+                        <td className="max-w-md truncate px-2 py-1">
+                          {n.body}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -187,7 +194,7 @@ export default async function DevNotificationsPage({
                         </td>
                         <td className="px-2 py-1">{d.channel}</td>
                         <td className="px-2 py-1">{d.status}</td>
-                        <td className="px-2 py-1 max-w-md truncate text-rose-600">
+                        <td className="max-w-md truncate px-2 py-1 text-rose-600">
                           {d.errorMessage ?? '—'}
                         </td>
                       </tr>

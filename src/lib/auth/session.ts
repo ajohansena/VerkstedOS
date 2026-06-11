@@ -29,7 +29,11 @@ export interface SessionContext {
 export async function getSessionContext(): Promise<SessionContext | null> {
   // ── TEMPORARY DEV-ONLY BYPASS (see src/lib/auth/dev-auto-login.ts) ────────
   const devUser = await getDevAutoLoginUser();
-  let authUser: { id: string; email: string; user_metadata: Record<string, unknown> } | null = null;
+  let authUser: {
+    id: string;
+    email: string;
+    user_metadata: Record<string, unknown>;
+  } | null = null;
 
   if (devUser) {
     authUser = {

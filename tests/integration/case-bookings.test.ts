@@ -245,7 +245,8 @@ describe('case bookings (D2)', () => {
     expect(inA.length).toBeGreaterThanOrEqual(1);
 
     // Trying to read org A's case as org B must return empty (or throw — both acceptable).
-    let inBForA: Awaited<ReturnType<typeof caseModule.listBookingsForCase>> = [];
+    let inBForA: Awaited<ReturnType<typeof caseModule.listBookingsForCase>> =
+      [];
     try {
       inBForA = await caseModule.listBookingsForCase(ctxB(), caseAId);
     } catch {

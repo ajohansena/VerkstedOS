@@ -38,9 +38,13 @@ export default async function BookingPolicyAdminPage() {
   const t = getDictionary(locale);
 
   const settings = (organization?.settings ?? {}) as Record<string, unknown>;
-  const policy = (settings['bookingPolicy'] as
-    | { defaultBookingWindowDays?: number; overbookingTolerancePercent?: number }
-    | undefined) ?? {};
+  const policy =
+    (settings['bookingPolicy'] as
+      | {
+          defaultBookingWindowDays?: number;
+          overbookingTolerancePercent?: number;
+        }
+      | undefined) ?? {};
   const defaultWindow = policy.defaultBookingWindowDays ?? 14;
   const tolerance = policy.overbookingTolerancePercent ?? 0;
 

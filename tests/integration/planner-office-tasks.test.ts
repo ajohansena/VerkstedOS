@@ -119,7 +119,8 @@ describe('planner office tasks (D3 Phase E)', () => {
     startOfToday.setHours(0, 0, 0, 0);
     const endOfToday = new Date(startOfToday.getTime() + 24 * 3600_000);
     const todayLane = open.filter(
-      (t) => t.dueAt !== null && t.dueAt < endOfToday && t.dueAt >= startOfToday,
+      (t) =>
+        t.dueAt !== null && t.dueAt < endOfToday && t.dueAt >= startOfToday,
     );
     expect(todayLane.length).toBeGreaterThanOrEqual(2);
   });

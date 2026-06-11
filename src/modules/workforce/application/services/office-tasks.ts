@@ -92,10 +92,7 @@ export async function createOfficeTaskSystem(
   assertSingleAssignee(input);
   const title = input.title.trim();
   if (!title) {
-    throw new OfficeTaskValidationError(
-      'EMPTY_TITLE',
-      'Tittel er påkrevd.',
-    );
+    throw new OfficeTaskValidationError('EMPTY_TITLE', 'Tittel er påkrevd.');
   }
   return insertOfficeTaskInTx(ctx, input, title);
 }
@@ -113,10 +110,7 @@ export async function createOfficeTask(
   assertSingleAssignee(input);
   const title = input.title.trim();
   if (!title) {
-    throw new OfficeTaskValidationError(
-      'EMPTY_TITLE',
-      'Tittel er påkrevd.',
-    );
+    throw new OfficeTaskValidationError('EMPTY_TITLE', 'Tittel er påkrevd.');
   }
   return insertOfficeTaskInTx(ctx, input, title);
 }

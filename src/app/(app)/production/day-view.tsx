@@ -56,7 +56,10 @@ export function DayView({
     );
   }
 
-  const byResource = new Map<string, { name: string; kind: string; rows: DayRow[] }>();
+  const byResource = new Map<
+    string,
+    { name: string; kind: string; rows: DayRow[] }
+  >();
   for (const r of rows) {
     const entry = byResource.get(r.resourceId);
     if (entry) {

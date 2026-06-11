@@ -115,9 +115,9 @@ describe('absence approval', () => {
       startsAt: new Date('2026-08-15T08:00:00Z'),
       endsAt: new Date('2026-08-15T16:00:00Z'),
     });
-    await expect(
-      workforce.declineAbsence(ctx(), req.id, ''),
-    ).rejects.toThrow('ABSENCE_DECLINE_REASON_REQUIRED');
+    await expect(workforce.declineAbsence(ctx(), req.id, '')).rejects.toThrow(
+      'ABSENCE_DECLINE_REASON_REQUIRED',
+    );
     const declined = await workforce.declineAbsence(
       ctx(),
       req.id,

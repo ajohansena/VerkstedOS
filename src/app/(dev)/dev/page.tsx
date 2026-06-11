@@ -182,7 +182,8 @@ const INSPECTION_SURFACES: readonly SurfaceLink[] = [
   {
     href: '/dev/office-tasks',
     title: 'Office tasks',
-    description: 'Office tasks per org and force-cancel for bad template waves.',
+    description:
+      'Office tasks per org and force-cancel for bad template waves.',
   },
   {
     href: '/dev/task-templates',
@@ -211,8 +212,7 @@ const CONTROL_SURFACES: readonly SurfaceLink[] = [
   {
     href: '/dev/two-person',
     title: 'Two-person approval queue',
-    description:
-      'Dangerous platform operations awaiting approval / execution.',
+    description: 'Dangerous platform operations awaiting approval / execution.',
   },
   {
     href: '/dev/feature-flags',

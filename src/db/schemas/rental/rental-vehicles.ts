@@ -28,7 +28,9 @@ export const rentalVehicles = pgTable(
     workshopId: uuid('workshop_id').references(() => workshops.id, {
       onDelete: 'set null',
     }),
-    registrationNumber: varchar('registration_number', { length: 16 }).notNull(),
+    registrationNumber: varchar('registration_number', {
+      length: 16,
+    }).notNull(),
     make: varchar('make', { length: 64 }),
     model: varchar('model', { length: 64 }),
     /** Daily rental rate in NOK (numeric(12,2)). */

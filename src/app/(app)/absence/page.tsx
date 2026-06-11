@@ -69,9 +69,7 @@ export default async function AbsencePage() {
         <h1 className="text-2xl font-semibold tracking-tight">
           {t.absence.title}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {t.absence.description}
-        </p>
+        <p className="text-sm text-muted-foreground">{t.absence.description}</p>
       </header>
 
       <section className="rounded-lg border bg-background p-4">
@@ -80,7 +78,10 @@ export default async function AbsencePage() {
         </h2>
         <AbsenceRequestForm
           action={submitAbsenceRequest}
-          employees={employees.map((e) => ({ id: e.id, displayName: e.fullName }))}
+          employees={employees.map((e) => ({
+            id: e.id,
+            displayName: e.fullName,
+          }))}
           types={types.map((tt) => ({ id: tt.id, label: tt.label }))}
           labels={{
             employee: t.absence.requestEmployee,
@@ -110,9 +111,15 @@ export default async function AbsencePage() {
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted-foreground">
               <tr>
-                <th className="px-4 py-2 font-medium">{t.absence.requestEmployee}</th>
-                <th className="px-4 py-2 font-medium">{t.absence.requestStart}</th>
-                <th className="px-4 py-2 font-medium">{t.absence.requestEnd}</th>
+                <th className="px-4 py-2 font-medium">
+                  {t.absence.requestEmployee}
+                </th>
+                <th className="px-4 py-2 font-medium">
+                  {t.absence.requestStart}
+                </th>
+                <th className="px-4 py-2 font-medium">
+                  {t.absence.requestEnd}
+                </th>
                 <th className="px-4 py-2 font-medium">Status</th>
                 <th className="px-4 py-2"></th>
               </tr>
@@ -121,11 +128,16 @@ export default async function AbsencePage() {
               {absences.map((a) => (
                 <tr key={a.entry.id}>
                   <td className="px-4 py-2">{a.employeeName}</td>
-                  <td className="px-4 py-2 font-mono text-xs">{fmtDate(a.entry.startsAt)}</td>
-                  <td className="px-4 py-2 font-mono text-xs">{fmtDate(a.entry.endsAt)}</td>
+                  <td className="px-4 py-2 font-mono text-xs">
+                    {fmtDate(a.entry.startsAt)}
+                  </td>
+                  <td className="px-4 py-2 font-mono text-xs">
+                    {fmtDate(a.entry.endsAt)}
+                  </td>
                   <td className="px-4 py-2">{statusLabel(a.entry.status)}</td>
                   <td className="px-4 py-2 text-right">
-                    {a.entry.status === 'requested' || a.entry.status === 'approved' ? (
+                    {a.entry.status === 'requested' ||
+                    a.entry.status === 'approved' ? (
                       <form action={cancelAbsenceAction}>
                         <input type="hidden" name="id" value={a.entry.id} />
                         <button

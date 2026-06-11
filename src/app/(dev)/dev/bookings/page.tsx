@@ -102,9 +102,7 @@ export default async function DevBookingsPage({
                         <span className="font-mono text-xs text-muted-foreground">
                           {b.caseId.slice(0, 8)}
                         </span>{' '}
-                        ·{' '}
-                        <span className="font-medium">{b.status}</span>{' '}
-                        ·{' '}
+                        · <span className="font-medium">{b.status}</span> ·{' '}
                         <span className="text-xs text-muted-foreground">
                           arr {b.expectedArrivalAt?.toISOString() ?? '—'} → del{' '}
                           {b.promisedDeliveryAt?.toISOString() ?? '—'}

@@ -104,7 +104,9 @@ export default async function WorkshopOwnerDashboardPage() {
         {/* Finance */}
         <section className="rounded-lg border bg-background p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">{t.dashboard.financeTitle}</h2>
+            <h2 className="text-sm font-semibold">
+              {t.dashboard.financeTitle}
+            </h2>
             <Link
               href="/finance"
               className="text-xs text-primary hover:underline"

@@ -114,7 +114,7 @@ export function BookFromIntakeBanner({
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="sm:col-span-2 space-y-1">
+        <div className="space-y-1 sm:col-span-2">
           <label className="text-xs font-medium text-blue-900">
             {labels.workshop}
           </label>
@@ -150,13 +150,13 @@ export function BookFromIntakeBanner({
             onChange={(e) => setDelivery(e.target.value)}
           />
         </div>
-        <div className="sm:col-span-2 space-y-1">
+        <div className="space-y-1 sm:col-span-2">
           <label className="text-xs font-medium text-blue-900">
             {labels.notes}
           </label>
           <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
-        <label className="sm:col-span-2 flex items-center gap-2 text-sm text-blue-900">
+        <label className="flex items-center gap-2 text-sm text-blue-900 sm:col-span-2">
           <input
             type="checkbox"
             checked={confirmImmediately}

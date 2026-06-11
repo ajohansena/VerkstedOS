@@ -110,15 +110,15 @@ export function CaseOfficeTaskForm({
           <select
             id="office-task-kind"
             value={kind}
-            onChange={(e) =>
-              setKind(e.target.value as typeof kind)
-            }
+            onChange={(e) => setKind(e.target.value as typeof kind)}
             disabled={pending}
             className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
           >
             <option value="order_parts">{labels.kindOrderParts}</option>
             <option value="customer_call">{labels.kindCustomerCall}</option>
-            <option value="insurer_followup">{labels.kindInsurerFollowup}</option>
+            <option value="insurer_followup">
+              {labels.kindInsurerFollowup}
+            </option>
             <option value="rental_booking">{labels.kindRentalBooking}</option>
             <option value="invoice_prep">{labels.kindInvoicePrep}</option>
             <option value="customer_followup">
@@ -138,9 +138,7 @@ export function CaseOfficeTaskForm({
           <select
             id="office-task-priority"
             value={priority}
-            onChange={(e) =>
-              setPriority(e.target.value as typeof priority)
-            }
+            onChange={(e) => setPriority(e.target.value as typeof priority)}
             disabled={pending}
             className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
           >
@@ -176,9 +174,7 @@ export function CaseOfficeTaskForm({
           </Button>
         </div>
       </div>
-      {error ? (
-        <p className="mt-2 text-xs text-red-600">{error}</p>
-      ) : null}
+      {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
     </div>
   );
 }

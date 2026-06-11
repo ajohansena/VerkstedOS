@@ -125,9 +125,7 @@ export async function listDeliveryAtRiskFacts(
         caseId: r.caseId,
         caseNumber: r.caseNumber,
         workshopId: r.workshopId,
-        promisedAt: new Date(
-          r.openedAt.getTime() + NORMAL_REPAIR_DAYS * DAY,
-        ),
+        promisedAt: new Date(r.openedAt.getTime() + NORMAL_REPAIR_DAYS * DAY),
         forecastAt: now,
         recipientUserIds: recipients,
       }));
@@ -173,14 +171,18 @@ export async function listSupplementPendingFacts(
         AND ei.deleted_at IS NULL
         AND c.deleted_at IS NULL
     `);
-    const list = Array.isArray(rows) ? rows : (rows as { rows?: typeof rows }).rows ?? [];
-    return (list as readonly {
-      case_id: string;
-      case_number: string;
-      current_workshop_id: string | null;
-      supplement_id: string;
-      raised_at: Date;
-    }[]).map((r) => ({
+    const list = Array.isArray(rows)
+      ? rows
+      : ((rows as { rows?: typeof rows }).rows ?? []);
+    return (
+      list as readonly {
+        case_id: string;
+        case_number: string;
+        current_workshop_id: string | null;
+        supplement_id: string;
+        raised_at: Date;
+      }[]
+    ).map((r) => ({
       caseId: r.case_id,
       caseNumber: r.case_number,
       workshopId: r.current_workshop_id,

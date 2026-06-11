@@ -95,9 +95,7 @@ export function CaseOfficeTaskRowActions({
           </Button>
         </div>
       ) : null}
-      {error ? (
-        <p className="text-xs text-red-600">{error}</p>
-      ) : null}
+      {error ? <p className="text-xs text-red-600">{error}</p> : null}
     </div>
   );
 }

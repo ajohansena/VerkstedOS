@@ -1,4 +1,7 @@
-import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js';
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+} from '@supabase/supabase-js';
 
 /**
  * Service-role Supabase client (Sprint 20 — Platform Maturity).
@@ -17,7 +20,8 @@ let cached: SupabaseClient | null = null;
 
 export function isAdminConfigured(): boolean {
   return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
   );
 }
 
@@ -59,7 +63,10 @@ export async function inviteAuthUser(input: {
   const email = input.email.trim().toLowerCase();
 
   // Look up existing user first (inviteUserByEmail errors with 422 if already exists).
-  const { data: existing } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+  const { data: existing } = await admin.auth.admin.listUsers({
+    page: 1,
+    perPage: 200,
+  });
   const found = existing?.users.find((u) => u.email?.toLowerCase() === email);
   if (found) {
     return { userId: found.id, email, emailSent: false };

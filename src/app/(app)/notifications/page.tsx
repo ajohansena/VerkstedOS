@@ -25,8 +25,8 @@ export default async function NotificationsPage() {
   const items = await listMyNotifications(session.context, { limit: 100 });
   const titleFor = (code: string | null): string => {
     if (!code) return t.notifications.titleOther;
-    const key = `title${code.charAt(0).toUpperCase()}${code.slice(1)}` as
-      | keyof typeof t.notifications;
+    const key =
+      `title${code.charAt(0).toUpperCase()}${code.slice(1)}` as keyof typeof t.notifications;
     const val = t.notifications[key];
     return typeof val === 'string' ? val : t.notifications.titleOther;
   };

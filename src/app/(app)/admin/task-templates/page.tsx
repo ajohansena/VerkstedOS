@@ -43,9 +43,7 @@ export default async function TaskTemplatesAdminPage() {
       </header>
 
       <section className="space-y-3 rounded-lg border bg-background p-4">
-        <h2 className="text-sm font-semibold">
-          {t.taskTemplate.seedHeading}
-        </h2>
+        <h2 className="text-sm font-semibold">{t.taskTemplate.seedHeading}</h2>
         <p className="text-sm text-muted-foreground">
           {t.taskTemplate.seedHelp}
         </p>
@@ -110,8 +108,7 @@ export default async function TaskTemplatesAdminPage() {
                     </td>
                     <td className="py-2 pr-4">{template.taskKind}</td>
                     <td className="py-2 pr-4 text-xs">
-                      {template.dueOffsetMinutes} min ·{' '}
-                      {template.dueReference}
+                      {template.dueOffsetMinutes} min · {template.dueReference}
                     </td>
                     <td className="py-2 pr-4">
                       {template.isActive

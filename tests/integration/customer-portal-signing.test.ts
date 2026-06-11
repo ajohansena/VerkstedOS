@@ -125,7 +125,9 @@ describe('customer portal signing', () => {
     expect(bogus.reason).toBe('token_invalid');
 
     // Issue + revoke + try.
-    const otherCase = await caseModule.createCase(ctx(), { fundingSources: [] });
+    const otherCase = await caseModule.createCase(ctx(), {
+      fundingSources: [],
+    });
     const t = await notifications.issuePortalToken(ctx(), {
       caseId: otherCase.id,
       scope: 'case_acceptance',

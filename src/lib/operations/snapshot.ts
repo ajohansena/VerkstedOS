@@ -25,12 +25,7 @@ import { caseAgeDays, classifyCaseRisk, NORMAL_REPAIR_DAYS } from './risk';
  * that already import from the composer.
  */
 
-export {
-  NORMAL_REPAIR_DAYS,
-  caseAgeDays,
-  classifyCaseRisk,
-} from './risk';
-
+export { NORMAL_REPAIR_DAYS, caseAgeDays, classifyCaseRisk } from './risk';
 
 export interface OpsAttentionItem {
   readonly id: string;

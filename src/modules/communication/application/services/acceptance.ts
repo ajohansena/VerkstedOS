@@ -268,7 +268,11 @@ async function applyDecision(
         input.decision === 'accepted'
           ? 'communication.acceptance.accepted'
           : 'communication.acceptance.declined',
-      payload: { caseId: updatedRow.caseId, acceptanceId, method: input.method },
+      payload: {
+        caseId: updatedRow.caseId,
+        acceptanceId,
+        method: input.method,
+      },
     });
 
     return updatedRow;

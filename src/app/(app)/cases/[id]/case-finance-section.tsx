@@ -86,7 +86,10 @@ export function CaseFinanceSection({
     return labels.statusDraft;
   }
 
-  function run(action: (fd: FormData) => Promise<{ ok: boolean; error?: string }>, fd: FormData) {
+  function run(
+    action: (fd: FormData) => Promise<{ ok: boolean; error?: string }>,
+    fd: FormData,
+  ) {
     setError(null);
     startTransition(async () => {
       const res = await action(fd);

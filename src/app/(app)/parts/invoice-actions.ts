@@ -37,9 +37,7 @@ export async function createSupplierInvoiceAction(
       invoiceNumber,
       invoiceDate: new Date(invoiceDateRaw),
       ...(dueRaw ? { dueDate: new Date(dueRaw) } : {}),
-      ...(formData.get('note')
-        ? { note: String(formData.get('note')) }
-        : {}),
+      ...(formData.get('note') ? { note: String(formData.get('note')) } : {}),
     });
     revalidatePath('/parts');
     return { ok: true, id: invoice.id };

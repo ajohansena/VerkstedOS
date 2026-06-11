@@ -11,12 +11,13 @@ import {
 } from '@/components/ui/card';
 import { getAuthorizedSession } from '@/lib/auth/authorize';
 import { cn } from '@/lib/utils';
-import { listOrgMembers, listRoles, listWorkshops } from '@/modules/identity/public';
-
 import {
-  deactivateMemberAction,
-  reactivateMemberAction,
-} from './actions';
+  listOrgMembers,
+  listRoles,
+  listWorkshops,
+} from '@/modules/identity/public';
+
+import { deactivateMemberAction, reactivateMemberAction } from './actions';
 import InviteEmployeeForm from './invite-form';
 
 export const dynamic = 'force-dynamic';

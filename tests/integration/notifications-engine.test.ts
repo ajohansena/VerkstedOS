@@ -106,8 +106,7 @@ describe('notifications engine', () => {
       limit: 50,
     });
     const partsHit = inbox.find(
-      (n) =>
-        n.ruleCode === 'parts_delay' && n.refId === requirement.id,
+      (n) => n.ruleCode === 'parts_delay' && n.refId === requirement.id,
     );
     expect(partsHit).toBeDefined();
     expect(partsHit?.severity).toBe('warning');
@@ -117,7 +116,9 @@ describe('notifications engine', () => {
     const before = await notifications.listMyNotifications(ctx(), {
       limit: 100,
     });
-    const beforeCount = before.filter((n) => n.ruleCode === 'parts_delay').length;
+    const beforeCount = before.filter(
+      (n) => n.ruleCode === 'parts_delay',
+    ).length;
 
     await notifications.evaluateNotificationRules(ctx());
 

@@ -97,8 +97,7 @@ export function CaseOfficeTasksSection({
         ) : (
           <ul className="divide-y rounded-md border">
             {open.map((t) => {
-              const overdue =
-                t.dueAt !== null && t.dueAt.getTime() < now;
+              const overdue = t.dueAt !== null && t.dueAt.getTime() < now;
               return (
                 <li
                   key={t.id}

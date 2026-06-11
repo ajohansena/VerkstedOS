@@ -197,10 +197,8 @@ export function parseVegvesenPayload(
       : undefined;
 
   const godkjenning = (e['godkjenning'] ?? {}) as Record<string, unknown>;
-  const tekniskGodkjenning = (godkjenning['tekniskGodkjenning'] ?? {}) as Record<
-    string,
-    unknown
-  >;
+  const tekniskGodkjenning = (godkjenning['tekniskGodkjenning'] ??
+    {}) as Record<string, unknown>;
   const tekniskeData = (tekniskGodkjenning['tekniskeData'] ?? {}) as Record<
     string,
     unknown

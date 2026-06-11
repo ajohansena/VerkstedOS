@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation';
 import { getSessionContext } from '@/lib/auth/session';
 import { getDictionary, resolveLocale } from '@/lib/i18n';
 import { findCaseById } from '@/modules/case/public';
-import { getCurrentOrganization, listWorkshops } from '@/modules/identity/public';
+import {
+  getCurrentOrganization,
+  listWorkshops,
+} from '@/modules/identity/public';
 import {
   absenceMinutesInDay,
   listPlannedSegmentsForRange,
@@ -23,13 +26,27 @@ import { BoardV2 } from './board-v2';
 import { BookFromIntakeBanner } from './book-from-intake-banner';
 import { DayView, type DayOfficeTask } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
-import { MyTasksView, type MyTasksRow, type MyOfficeTaskRow } from './my-tasks-view';
+import {
+  MyTasksView,
+  type MyTasksRow,
+  type MyOfficeTaskRow,
+} from './my-tasks-view';
 import { ResourceView, type ResourceRow as RV_Row } from './resource-view';
-import { WeekView, type WeekRow as WV_Row, type WeekOfficeTaskCell } from './week-view';
+import {
+  WeekView,
+  type WeekRow as WV_Row,
+  type WeekOfficeTaskCell,
+} from './week-view';
 
 export const dynamic = 'force-dynamic';
 
-const VALID_MODES: BoardMode[] = ['board', 'day', 'week', 'resource', 'mytasks'];
+const VALID_MODES: BoardMode[] = [
+  'board',
+  'day',
+  'week',
+  'resource',
+  'mytasks',
+];
 
 /**
  * /production — Production Board v3 (doc 13). One engine, multiple
@@ -119,15 +136,11 @@ export default async function ProductionBoardPage(props: {
         />
       ) : null}
 
-      {mode === 'board' && (
-        <BoardSection session={session} t={t} />
-      )}
+      {mode === 'board' && <BoardSection session={session} t={t} />}
       {mode === 'day' && <DaySection session={session} t={t} />}
       {mode === 'week' && <WeekSection session={session} t={t} />}
       {mode === 'resource' && <ResourceSection session={session} t={t} />}
-      {mode === 'mytasks' && (
-        <MyTasksSection session={session} t={t} />
-      )}
+      {mode === 'mytasks' && <MyTasksSection session={session} t={t} />}
     </div>
   );
 }

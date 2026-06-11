@@ -104,9 +104,7 @@ export function CommandPalette({
             label: v.label,
             ...(v.subtitle != null ? { subtitle: v.subtitle } : {}),
             icon: Boxes,
-            href: `/vehicles?q=${encodeURIComponent(
-              v.subtitle ?? v.label,
-            )}`,
+            href: `/vehicles?q=${encodeURIComponent(v.subtitle ?? v.label)}`,
             group: labels.sectionVehicles,
           })),
           customers: out.customers.map((c) => ({
@@ -144,16 +142,64 @@ export function CommandPalette({
       group: labels.sectionRecents,
     }));
     const gotoItems: CommandItem[] = [
-      { id: 'goto:ops', label: labels.gotoOps, icon: KanbanSquare, href: '/', group: labels.sectionGoto },
-      { id: 'goto:prod', label: labels.gotoProduction, icon: KanbanSquare, href: '/production', group: labels.sectionGoto },
-      { id: 'goto:cases', label: labels.gotoCases, icon: ClipboardList, href: '/cases', group: labels.sectionGoto },
-      { id: 'goto:parts', label: labels.gotoParts, icon: Boxes, href: '/parts', group: labels.sectionGoto },
-      { id: 'goto:admin', label: labels.gotoAdmin, icon: Settings, href: '/admin', group: labels.sectionGoto },
+      {
+        id: 'goto:ops',
+        label: labels.gotoOps,
+        icon: KanbanSquare,
+        href: '/',
+        group: labels.sectionGoto,
+      },
+      {
+        id: 'goto:prod',
+        label: labels.gotoProduction,
+        icon: KanbanSquare,
+        href: '/production',
+        group: labels.sectionGoto,
+      },
+      {
+        id: 'goto:cases',
+        label: labels.gotoCases,
+        icon: ClipboardList,
+        href: '/cases',
+        group: labels.sectionGoto,
+      },
+      {
+        id: 'goto:parts',
+        label: labels.gotoParts,
+        icon: Boxes,
+        href: '/parts',
+        group: labels.sectionGoto,
+      },
+      {
+        id: 'goto:admin',
+        label: labels.gotoAdmin,
+        icon: Settings,
+        href: '/admin',
+        group: labels.sectionGoto,
+      },
     ];
     const actionItems: CommandItem[] = [
-      { id: 'action:new-case', label: labels.actionNewCase, icon: Plus, href: '/cases/new', group: labels.sectionActions },
-      { id: 'action:clock', label: labels.actionClockIn, icon: Clock, href: '/clock', group: labels.sectionActions },
-      { id: 'action:yard', label: labels.actionInbound, icon: Truck, href: '/yard', group: labels.sectionActions },
+      {
+        id: 'action:new-case',
+        label: labels.actionNewCase,
+        icon: Plus,
+        href: '/cases/new',
+        group: labels.sectionActions,
+      },
+      {
+        id: 'action:clock',
+        label: labels.actionClockIn,
+        icon: Clock,
+        href: '/clock',
+        group: labels.sectionActions,
+      },
+      {
+        id: 'action:yard',
+        label: labels.actionInbound,
+        icon: Truck,
+        href: '/yard',
+        group: labels.sectionActions,
+      },
     ];
     return [...recentItems, ...gotoItems, ...actionItems];
   }, [query, recents, results, labels]);
@@ -224,9 +270,7 @@ export function CommandPalette({
                       <button
                         type="button"
                         onClick={() => activate(item)}
-                        onMouseMove={() =>
-                          setActiveIndex(items.indexOf(item))
-                        }
+                        onMouseMove={() => setActiveIndex(items.indexOf(item))}
                         className={cn(
                           'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm',
                           isActive

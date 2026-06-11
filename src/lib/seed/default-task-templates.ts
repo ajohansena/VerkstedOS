@@ -52,8 +52,7 @@ export const DEFAULT_TASK_TEMPLATES: readonly DefaultTaskTemplateSpec[] = [
     triggerEventFilter: { toStateCode: 'delivered' },
     taskKind: 'invoice_prep',
     taskTitleTemplate: 'Klargjør faktura — {caseNumber}',
-    taskDescriptionTemplate:
-      'Faktura skal være klar samme dag som levering.',
+    taskDescriptionTemplate: 'Faktura skal være klar samme dag som levering.',
     dueOffsetMinutes: 60,
     dueReference: 'event_time' as TaskTemplateDueReference,
     defaultPriority: 'high',
@@ -65,8 +64,7 @@ export const DEFAULT_TASK_TEMPLATES: readonly DefaultTaskTemplateSpec[] = [
     triggerEventFilter: { requiresRental: true },
     taskKind: 'rental_booking',
     taskTitleTemplate: 'Bestill leiebil — {caseNumber}',
-    taskDescriptionTemplate:
-      'Bestill leiebil i tide til kundens innlevering.',
+    taskDescriptionTemplate: 'Bestill leiebil i tide til kundens innlevering.',
     dueOffsetMinutes: 0,
     dueReference: 'case_expected_arrival_at' as TaskTemplateDueReference,
     defaultPriority: 'normal',

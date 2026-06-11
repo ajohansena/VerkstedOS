@@ -19,24 +19,14 @@ export async function saveBookingPolicyAction(
   try {
     const session = await getSessionContext();
     if (!session) return { ok: false, error: 'NOT_AUTHENTICATED' };
-    const windowDays = Number(
-      formData.get('defaultBookingWindowDays') ?? '14',
-    );
+    const windowDays = Number(formData.get('defaultBookingWindowDays') ?? '14');
     const tolerance = Number(
       formData.get('overbookingTolerancePercent') ?? '0',
     );
-    if (
-      !Number.isFinite(windowDays) ||
-      windowDays < 1 ||
-      windowDays > 365
-    ) {
+    if (!Number.isFinite(windowDays) || windowDays < 1 || windowDays > 365) {
       return { ok: false, error: 'INVALID_WINDOW_DAYS' };
     }
-    if (
-      !Number.isFinite(tolerance) ||
-      tolerance < 0 ||
-      tolerance > 100
-    ) {
+    if (!Number.isFinite(tolerance) || tolerance < 0 || tolerance > 100) {
       return { ok: false, error: 'INVALID_TOLERANCE' };
     }
     await updateOrganizationSettings(session.context, {

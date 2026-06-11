@@ -172,7 +172,11 @@ export interface CreateCaseFromWizardInput {
       }
     | {
         kind: 'new';
-        customerKind: 'individual' | 'company' | 'leasing_company' | 'fleet_operator';
+        customerKind:
+          | 'individual'
+          | 'company'
+          | 'leasing_company'
+          | 'fleet_operator';
         name: string;
         primaryPhone?: string;
         primaryEmail?: string;
@@ -290,7 +294,11 @@ export async function createCaseFromWizardAction(
     //    can't ask for it in-line (avoid surprising the user with errors that
     //    the UI doesn't expose a field for).
     const fundingSources = input.fundingSources.map((fs) => {
-      if (fs.kind === 'private_pay' && !fs.payerCustomerId && primaryCustomerId) {
+      if (
+        fs.kind === 'private_pay' &&
+        !fs.payerCustomerId &&
+        primaryCustomerId
+      ) {
         return { ...fs, payerCustomerId: primaryCustomerId };
       }
       return fs;

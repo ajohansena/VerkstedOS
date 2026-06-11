@@ -103,8 +103,8 @@ export default async function DevOrgInspectPage({
         <CardHeader>
           <CardTitle className="text-base">Platform actions</CardTitle>
           <CardDescription>
-            Mutations performed as PlatformOwner. Status / archive changes
-            apply to the entire org and all its workshops.
+            Mutations performed as PlatformOwner. Status / archive changes apply
+            to the entire org and all its workshops.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">

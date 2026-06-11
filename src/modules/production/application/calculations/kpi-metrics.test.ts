@@ -10,11 +10,17 @@ import {
 const DAY = 24 * 60 * 60 * 1000;
 const base = new Date('2026-01-01T00:00:00Z');
 
-function dcase(openDay: number, deliverDay: number | null, promiseDay: number | null): DeliveredCase {
+function dcase(
+  openDay: number,
+  deliverDay: number | null,
+  promiseDay: number | null,
+): DeliveredCase {
   return {
     openedAt: new Date(base.getTime() + openDay * DAY),
-    deliveredAt: deliverDay === null ? null : new Date(base.getTime() + deliverDay * DAY),
-    promisedAt: promiseDay === null ? null : new Date(base.getTime() + promiseDay * DAY),
+    deliveredAt:
+      deliverDay === null ? null : new Date(base.getTime() + deliverDay * DAY),
+    promisedAt:
+      promiseDay === null ? null : new Date(base.getTime() + promiseDay * DAY),
   };
 }
 

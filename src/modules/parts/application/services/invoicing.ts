@@ -173,12 +173,7 @@ export interface CreateCreditNoteInput {
   supplierInvoiceId: string;
   creditNoteNumber: string;
   creditNoteDate: Date;
-  reason?:
-    | 'return'
-    | 'price_correction'
-    | 'overbilling'
-    | 'damaged'
-    | 'other';
+  reason?: 'return' | 'price_correction' | 'overbilling' | 'damaged' | 'other';
   currency?: string;
   note?: string;
 }
@@ -354,7 +349,11 @@ async function recomputeCreditTotalAndFlagInvoice(
 
   await tx
     .update(supplierCreditNotes)
-    .set({ totalGross: row.total, updatedBy: ctx.userId, updatedAt: new Date() })
+    .set({
+      totalGross: row.total,
+      updatedBy: ctx.userId,
+      updatedAt: new Date(),
+    })
     .where(
       and(
         eq(supplierCreditNotes.id, creditNoteId),

@@ -63,7 +63,11 @@ export function CreateTaskTemplateForm({ labels }: Props) {
         if (filterRaw) {
           try {
             const parsed = JSON.parse(filterRaw);
-            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            if (
+              parsed &&
+              typeof parsed === 'object' &&
+              !Array.isArray(parsed)
+            ) {
               filter = parsed as Record<string, unknown>;
             } else {
               setError('triggerEventFilter must be a JSON object.');
@@ -81,9 +85,7 @@ export function CreateTaskTemplateForm({ labels }: Props) {
           const result: TaskTemplateActionResult<{ templateId: string }> =
             await createTaskTemplateAction({
               name: String(fd.get('name') ?? '').trim(),
-              triggerEventType: String(
-                fd.get('triggerEventType') ?? '',
-              ).trim(),
+              triggerEventType: String(fd.get('triggerEventType') ?? '').trim(),
               triggerEventFilter: filter,
               taskKind: String(fd.get('taskKind') ?? 'other') as
                 | 'order_parts'
@@ -192,7 +194,7 @@ export function CreateTaskTemplateForm({ labels }: Props) {
         />
       </label>
 
-      <div className="sm:col-span-2 flex items-center gap-3">
+      <div className="flex items-center gap-3 sm:col-span-2">
         <button
           type="submit"
           disabled={pending}
@@ -205,9 +207,7 @@ export function CreateTaskTemplateForm({ labels }: Props) {
             {error}
           </span>
         ) : null}
-        {success ? (
-          <span className="text-sm text-green-700">✓</span>
-        ) : null}
+        {success ? <span className="text-sm text-green-700">✓</span> : null}
       </div>
     </form>
   );

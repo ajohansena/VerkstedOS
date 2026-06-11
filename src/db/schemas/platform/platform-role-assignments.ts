@@ -1,4 +1,10 @@
-import { pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 import { platformRole } from '@/db/enums';
@@ -33,7 +39,8 @@ export const platformRoleAssignments = pgTable(
       'platform_role_assignments_one_active_owner_idx',
     )
       .on(table.role)
-      .where(sql`${table.role} = 'PlatformOwner' AND ${table.revokedAt} IS NULL`),
+      .where(
+        sql`${table.role} = 'PlatformOwner' AND ${table.revokedAt} IS NULL`,
+      ),
   }),
 );
-

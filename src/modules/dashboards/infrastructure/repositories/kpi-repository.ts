@@ -120,8 +120,7 @@ export async function upsertKpiSnapshot(
         periodStart: input.periodStart,
         periodEnd: input.periodEnd,
         value: String(input.value),
-        sampleSize:
-          input.sampleSize != null ? String(input.sampleSize) : null,
+        sampleSize: input.sampleSize != null ? String(input.sampleSize) : null,
         computedAt: new Date(),
         createdBy: ctx.userId,
         updatedBy: ctx.userId,

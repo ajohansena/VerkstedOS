@@ -9,9 +9,7 @@ import {
 } from '@/components/ui/card';
 import { getAuthorizedSession } from '@/lib/auth/authorize';
 import { getDictionary, resolveLocale } from '@/lib/i18n';
-import {
-  getCurrentOrganization,
-} from '@/modules/identity/public';
+import { getCurrentOrganization } from '@/modules/identity/public';
 import { listOpenOfficeTasksForOrg } from '@/modules/workforce/public';
 
 export const dynamic = 'force-dynamic';
@@ -66,13 +64,9 @@ export default async function OfficeTasksAdminPage() {
                   <tr className="border-b">
                     <th className="py-2 pr-4">{t.officeTask.columnTitle}</th>
                     <th className="py-2 pr-4">{t.officeTask.columnDueAt}</th>
-                    <th className="py-2 pr-4">
-                      {t.officeTask.columnPriority}
-                    </th>
+                    <th className="py-2 pr-4">{t.officeTask.columnPriority}</th>
                     <th className="py-2 pr-4">{t.officeTask.columnStatus}</th>
-                    <th className="py-2 pr-4">
-                      {t.officeTask.columnAssignee}
-                    </th>
+                    <th className="py-2 pr-4">{t.officeTask.columnAssignee}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -80,14 +74,13 @@ export default async function OfficeTasksAdminPage() {
                     const overdue =
                       task.dueAt !== null &&
                       task.dueAt < now &&
-                      (task.status === 'open' ||
-                        task.status === 'in_progress');
+                      (task.status === 'open' || task.status === 'in_progress');
                     return (
                       <tr key={task.id} className="border-b align-top">
                         <td className="py-2 pr-4">
                           <div className="font-medium">{task.title}</div>
                           {task.description ? (
-                            <div className="text-xs text-muted-foreground line-clamp-2">
+                            <div className="line-clamp-2 text-xs text-muted-foreground">
                               {task.description}
                             </div>
                           ) : null}
@@ -96,9 +89,7 @@ export default async function OfficeTasksAdminPage() {
                           {task.dueAt ? (
                             <span
                               className={
-                                overdue
-                                  ? 'font-medium text-red-600'
-                                  : undefined
+                                overdue ? 'font-medium text-red-600' : undefined
                               }
                             >
                               {fmt.format(task.dueAt)}

@@ -64,7 +64,7 @@ function pageFileToRoute(file: string): string {
 function extractGroup(file: string): string | null {
   const rel = relative(APP_ROOT, file).replace(/\\/g, '/');
   const m = rel.match(/\(([^)]+)\)/);
-  return m ? m[1] ?? null : null;
+  return m ? (m[1] ?? null) : null;
 }
 
 async function inventory(): Promise<RouteRow[]> {
@@ -105,8 +105,7 @@ async function collectDevHrefs(): Promise<{ href: string; from: string }[]> {
       if (!href) continue;
       // Strip query/hash + trailing slash
       const clean = href.split('?')[0]?.split('#')[0] ?? href;
-      const normalized =
-        clean.length > 1 ? clean.replace(/\/$/, '') : clean;
+      const normalized = clean.length > 1 ? clean.replace(/\/$/, '') : clean;
       out.push({ href: normalized, from: relative(REPO_ROOT, file) });
     }
   }
@@ -178,7 +177,9 @@ async function main() {
   lines.push('## /dev cross-reference');
   lines.push('');
   if (missing.length === 0) {
-    lines.push('All static `href="/..."` references inside `/dev` resolve to a known page route. ✅');
+    lines.push(
+      'All static `href="/..."` references inside `/dev` resolve to a known page route. ✅',
+    );
   } else {
     lines.push(
       'The following `/dev` references point at routes with **no `page.tsx`** — they will 404:',

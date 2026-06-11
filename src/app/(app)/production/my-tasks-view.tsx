@@ -46,7 +46,9 @@ export function MyTasksView({
   t,
 }: Props) {
   const fmtTime = (d: Date | null): string =>
-    d ? new Intl.DateTimeFormat('nb-NO', { timeStyle: 'short' }).format(d) : '—';
+    d
+      ? new Intl.DateTimeFormat('nb-NO', { timeStyle: 'short' }).format(d)
+      : '—';
 
   const fmtRange = (s: Date, e: Date | null): string =>
     `${fmtTime(s)}–${fmtTime(e)}`;
@@ -151,8 +153,10 @@ function OfficeTaskList({
             <li key={r.taskId} className="flex items-center gap-3 p-3">
               <span
                 className={
-                  'min-w-24 tabular-nums text-xs ' +
-                  (overdue ? 'font-medium text-red-600' : 'text-muted-foreground')
+                  'min-w-24 text-xs tabular-nums ' +
+                  (overdue
+                    ? 'font-medium text-red-600'
+                    : 'text-muted-foreground')
                 }
               >
                 {showDate ? fmtDate(r.dueAt) : fmtTime(r.dueAt)}
@@ -164,10 +168,7 @@ function OfficeTaskList({
                 </span>
               </span>
               {r.caseId && r.caseNumber ? (
-                <Link
-                  href={`/cases/${r.caseId}`}
-                  className="text-xs underline"
-                >
+                <Link href={`/cases/${r.caseId}`} className="text-xs underline">
                   {r.caseNumber}
                 </Link>
               ) : null}
@@ -178,7 +179,6 @@ function OfficeTaskList({
     </section>
   );
 }
-
 
 function TaskTable({
   heading,
@@ -232,10 +232,7 @@ function TaskTable({
               <td className="p-3">{r.segmentLabel ?? '—'}</td>
               <td className="p-3 text-muted-foreground">{r.resourceName}</td>
               <td className="p-3 text-right">
-                <Link
-                  href={`/cases/${r.caseId}`}
-                  className="text-xs underline"
-                >
+                <Link href={`/cases/${r.caseId}`} className="text-xs underline">
                   {t.myTasks.openCase}
                 </Link>
               </td>

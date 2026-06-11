@@ -80,9 +80,7 @@ export default async function DevOfficeTasksPage({
       {org ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
-              Tasks ({tasks.length})
-            </CardTitle>
+            <CardTitle className="text-base">Tasks ({tasks.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {tasks.length === 0 ? (
@@ -101,8 +99,7 @@ export default async function DevOfficeTasksPage({
                         <span className="font-mono text-xs text-muted-foreground">
                           {t.id.slice(0, 8)}
                         </span>{' '}
-                        · <span className="font-medium">{t.title}</span>{' '}
-                        ·{' '}
+                        · <span className="font-medium">{t.title}</span> ·{' '}
                         <span className="text-xs text-muted-foreground">
                           {t.kind} · {t.priority} · {t.status} · due{' '}
                           {t.dueAt?.toISOString() ?? '—'}

@@ -571,7 +571,8 @@ async function main(): Promise<void> {
     { id: string; name: string; primary_email: string | null }[]
   >`SELECT id, name, primary_email FROM customers WHERE organization_id = ${orgId}`;
   const existingCustomerByName = new Map<string, string>();
-  for (const c of existingCustomerRows) existingCustomerByName.set(c.name, c.id);
+  for (const c of existingCustomerRows)
+    existingCustomerByName.set(c.name, c.id);
 
   const customerIds: string[] = [];
   const customerContacts: { email: string; phone: string }[] = [];
@@ -703,7 +704,12 @@ async function main(): Promise<void> {
   // case state (1..24) is not supported — re-running picks up from a clean
   // case block only.
   const existingCaseRows = await adminSql<
-    { id: string; vehicle_id: string; primary_customer_id: string; current_workshop_id: string }[]
+    {
+      id: string;
+      vehicle_id: string;
+      primary_customer_id: string;
+      current_workshop_id: string;
+    }[]
   >`SELECT id, vehicle_id, primary_customer_id, current_workshop_id
      FROM cases WHERE organization_id = ${orgId} ORDER BY created_at`;
   const existingCaseCount = existingCaseRows.length;
@@ -717,7 +723,9 @@ async function main(): Promise<void> {
       const vehicleIdx = (i * 3) % vehicleIds.length;
       const customerIdx = vehicleOwnerByVehicleIdx[vehicleIdx]!;
       const expectedVehicleId = vehicleIds[vehicleIdx]!;
-      const row = existingCaseRows.find((r) => r.vehicle_id === expectedVehicleId);
+      const row = existingCaseRows.find(
+        (r) => r.vehicle_id === expectedVehicleId,
+      );
       if (!row) {
         throw new Error(
           `Resume: expected case for vehicle ${expectedVehicleId} (slot ${i}) not found`,
@@ -742,89 +750,90 @@ async function main(): Promise<void> {
       `Cannot resume: found ${existingCaseCount} cases in org (expected 0 or 25). ` +
         `Either delete all cases for this org or restore to full 25.`,
     );
-  } else for (let i = 0; i < 25; i++) {
-    const vehicleIdx = (i * 3) % vehicleIds.length;
-    const customerIdx = vehicleOwnerByVehicleIdx[vehicleIdx]!;
-    const workshopId = workshopIds[i % workshopIds.length]!;
-    const stopState = STOP_STATES[i]!;
+  } else
+    for (let i = 0; i < 25; i++) {
+      const vehicleIdx = (i * 3) % vehicleIds.length;
+      const customerIdx = vehicleOwnerByVehicleIdx[vehicleIdx]!;
+      const workshopId = workshopIds[i % workshopIds.length]!;
+      const stopState = STOP_STATES[i]!;
 
-    // Funding: 60% insurance with new claim, 30% private_pay, 10% mixed.
-    const fundingSources: FundingSourceInput[] = [];
-    const fund = rand();
-    if (fund < 0.6 && insurers.length > 0) {
-      const insurer = pick(insurers);
-      fundingSources.push({
-        kind: 'insurance',
-        label: `Forsikring (${insurer.name})`,
-        newClaim: {
-          insuranceCompanyId: insurer.id,
-          claimNumber: `JBSK-${(2000 + i).toString()}`,
-        },
-        coverageCapAmount: 75000 + Math.floor(rand() * 50000),
-        deductibleAmount: 4000,
-        deductiblePayerCustomerId: customerIds[customerIdx]!,
-      });
-    } else if (fund < 0.9) {
-      fundingSources.push({
-        kind: 'private_pay',
-        label: 'Privatbetalt',
-        payerCustomerId: customerIds[customerIdx]!,
-      });
-    } else if (insurers.length > 0) {
-      const insurer = pick(insurers);
-      fundingSources.push({
-        kind: 'insurance',
-        label: `Forsikring (${insurer.name})`,
-        newClaim: {
-          insuranceCompanyId: insurer.id,
-          claimNumber: `JBSK-${(3000 + i).toString()}`,
-        },
-        deductibleAmount: 6000,
-        deductiblePayerCustomerId: customerIds[customerIdx]!,
-      });
-      fundingSources.push({
-        kind: 'private_pay',
-        label: 'Egenbetalt tilleggsskade',
-        payerCustomerId: customerIds[customerIdx]!,
-      });
-    }
+      // Funding: 60% insurance with new claim, 30% private_pay, 10% mixed.
+      const fundingSources: FundingSourceInput[] = [];
+      const fund = rand();
+      if (fund < 0.6 && insurers.length > 0) {
+        const insurer = pick(insurers);
+        fundingSources.push({
+          kind: 'insurance',
+          label: `Forsikring (${insurer.name})`,
+          newClaim: {
+            insuranceCompanyId: insurer.id,
+            claimNumber: `JBSK-${(2000 + i).toString()}`,
+          },
+          coverageCapAmount: 75000 + Math.floor(rand() * 50000),
+          deductibleAmount: 4000,
+          deductiblePayerCustomerId: customerIds[customerIdx]!,
+        });
+      } else if (fund < 0.9) {
+        fundingSources.push({
+          kind: 'private_pay',
+          label: 'Privatbetalt',
+          payerCustomerId: customerIds[customerIdx]!,
+        });
+      } else if (insurers.length > 0) {
+        const insurer = pick(insurers);
+        fundingSources.push({
+          kind: 'insurance',
+          label: `Forsikring (${insurer.name})`,
+          newClaim: {
+            insuranceCompanyId: insurer.id,
+            claimNumber: `JBSK-${(3000 + i).toString()}`,
+          },
+          deductibleAmount: 6000,
+          deductiblePayerCustomerId: customerIds[customerIdx]!,
+        });
+        fundingSources.push({
+          kind: 'private_pay',
+          label: 'Egenbetalt tilleggsskade',
+          payerCustomerId: customerIds[customerIdx]!,
+        });
+      }
 
-    const created = await createCase(ctxAt(workshopId), {
-      vehicleId: vehicleIds[vehicleIdx]!,
-      primaryCustomerId: customerIds[customerIdx]!,
-      incidentTag: pick(INCIDENTS),
-      currentWorkshopId: workshopId,
-      fundingSources,
-    });
+      const created = await createCase(ctxAt(workshopId), {
+        vehicleId: vehicleIds[vehicleIdx]!,
+        primaryCustomerId: customerIds[customerIdx]!,
+        incidentTag: pick(INCIDENTS),
+        currentWorkshopId: workshopId,
+        fundingSources,
+      });
 
-    // Production order + initial assignment.
-    await ensureProductionOrder(ctxAt(workshopId), created.id);
-    await assignCaseToWorkshop(ctxAt(workshopId), {
-      caseId: created.id,
-      workshopId,
-      role: i % 2 === 0 ? 'body' : 'paint',
-    });
-
-    // Advance through the state path until we hit the stop state.
-    for (const code of STATE_PATH) {
-      if (code === 'received') continue; // initial state set by ensureProductionOrder
-      await transitionState(ctxAt(workshopId), {
+      // Production order + initial assignment.
+      await ensureProductionOrder(ctxAt(workshopId), created.id);
+      await assignCaseToWorkshop(ctxAt(workshopId), {
         caseId: created.id,
-        toStateCode: code,
-        reason: `Demo seed: ${code}`,
+        workshopId,
+        role: i % 2 === 0 ? 'body' : 'paint',
       });
-      if (code === stopState) break;
-    }
 
-    cases.push({
-      id: created.id,
-      workshopId,
-      stopState,
-      customerId: customerIds[customerIdx]!,
-      customerHasPhone: Boolean(customerContacts[customerIdx]!.phone),
-      customerHasEmail: Boolean(customerContacts[customerIdx]!.email),
-    });
-  }
+      // Advance through the state path until we hit the stop state.
+      for (const code of STATE_PATH) {
+        if (code === 'received') continue; // initial state set by ensureProductionOrder
+        await transitionState(ctxAt(workshopId), {
+          caseId: created.id,
+          toStateCode: code,
+          reason: `Demo seed: ${code}`,
+        });
+        if (code === stopState) break;
+      }
+
+      cases.push({
+        id: created.id,
+        workshopId,
+        stopState,
+        customerId: customerIds[customerIdx]!,
+        customerHasPhone: Boolean(customerContacts[customerIdx]!.phone),
+        customerHasEmail: Boolean(customerContacts[customerIdx]!.email),
+      });
+    }
   console.log(
     `✔ ${cases.length} cases created with production state lifecycle`,
   );
