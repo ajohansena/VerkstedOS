@@ -176,6 +176,20 @@
       "when": 1781125489566,
       "tag": "0049_case_bookings_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1781188057698,
+      "tag": "0051_office_tasks_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1781189422144,
+      "tag": "0053_task_templates_tables",
+      "breakpoints": true
     }
   ]
 }

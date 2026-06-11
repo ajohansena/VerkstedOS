@@ -6,7 +6,6 @@ import { getSessionContext } from '@/lib/auth/session';
 import {
   createBooking,
   createCase,
-  findCaseById,
   validateBookingDates,
   validateFundingSet,
   type FundingSourceInput,
@@ -106,52 +105,6 @@ export async function caseFromCustomerAction(
     primaryCustomerId: customerId,
     fundingSources: [],
   });
-  redirect(`/cases/${created.id}`);
-}
-
-/**
- * Fast path: create a customer and/or vehicle from minimal input, then open a
- * new case. Used when search finds nothing — the receptionist types the reg +
- * name + phone and goes straight to the case.
- */
-export async function quickIntakeAction(formData: FormData): Promise<void> {
-  const session = await getSessionContext();
-  if (!session) redirect('/login');
-
-  const registrationNumber = String(
-    formData.get('registrationNumber') ?? '',
-  ).trim();
-  const customerName = String(formData.get('customerName') ?? '').trim();
-  const customerPhone = String(formData.get('customerPhone') ?? '').trim();
-
-  let primaryCustomerId: string | undefined;
-  if (customerName) {
-    const customer = await createCustomer(session.context, {
-      kind: 'individual',
-      name: customerName,
-      ...(customerPhone ? { primaryPhone: customerPhone } : {}),
-    });
-    primaryCustomerId = customer.id;
-  }
-
-  let vehicleId: string | undefined;
-  if (registrationNumber) {
-    const vehicle = await createVehicle(session.context, {
-      registrationNumber,
-      ownershipType: 'private',
-      ...(primaryCustomerId ? { ownerCustomerId: primaryCustomerId } : {}),
-    });
-    vehicleId = vehicle.id;
-  }
-
-  const created = await createCase(session.context, {
-    ...(primaryCustomerId ? { primaryCustomerId } : {}),
-    ...(vehicleId ? { vehicleId } : {}),
-    fundingSources: [],
-  });
-
-  // Defensive: confirm the case is readable before redirecting.
-  await findCaseById(session.context, created.id);
   redirect(`/cases/${created.id}`);
 }
 

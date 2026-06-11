@@ -84,6 +84,10 @@ export const metricRegistry = {
     module: 'case',
     calc: 'validateBookingDates',
   },
+  open_office_tasks_for_case: {
+    module: 'workforce',
+    calc: 'calculateOpenOfficeTaskSummary',
+  },
 } as const satisfies Record<string, MetricEntry>;
 
 export type MetricName = keyof typeof metricRegistry;

@@ -54,7 +54,6 @@ export interface WizardLabels {
   step: string;
   next: string;
   previous: string;
-  legacyLink: string;
   vehicleTitle: string;
   vehicleHint: string;
   vehicleRegPlaceholder: string;
@@ -180,12 +179,10 @@ export function IntakeWizard({
   labels,
   insuranceCompanies,
   workshops,
-  legacyHref,
 }: {
   labels: WizardLabels;
   insuranceCompanies: InsuranceCompany[];
   workshops: Array<{ id: string; name: string }>;
-  legacyHref: string;
 }) {
   const [step, setStep] = useState<StepIndex>(0);
   const [vehicle, setVehicle] = useState<VehicleSelection>({ kind: 'pending' });
@@ -433,14 +430,7 @@ export function IntakeWizard({
             >
               {labels.previous}
             </Button>
-          ) : (
-            <a
-              href={legacyHref}
-              className="text-xs text-muted-foreground underline"
-            >
-              {labels.legacyLink}
-            </a>
-          )}
+          ) : null}
         </div>
         <div className="flex gap-2">
           {step < 4 ? (

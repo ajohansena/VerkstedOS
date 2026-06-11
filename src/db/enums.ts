@@ -614,6 +614,54 @@ export const caseBookingStatus = pgEnum('case_booking_status', [
   'cancelled',
 ]);
 
+// --- Office tasks (D3, doc 13 § 10 + § 16.1) --------------------------------
+
+/**
+ * Office task categories. Drives default icon, default assignee role, and the
+ * task-template generator filter. Not billable — see CLAUDE.md § 4.7
+ * (TakstKontroll compatibility — office tasks are NEVER aggregated into case
+ * cost).
+ */
+export const officeTaskKind = pgEnum('office_task_kind', [
+  'order_parts',
+  'customer_call',
+  'insurer_followup',
+  'rental_booking',
+  'invoice_prep',
+  'customer_followup',
+  'documentation',
+  'other',
+]);
+
+export const officeTaskPriority = pgEnum('office_task_priority', [
+  'low',
+  'normal',
+  'high',
+  'urgent',
+]);
+
+export const officeTaskStatus = pgEnum('office_task_status', [
+  'open',
+  'in_progress',
+  'completed',
+  'cancelled',
+]);
+
+/**
+ * Task template due-time reference (D3 Phase F). Determines what the
+ * `due_offset_minutes` is measured FROM.
+ *   - event_time: when the source event was emitted (e.g. +60 min after
+ *     `production.state.transitioned` to 'delivered' → invoice prep).
+ *   - case_expected_arrival_at: relative to the booked arrival (e.g. -10*1440
+ *     min = 10 days before arrival → order parts).
+ *   - case_promised_delivery_at: relative to promised delivery.
+ */
+export const taskTemplateDueReference = pgEnum('task_template_due_reference', [
+  'event_time',
+  'case_expected_arrival_at',
+  'case_promised_delivery_at',
+]);
+
 // --- Dashboards & KPIs (docs/11-dashboards.md, Sprint 16) --------------------
 
 export const kpiUnit = pgEnum('kpi_unit', [

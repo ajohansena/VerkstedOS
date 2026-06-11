@@ -3,7 +3,8 @@ import Link from 'next/link';
 /**
  * Production Board v3 — Day View (doc 13 §4.2). Today's planned segments
  * grouped by resource, sorted by planned start. Read-only first pass; drag-
- * to-replan lands in a later sprint (doc 13 §16.2).
+ * to-replan lands in a later sprint (doc 13 §16.2). Office tasks render in a
+ * separate "Kontor" lane above the resource rows (doc 13 § 10, D3 Phase E).
  */
 
 export interface DayRow {
@@ -20,20 +21,34 @@ export interface DayRow {
   status: string;
 }
 
+export interface DayOfficeTask {
+  taskId: string;
+  title: string;
+  kind: string;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  dueAt: string | null;
+  caseId: string | null;
+  caseNumber: string | null;
+}
+
 export function DayView({
   rows,
+  officeTasks = [],
   labels,
 }: {
   rows: DayRow[];
+  officeTasks?: DayOfficeTask[];
   labels: {
     heading: string;
     empty: string;
     timeColumn: string;
     caseColumn: string;
     resourceColumn: string;
+    officeLaneHeading: string;
+    officeLaneEmpty: string;
   };
 }) {
-  if (rows.length === 0) {
+  if (rows.length === 0 && officeTasks.length === 0) {
     return (
       <section className="rounded-lg border bg-background p-6 text-sm text-muted-foreground">
         {labels.empty}
@@ -68,6 +83,46 @@ export function DayView({
       <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {labels.heading}
       </h2>
+      <div className="rounded-lg border bg-amber-50/40">
+        <header className="flex items-center justify-between border-b border-amber-200/60 px-3 py-2">
+          <div className="font-medium">{labels.officeLaneHeading}</div>
+          <div className="text-xs text-muted-foreground">
+            {officeTasks.length}
+          </div>
+        </header>
+        {officeTasks.length === 0 ? (
+          <p className="px-3 py-2 text-xs text-muted-foreground">
+            {labels.officeLaneEmpty}
+          </p>
+        ) : (
+          <ul className="divide-y divide-amber-200/40">
+            {officeTasks.map((t) => (
+              <li
+                key={t.taskId}
+                className="flex items-center gap-3 px-3 py-2 text-sm"
+              >
+                <span className="min-w-16 font-mono text-xs tabular-nums">
+                  {fmtTime(t.dueAt)}
+                </span>
+                <span className="flex-1 truncate">
+                  <span className="font-medium">{t.title}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {t.kind} · {t.priority}
+                  </span>
+                </span>
+                {t.caseId && t.caseNumber ? (
+                  <Link
+                    href={`/cases/${t.caseId}`}
+                    className="text-xs underline"
+                  >
+                    {t.caseNumber}
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       <div className="space-y-3">
         {Array.from(byResource.entries()).map(([resourceId, entry]) => (
           <div key={resourceId} className="rounded-lg border bg-background">

@@ -180,6 +180,17 @@ const INSPECTION_SURFACES: readonly SurfaceLink[] = [
     description: 'Case bookings per org and force-cancel for stuck bookings.',
   },
   {
+    href: '/dev/office-tasks',
+    title: 'Office tasks',
+    description: 'Office tasks per org and force-cancel for bad template waves.',
+  },
+  {
+    href: '/dev/task-templates',
+    title: 'Task templates',
+    description:
+      'Event-driven task templates per org and force-disable for runaways.',
+  },
+  {
     href: '/dev/communication',
     title: 'Communication',
     description: 'Customer acceptances and queued outbound messages.',

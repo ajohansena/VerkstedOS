@@ -381,64 +381,77 @@ async function main(): Promise<void> {
 
   console.log(`\n🛠️  Seeding demo dataset → "${ORG_NAME}"\n`);
 
-  // --- Idempotency check ----------------------------------------------------
+  // --- Resume or create organization (entity-level idempotency) ------------
+  // Every step below is safe to re-run: each entity creation checks existence
+  // by a natural key (name, email, reg-no, code) before inserting. Re-running
+  // after a crash picks up where it left off without producing duplicates.
   const admin = getRawClient({ as: 'admin' });
+  const adminSql = postgres(adminUrl, { max: 2 });
   const existingOrg = await admin
     .select({ id: organizations.id })
     .from(organizations)
     .where(eq(organizations.name, ORG_NAME))
     .limit(1);
+
+  let orgId: string;
   if (existingOrg[0]) {
-    console.error(
-      `❌  Organization "${ORG_NAME}" already exists (id=${existingOrg[0].id}). ` +
-        `Drop the database and re-run (\`pnpm db:migrate && pnpm db:seed-demo\`).`,
-    );
-    process.exit(1);
+    orgId = existingOrg[0].id;
+    console.log(`↻ Resuming existing organization: ${orgId}`);
+  } else {
+    await ensureUser({
+      id: OWNER_USER_ID,
+      email: OWNER_EMAIL,
+      fullName: 'Olav Johansen',
+    });
+    const { organization } = await createOrganizationWithOwner({
+      name: ORG_NAME,
+      ownerUserId: OWNER_USER_ID,
+      orgNumber: '913 000 001',
+    });
+    orgId = organization.id;
+    console.log(`✔ Organization created: ${orgId}`);
   }
 
-  // --- Platform catalog -----------------------------------------------------
+  // --- Platform catalog (idempotent at source) -----------------------------
   const insurerCount = await seedInsuranceCompanies();
   console.log(`✔ Insurance catalog: ${insurerCount} companies (idempotent)`);
 
-  // Read back insurer ids for funding sources.
   const insurerSql = postgres(adminUrl, { max: 1 });
   const insurers = await insurerSql<
     { id: string; name: string }[]
   >`SELECT id, name FROM insurance_companies WHERE is_active = true ORDER BY name`;
   await insurerSql.end();
 
-  // --- Owner + organization -------------------------------------------------
-  await ensureUser({
-    id: OWNER_USER_ID,
-    email: OWNER_EMAIL,
-    fullName: 'Olav Johansen',
-  });
-  const { organization } = await createOrganizationWithOwner({
-    name: ORG_NAME,
-    ownerUserId: OWNER_USER_ID,
-    orgNumber: '913 000 001',
-  });
-  const orgId = organization.id;
-  console.log(`✔ Organization created: ${orgId}`);
+  await seedDefaultWorkflow(orgId); // idempotent
+  console.log(`✔ Default production workflow ready`);
 
-  await seedDefaultWorkflow(orgId);
-  console.log(`✔ Default production workflow seeded`);
+  const ruleCount = await seedNotificationRules(orgId); // idempotent
+  console.log(`✔ Notification rules ready (${ruleCount})`);
 
-  const ruleCount = await seedNotificationRules(orgId);
-  console.log(`✔ Notification rules seeded (${ruleCount} default)`);
-
-  // --- Workshops ------------------------------------------------------------
-  const adminSql = postgres(adminUrl, { max: 2 });
+  // --- Workshops (idempotent by (org, name)) -------------------------------
   const workshopIds: string[] = [];
+  let workshopsCreated = 0;
   for (const w of WORKSHOPS) {
+    const existing = await adminSql<{ id: string }[]>`
+      SELECT id FROM workshops
+      WHERE organization_id = ${orgId} AND name = ${w.name}
+      LIMIT 1
+    `;
+    if (existing[0]) {
+      workshopIds.push(existing[0].id);
+      continue;
+    }
     const rows = await adminSql<{ id: string }[]>`
       INSERT INTO workshops (organization_id, name, address)
       VALUES (${orgId}, ${w.name}, ${JSON.stringify({ city: w.city, country: 'NO' })}::jsonb)
       RETURNING id
     `;
     workshopIds.push(rows[0]!.id);
+    workshopsCreated++;
   }
-  console.log(`✔ ${workshopIds.length} workshops created`);
+  console.log(
+    `✔ Workshops ready (${workshopIds.length} total, ${workshopsCreated} new)`,
+  );
 
   // --- Look up role ids for the org ----------------------------------------
   const roleRows = await admin
@@ -450,28 +463,69 @@ async function main(): Promise<void> {
     if (r.key) roleIdByKey.set(r.key, r.id);
   }
 
-  // --- Employees ------------------------------------------------------------
-  const employeeIds: string[] = [OWNER_USER_ID];
+  // --- Employees (idempotent: lookup user by email; skip if membership exists) ---
+  // Resolve owner id: if a user already exists with OWNER_EMAIL, reuse its id
+  // rather than the hardcoded OWNER_USER_ID (which only applies on first run).
+  const ownerLookup = await adminSql<{ id: string }[]>`
+    SELECT id FROM users WHERE email = ${OWNER_EMAIL} LIMIT 1
+  `;
+  const resolvedOwnerId = ownerLookup[0]?.id ?? OWNER_USER_ID;
+  if (!ownerLookup[0]) {
+    await ensureUser({
+      id: OWNER_USER_ID,
+      email: OWNER_EMAIL,
+      fullName: 'Olav Johansen',
+    });
+  }
+
+  const employeeIds: string[] = [resolvedOwnerId];
+  let employeesCreated = 0;
   for (const emp of EMPLOYEES) {
-    const userId = randomUUID();
-    await ensureUser({ id: userId, email: emp.email, fullName: emp.fullName });
+    // Reuse user by email if present
+    const userLookup = await adminSql<{ id: string }[]>`
+      SELECT id FROM users WHERE email = ${emp.email} LIMIT 1
+    `;
+    let userId: string;
+    if (userLookup[0]) {
+      userId = userLookup[0].id;
+    } else {
+      userId = randomUUID();
+      await ensureUser({
+        id: userId,
+        email: emp.email,
+        fullName: emp.fullName,
+      });
+    }
+    employeeIds.push(userId);
+
+    // Skip membership/role-assignment if membership already active in this org
+    const memLookup = await adminSql<{ id: string }[]>`
+      SELECT id FROM memberships
+      WHERE organization_id = ${orgId} AND user_id = ${userId}
+        AND deleted_at IS NULL
+      LIMIT 1
+    `;
+    if (memLookup[0]) continue;
+
     const roleId = roleIdByKey.get(emp.role);
     if (!roleId) throw new Error(`Missing role ${emp.role}`);
     await addMembershipWithRole({
       organizationId: orgId,
       userId,
       roleId,
-      assignedByUserId: OWNER_USER_ID,
+      assignedByUserId: resolvedOwnerId,
       defaultWorkshopId: workshopIds[emp.workshopIndex] ?? null,
     });
-    employeeIds.push(userId);
+    employeesCreated++;
   }
-  console.log(`✔ ${employeeIds.length} employees provisioned (incl. owner)`);
+  console.log(
+    `✔ Employees ready (${employeeIds.length} total incl. owner, ${employeesCreated} new)`,
+  );
 
   // --- System ctx for the bulk seed work -----------------------------------
   // Owner has all permissions; bulk-create through their context.
   const sysCtx: RequestContext = {
-    userId: OWNER_USER_ID,
+    userId: resolvedOwnerId,
     organizationId: orgId,
     workshopId: workshopIds[0]!,
     accessibleWorkshopIds: [...workshopIds],
@@ -483,9 +537,19 @@ async function main(): Promise<void> {
     correlationId: randomUUID(),
   });
 
-  // --- Checklist templates (seed once at org level) ------------------------
+  // --- Checklist templates (idempotent by (org, code)) ---------------------
   const templateIdByCode = new Map<string, string>();
+  let templatesCreated = 0;
   for (const tpl of DEFAULT_CHECKLIST_TEMPLATES) {
+    const existing = await adminSql<{ id: string }[]>`
+      SELECT id FROM checklist_templates
+      WHERE organization_id = ${orgId} AND code = ${tpl.code}
+      LIMIT 1
+    `;
+    if (existing[0]) {
+      templateIdByCode.set(tpl.code, existing[0].id);
+      continue;
+    }
     const created = await createChecklistTemplate(sysCtx, {
       code: tpl.code,
       name: tpl.name,
@@ -493,12 +557,25 @@ async function main(): Promise<void> {
       items: tpl.items.map((i) => ({ ...i })),
     });
     templateIdByCode.set(tpl.code, created.id);
+    templatesCreated++;
   }
-  console.log(`✔ ${templateIdByCode.size} QC checklist templates seeded`);
+  console.log(
+    `✔ QC checklist templates ready (${templateIdByCode.size} total, ${templatesCreated} new)`,
+  );
 
-  // --- Customers ------------------------------------------------------------
+  // --- Customers (idempotent by (org, name)) -------------------------------
+  // Pre-load existing customers so we can match deterministic seed positions
+  // back to their already-created IDs. We index by name because the script
+  // generates a stable name per seed index (via PRNG + name pools).
+  const existingCustomerRows = await adminSql<
+    { id: string; name: string; primary_email: string | null }[]
+  >`SELECT id, name, primary_email FROM customers WHERE organization_id = ${orgId}`;
+  const existingCustomerByName = new Map<string, string>();
+  for (const c of existingCustomerRows) existingCustomerByName.set(c.name, c.id);
+
   const customerIds: string[] = [];
   const customerContacts: { email: string; phone: string }[] = [];
+  let customersCreated = 0;
   for (let i = 0; i < 50; i++) {
     const isBusiness = i % 5 === 0; // 10 of 50 are businesses
     const name = isBusiness
@@ -511,6 +588,13 @@ async function main(): Promise<void> {
     const r = rand();
     const phone = r < 0.9 ? phoneNumber(i) : '';
     const email = r >= 0.2 ? emailFromName(name, i) : '';
+
+    const existingId = existingCustomerByName.get(name);
+    if (existingId) {
+      customerIds.push(existingId);
+      customerContacts.push({ email, phone });
+      continue;
+    }
     const input: CreateCustomerInput = {
       kind: isBusiness ? 'company' : 'individual',
       name,
@@ -522,21 +606,39 @@ async function main(): Promise<void> {
     const created = await createCustomer(sysCtx, input);
     customerIds.push(created.id);
     customerContacts.push({ email, phone });
+    customersCreated++;
   }
-  console.log(`✔ ${customerIds.length} customers created`);
+  console.log(
+    `✔ Customers ready (${customerIds.length} total, ${customersCreated} new)`,
+  );
 
-  // --- Vehicles -------------------------------------------------------------
+  // --- Vehicles (idempotent by (org, registration_number)) -----------------
+  const existingVehicleRows = await adminSql<
+    { id: string; registration_number: string }[]
+  >`SELECT id, registration_number FROM vehicles WHERE organization_id = ${orgId}`;
+  const existingVehicleByReg = new Map<string, string>();
+  for (const v of existingVehicleRows)
+    existingVehicleByReg.set(v.registration_number, v.id);
+
   const vehicleIds: string[] = [];
   const vehicleOwnerByVehicleIdx: number[] = []; // map vehicle idx → customer idx
+  let vehiclesCreated = 0;
   for (let i = 0; i < 75; i++) {
     // Round-robin distribute to customers, but skip some so a few customers
     // have zero vehicles (realistic — walk-ins, pure-payer customers, etc.).
     const ownerIdx = (i * 2 + (i % 3)) % customerIds.length;
+    const reg = regNumber(i);
+    const existingId = existingVehicleByReg.get(reg);
+    if (existingId) {
+      vehicleIds.push(existingId);
+      vehicleOwnerByVehicleIdx.push(ownerIdx);
+      continue;
+    }
     const spec = VEHICLES[i % VEHICLES.length]!;
     const ownership =
       i % 7 === 0 ? 'company_pool' : i % 11 === 0 ? 'leased' : 'private';
     const v = await createVehicle(sysCtx, {
-      registrationNumber: regNumber(i),
+      registrationNumber: reg,
       make: spec.make,
       model: spec.model,
       year: spec.year,
@@ -546,8 +648,11 @@ async function main(): Promise<void> {
     });
     vehicleIds.push(v.id);
     vehicleOwnerByVehicleIdx.push(ownerIdx);
+    vehiclesCreated++;
   }
-  console.log(`✔ ${vehicleIds.length} vehicles created`);
+  console.log(
+    `✔ Vehicles ready (${vehicleIds.length} total, ${vehiclesCreated} new)`,
+  );
 
   // --- Cases ---------------------------------------------------------------
   // 25 cases. Distribute stop-states so the production board shows life:
@@ -592,7 +697,52 @@ async function main(): Promise<void> {
   }
   const cases: SeededCase[] = [];
 
-  for (let i = 0; i < 25; i++) {
+  // Pre-load existing cases for this org. If 25 exist, we resume by mapping
+  // them to seed slots (so downstream blocks like photos / QC / signatures can
+  // run idempotently against them). If 0 exist, we create all 25. Partial
+  // case state (1..24) is not supported — re-running picks up from a clean
+  // case block only.
+  const existingCaseRows = await adminSql<
+    { id: string; vehicle_id: string; primary_customer_id: string; current_workshop_id: string }[]
+  >`SELECT id, vehicle_id, primary_customer_id, current_workshop_id
+     FROM cases WHERE organization_id = ${orgId} ORDER BY created_at`;
+  const existingCaseCount = existingCaseRows.length;
+
+  if (existingCaseCount === 25) {
+    // Resume: rebuild SeededCase[] from DB, matching deterministic seed order
+    // by vehicle_id (same vehicleIdx → same vehicle).
+    for (let i = 0; i < 25; i++) {
+      // Recompute deterministic indices to discover the expected vehicleIdx
+      // for slot i, then find the matching DB row.
+      const vehicleIdx = (i * 3) % vehicleIds.length;
+      const customerIdx = vehicleOwnerByVehicleIdx[vehicleIdx]!;
+      const expectedVehicleId = vehicleIds[vehicleIdx]!;
+      const row = existingCaseRows.find((r) => r.vehicle_id === expectedVehicleId);
+      if (!row) {
+        throw new Error(
+          `Resume: expected case for vehicle ${expectedVehicleId} (slot ${i}) not found`,
+        );
+      }
+      cases.push({
+        id: row.id,
+        workshopId: row.current_workshop_id,
+        stopState: STOP_STATES[i]!,
+        customerId: customerIds[customerIdx]!,
+        customerHasPhone: Boolean(customerContacts[customerIdx]!.phone),
+        customerHasEmail: Boolean(customerContacts[customerIdx]!.email),
+      });
+      // Consume rand() calls that the create path would have made (funding +
+      // misc), to keep downstream PRNG aligned with what photos/etc expect.
+      rand(); // funding selector
+      rand(); // coverage cap noise (sometimes used)
+    }
+    console.log(`↻ Cases resumed (${cases.length} loaded from DB)`);
+  } else if (existingCaseCount !== 0) {
+    throw new Error(
+      `Cannot resume: found ${existingCaseCount} cases in org (expected 0 or 25). ` +
+        `Either delete all cases for this org or restore to full 25.`,
+    );
+  } else for (let i = 0; i < 25; i++) {
     const vehicleIdx = (i * 3) % vehicleIds.length;
     const customerIdx = vehicleOwnerByVehicleIdx[vehicleIdx]!;
     const workshopId = workshopIds[i % workshopIds.length]!;

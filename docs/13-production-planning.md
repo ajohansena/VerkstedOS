@@ -591,6 +591,17 @@ An apprentice planned on work requiring `qualified` proficiency triggers a soft 
 
 ## 10. Office planning
 
+> **D3 — IMPLEMENTED.** Office tasks are a first-class entity (`office_tasks`)
+> with full lifecycle (open → in_progress → completed / cancelled with reason),
+> assigned to either a Resource or a User (CHECK constraint enforces exactly
+> one), and surfaced in three places:
+>   • **My Tasks (office)** — split today / later for the signed-in user.
+>   • **Day View** — top "Kontor" lane (amber), independent of resource lanes.
+>   • **Week View** — top office row with per-day count badges.
+> Office tasks are **NOT** consumed by the capacity engine and **NEVER**
+> aggregated into case cost (TakstKontroll-safe — CLAUDE.md § 4.7). Event-
+> driven generation lives in `task_templates` (§ 16.1 implementation).
+
 The directive is right that the planning board is not only for workshop staff. Office work — order parts, customer calls, rental booking, supplement requests, insurer follow-up, invoicing, documentation — must be plannable alongside production.
 
 ### How office tasks coexist with production
@@ -831,6 +842,19 @@ Four items require a project-owner decision. None is resolved here.
 ---
 
 **🛑 16.1 — Office tasks: no backing entity (most significant)**
+
+> **D3 RESOLUTION — Option 1 ADOPTED + IMPLEMENTED.** A new `office_tasks`
+> entity ships in migrations 0051/0052 with full RLS. Generation is event-
+> driven via the companion `task_templates` entity (migrations 0053/0054):
+> templates subscribe to outbox event types with an optional shallow JSON
+> filter; a per-org Inngest cron (`generate-office-tasks-from-events`,
+> every 5 min) scans the published outbox window and unfolds office tasks
+> via `createOfficeTaskSystem`. Idempotency is enforced by the partial
+> unique index `office_tasks_template_event_unique` on
+> `(generated_from_template_id, generated_from_event_id)`. Five default
+> Norwegian templates are seeded via `/admin/task-templates` →
+> "Opprett standardmaler". Cross-org platform inspector + force-disable
+> live at `/dev/task-templates`. ADR: `docs/adrs/0010-office-tasks-and-task-templates.md`.
 
 *What:* § 10 needs standalone, plannable, often case-linked office tasks (order parts, call customer, insurer follow-up, invoicing, rental booking, documentation). Doc 10 has no entity for this. WorkSegment = production work from an estimate; Task = sub-segment of a WorkSegment. Neither fits.
 

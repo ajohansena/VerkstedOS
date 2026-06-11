@@ -69,6 +69,8 @@ export { clockSessions } from './workforce/clock-sessions';
 export { timeEntries } from './workforce/time-entries';
 export { absenceTypes } from './workforce/absence-types';
 export { absenceEntries } from './workforce/absence-entries';
+export { officeTasks } from './workforce/office-tasks';
+export { taskTemplates } from './workforce/task-templates';
 
 // Parts & Procurement
 export { suppliers } from './parts/suppliers';

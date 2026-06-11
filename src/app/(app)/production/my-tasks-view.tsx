@@ -12,27 +12,52 @@ export type MyTasksRow = {
   plannedEndAt: Date | null;
 };
 
+export type MyOfficeTaskRow = {
+  taskId: string;
+  title: string;
+  kind: string;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  caseId: string | null;
+  caseNumber: string | null;
+  dueAt: Date | null;
+};
+
 interface Props {
   todays: MyTasksRow[];
   rest: MyTasksRow[];
+  officeTasksToday: MyOfficeTaskRow[];
+  officeTasksLater: MyOfficeTaskRow[];
   hasResources: boolean;
   t: ReturnType<typeof getDictionary>;
 }
 
 /**
- * Production Board v3 — My Tasks View (Sprint 20, doc 13 §4.5). Shows the
- * segments planned for the current user's resources (assignments where the
- * resource is linked to their employee record). Two buckets: today + rest of
- * the week. Empty state when the user has no linked resources.
+ * Production Board v3 — My Tasks View (Sprint 20 + D3 Phase E, doc 13 §4.5).
+ * Shows segments planned for the current user's resources + office tasks
+ * directly assigned to the user or their resources. Empty state when the user
+ * has neither resources nor office tasks.
  */
-export function MyTasksView({ todays, rest, hasResources, t }: Props) {
+export function MyTasksView({
+  todays,
+  rest,
+  officeTasksToday,
+  officeTasksLater,
+  hasResources,
+  t,
+}: Props) {
   const fmtTime = (d: Date | null): string =>
     d ? new Intl.DateTimeFormat('nb-NO', { timeStyle: 'short' }).format(d) : '—';
 
   const fmtRange = (s: Date, e: Date | null): string =>
     `${fmtTime(s)}–${fmtTime(e)}`;
 
-  if (!hasResources) {
+  const hasAnything =
+    todays.length > 0 ||
+    rest.length > 0 ||
+    officeTasksToday.length > 0 ||
+    officeTasksLater.length > 0;
+
+  if (!hasResources && !hasAnything) {
     return (
       <section className="rounded-lg border bg-background p-6 text-sm text-muted-foreground">
         {t.myTasks.notAssigned}
@@ -40,7 +65,7 @@ export function MyTasksView({ todays, rest, hasResources, t }: Props) {
     );
   }
 
-  if (todays.length === 0 && rest.length === 0) {
+  if (!hasAnything) {
     return (
       <section className="rounded-lg border bg-background p-6 text-sm text-muted-foreground">
         {t.myTasks.empty}
@@ -50,12 +75,27 @@ export function MyTasksView({ todays, rest, hasResources, t }: Props) {
 
   return (
     <div className="space-y-6">
+      {officeTasksToday.length > 0 && (
+        <OfficeTaskList
+          heading={t.officeTask.title + ' · ' + t.common.today}
+          rows={officeTasksToday}
+          t={t}
+        />
+      )}
       {todays.length > 0 && (
         <TaskTable
           heading={t.myTasks.plannedTodayHeading}
           rows={todays}
           t={t}
           fmtRange={fmtRange}
+        />
+      )}
+      {officeTasksLater.length > 0 && (
+        <OfficeTaskList
+          heading={t.officeTask.title}
+          rows={officeTasksLater}
+          t={t}
+          showDate
         />
       )}
       {rest.length > 0 && (
@@ -70,6 +110,75 @@ export function MyTasksView({ todays, rest, hasResources, t }: Props) {
     </div>
   );
 }
+
+function OfficeTaskList({
+  heading,
+  rows,
+  t,
+  showDate,
+}: {
+  heading: string;
+  rows: MyOfficeTaskRow[];
+  t: ReturnType<typeof getDictionary>;
+  showDate?: boolean;
+}) {
+  const now = Date.now();
+  const fmtDate = (d: Date | null): string =>
+    d
+      ? new Intl.DateTimeFormat('nb-NO', {
+          weekday: 'short',
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(d)
+      : t.officeTask.noDueAt;
+  const fmtTime = (d: Date | null): string =>
+    d
+      ? new Intl.DateTimeFormat('nb-NO', { timeStyle: 'short' }).format(d)
+      : t.officeTask.noDueAt;
+  return (
+    <section className="rounded-lg border bg-background">
+      <header className="border-b p-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {heading}
+        </h2>
+      </header>
+      <ul className="divide-y text-sm">
+        {rows.map((r) => {
+          const overdue = r.dueAt !== null && r.dueAt.getTime() < now;
+          return (
+            <li key={r.taskId} className="flex items-center gap-3 p-3">
+              <span
+                className={
+                  'min-w-24 tabular-nums text-xs ' +
+                  (overdue ? 'font-medium text-red-600' : 'text-muted-foreground')
+                }
+              >
+                {showDate ? fmtDate(r.dueAt) : fmtTime(r.dueAt)}
+              </span>
+              <span className="flex-1">
+                <span className="font-medium">{r.title}</span>
+                <span className="ml-2 text-xs text-muted-foreground">
+                  {r.kind}
+                </span>
+              </span>
+              {r.caseId && r.caseNumber ? (
+                <Link
+                  href={`/cases/${r.caseId}`}
+                  className="text-xs underline"
+                >
+                  {r.caseNumber}
+                </Link>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 
 function TaskTable({
   heading,

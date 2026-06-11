@@ -3,6 +3,7 @@ import { serve } from 'inngest/next';
 import { inngest } from '@/../inngest/client';
 import { computeKpiSnapshots } from '@/../inngest/functions/compute-kpi-snapshots';
 import { evaluateNotifications } from '@/../inngest/functions/evaluate-notifications';
+import { generateOfficeTasksFromEvents } from '@/../inngest/functions/generate-office-tasks-from-events';
 import { publishOutbox } from '@/../inngest/functions/publish-outbox';
 
 /**
@@ -11,5 +12,10 @@ import { publishOutbox } from '@/../inngest/functions/publish-outbox';
  */
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [publishOutbox, computeKpiSnapshots, evaluateNotifications],
+  functions: [
+    publishOutbox,
+    computeKpiSnapshots,
+    evaluateNotifications,
+    generateOfficeTasksFromEvents,
+  ],
 });

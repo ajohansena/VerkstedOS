@@ -12,15 +12,20 @@ import {
   listWorkflowAdjacency,
   listWorkflowStates,
 } from '@/modules/production/public';
-import { findEmployeeByUserId, listApprovedAbsenceWindowsForEmployees } from '@/modules/workforce/public';
+import {
+  findEmployeeByUserId,
+  listApprovedAbsenceWindowsForEmployees,
+  listMyOpenOfficeTasks,
+  listOpenOfficeTasksForOrg,
+} from '@/modules/workforce/public';
 
 import { BoardV2 } from './board-v2';
 import { BookFromIntakeBanner } from './book-from-intake-banner';
-import { DayView } from './day-view';
+import { DayView, type DayOfficeTask } from './day-view';
 import { ModeTabs, type BoardMode } from './mode-tabs';
-import { MyTasksView, type MyTasksRow } from './my-tasks-view';
+import { MyTasksView, type MyTasksRow, type MyOfficeTaskRow } from './my-tasks-view';
 import { ResourceView, type ResourceRow as RV_Row } from './resource-view';
-import { WeekView, type WeekRow as WV_Row } from './week-view';
+import { WeekView, type WeekRow as WV_Row, type WeekOfficeTaskCell } from './week-view';
 
 export const dynamic = 'force-dynamic';
 
@@ -188,11 +193,26 @@ async function DaySection({
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
-  const rows = await listPlannedSegmentsForRange(
-    session.context,
-    startOfToday,
-    endOfToday,
+  const [rows, allOffice] = await Promise.all([
+    listPlannedSegmentsForRange(session.context, startOfToday, endOfToday),
+    listOpenOfficeTasksForOrg(session.context, 100),
+  ]);
+  const todaysOffice = allOffice.filter(
+    (t) => t.dueAt !== null && t.dueAt < endOfToday,
   );
+  const caseNumberById = await loadCaseNumbers(
+    session,
+    todaysOffice.map((o) => o.caseId).filter((id): id is string => id !== null),
+  );
+  const officeTasks: DayOfficeTask[] = todaysOffice.map((o) => ({
+    taskId: o.id,
+    title: o.title,
+    kind: o.kind,
+    priority: o.priority,
+    dueAt: o.dueAt ? o.dueAt.toISOString() : null,
+    caseId: o.caseId,
+    caseNumber: o.caseId ? (caseNumberById.get(o.caseId) ?? null) : null,
+  }));
   return (
     <DayView
       rows={rows.map((r) => ({
@@ -210,15 +230,38 @@ async function DaySection({
         plannedEndAt: r.plannedEndAt ? r.plannedEndAt.toISOString() : null,
         status: r.status,
       }))}
+      officeTasks={officeTasks}
       labels={{
         heading: t.productionBoard.dayHeading,
         empty: t.productionBoard.dayEmpty,
         timeColumn: t.productionBoard.dayTimeColumn,
         caseColumn: t.productionBoard.dayCaseColumn,
         resourceColumn: t.productionBoard.dayResourceColumn,
+        officeLaneHeading: t.productionBoard.officeLaneHeading,
+        officeLaneEmpty: t.productionBoard.officeLaneEmpty,
       }}
     />
   );
+}
+
+/**
+ * Batch case-number lookup. `findCaseById` is single-shot; this helper
+ * de-dupes and runs them in parallel. Small N (≤ a few dozen) so a join-
+ * style query isn't worth the extra repository surface.
+ */
+async function loadCaseNumbers(
+  session: NonNullable<Awaited<ReturnType<typeof getSessionContext>>>,
+  caseIds: string[],
+): Promise<Map<string, string>> {
+  const unique = Array.from(new Set(caseIds));
+  const map = new Map<string, string>();
+  await Promise.all(
+    unique.map(async (id) => {
+      const c = await findCaseById(session.context, id);
+      if (c) map.set(id, c.caseNumber);
+    }),
+  );
+  return map;
 }
 
 /**
@@ -241,14 +284,37 @@ async function MyTasksSection({
   const weekEnd = new Date(today.getTime() + 7 * DAY);
 
   const employee = await findEmployeeByUserId(session.context, session.user.id);
-  const [resources, planned] = await Promise.all([
+  const [resources, planned, myOffice] = await Promise.all([
     listResourcesForBoard(session.context),
     listPlannedSegmentsForRange(session.context, today, weekEnd),
+    listMyOpenOfficeTasks(
+      session.context,
+      [], // resource ids filled in after `resources` load below
+    ),
   ]);
   const myResourceIds = new Set(
     resources
       .filter((r) => employee && r.employeeId === employee.id)
       .map((r) => r.id),
+  );
+  // Now that we have the resource list, also fetch the resource-assigned
+  // office tasks for this user. We could re-query, but in practice the bulk
+  // (assignee_user_id direct) already came back above; merge the resource
+  // matches in via a follow-up scan against the org-wide list.
+  const allOrgOffice = await listOpenOfficeTasksForOrg(session.context, 500);
+  const myOfficeMap = new Map<string, (typeof myOffice)[number]>();
+  for (const t of myOffice) myOfficeMap.set(t.id, t);
+  for (const t of allOrgOffice) {
+    if (t.assigneeResourceId && myResourceIds.has(t.assigneeResourceId)) {
+      myOfficeMap.set(t.id, t);
+    }
+  }
+  const myOfficeTasks = Array.from(myOfficeMap.values());
+  const caseNumberById = await loadCaseNumbers(
+    session,
+    myOfficeTasks
+      .map((t) => t.caseId)
+      .filter((id): id is string => id !== null),
   );
 
   const todays: MyTasksRow[] = [];
@@ -269,10 +335,28 @@ async function MyTasksSection({
     else rest.push(row);
   }
 
+  const officeTasksToday: MyOfficeTaskRow[] = [];
+  const officeTasksLater: MyOfficeTaskRow[] = [];
+  for (const o of myOfficeTasks) {
+    const row: MyOfficeTaskRow = {
+      taskId: o.id,
+      title: o.title,
+      kind: o.kind,
+      priority: o.priority,
+      caseId: o.caseId,
+      caseNumber: o.caseId ? (caseNumberById.get(o.caseId) ?? null) : null,
+      dueAt: o.dueAt,
+    };
+    if (o.dueAt && o.dueAt < todayEnd) officeTasksToday.push(row);
+    else officeTasksLater.push(row);
+  }
+
   return (
     <MyTasksView
       todays={todays}
       rest={rest}
+      officeTasksToday={officeTasksToday}
+      officeTasksLater={officeTasksLater}
       hasResources={employee !== null && myResourceIds.size > 0}
       t={t}
     />
@@ -418,9 +502,10 @@ async function WeekSection({
   const weekStart = new Date(today.getTime() - daysFromMonday * DAY);
   const weekEnd = new Date(weekStart.getTime() + 5 * DAY);
 
-  const [resources, planned] = await Promise.all([
+  const [resources, planned, officeAll] = await Promise.all([
     listResourcesForBoard(session.context),
     listPlannedSegmentsForRange(session.context, weekStart, weekEnd),
+    listOpenOfficeTasksForOrg(session.context, 500),
   ]);
 
   const employeeIds = resources
@@ -503,12 +588,22 @@ async function WeekSection({
     <WeekView
       rows={rows}
       dates={dates}
+      officeTasksByDate={dates.map((iso) => {
+        const dayStart = new Date(`${iso}T00:00:00`);
+        const dayEnd = new Date(dayStart.getTime() + DAY);
+        const count = officeAll.filter(
+          (o) => o.dueAt && o.dueAt >= dayStart && o.dueAt < dayEnd,
+        ).length;
+        return { date: iso, count } satisfies WeekOfficeTaskCell;
+      })}
       labels={{
         heading: t.productionBoard.weekHeading,
         empty: t.productionBoard.weekEmpty,
         loadDept: t.productionBoard.weekDeptLoad,
         hoursSuffix: t.productionBoard.weekHoursSuffix,
         freeLabel: t.productionBoard.weekFree,
+        officeLaneHeading: t.productionBoard.officeLaneHeading,
+        officeLaneEmpty: t.productionBoard.officeLaneEmpty,
       }}
     />
   );

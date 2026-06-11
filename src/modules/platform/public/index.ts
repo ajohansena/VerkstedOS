@@ -108,6 +108,18 @@ export {
 } from '../infrastructure/repositories/platform-booking-repository';
 
 export {
+  listOfficeTasksForOrgPlatform,
+  repairCancelOfficeTask,
+  type OfficeTaskRow,
+} from '../infrastructure/repositories/platform-office-task-repository';
+
+export {
+  listTaskTemplatesForOrgPlatform,
+  repairDisableTaskTemplate,
+  type TaskTemplateRow,
+} from '../infrastructure/repositories/platform-task-template-repository';
+
+export {
   qcSummaryForOrg,
   type QcRunRow,
   type QcOrgSummary,

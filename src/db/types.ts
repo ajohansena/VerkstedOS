@@ -40,6 +40,8 @@ import type { clockSessions } from './schemas/workforce/clock-sessions';
 import type { timeEntries } from './schemas/workforce/time-entries';
 import type { absenceTypes } from './schemas/workforce/absence-types';
 import type { absenceEntries } from './schemas/workforce/absence-entries';
+import type { officeTasks } from './schemas/workforce/office-tasks';
+import type { taskTemplates } from './schemas/workforce/task-templates';
 import type { suppliers } from './schemas/parts/suppliers';
 import type { supplierAgreements } from './schemas/parts/supplier-agreements';
 import type { partRequirements } from './schemas/parts/part-requirements';
@@ -290,6 +292,11 @@ export type NewAbsenceType = InferInsertModel<typeof absenceTypes>;
 
 export type AbsenceEntry = InferSelectModel<typeof absenceEntries>;
 export type NewAbsenceEntry = InferInsertModel<typeof absenceEntries>;
+
+export type OfficeTask = InferSelectModel<typeof officeTasks>;
+export type NewOfficeTask = InferInsertModel<typeof officeTasks>;
+export type TaskTemplate = InferSelectModel<typeof taskTemplates>;
+export type NewTaskTemplate = InferInsertModel<typeof taskTemplates>;
 
 export type Supplier = InferSelectModel<typeof suppliers>;
 export type NewSupplier = InferInsertModel<typeof suppliers>;

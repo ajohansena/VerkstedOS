@@ -73,9 +73,11 @@ import { cn } from '@/lib/utils';
 import { findCustomerById, findVehicleById } from '@/modules/customer/public';
 import { NORMAL_REPAIR_DAYS } from '@/lib/operations/snapshot';
 import { findCaseProductionState } from '@/modules/production/public';
+import { listOfficeTasksForCase } from '@/modules/workforce/public';
 import { CaseSidePanel } from './case-side-panel';
 import { CaseFinanceSection } from './case-finance-section';
 import { CaseBookingsSection } from './case-bookings-section';
+import { CaseOfficeTasksSection } from './case-office-tasks-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -182,6 +184,7 @@ export default async function CaseDetailPage({
     (w) => w.id !== currentWorkshopId,
   );
   const bookings = await listBookingsForCase(session.context, id);
+  const officeTasks = await listOfficeTasksForCase(session.context, id);
 
   const acceptance = await latestAcceptance(session.context, id);
   const threads = await listThreads(session.context, id);
@@ -476,6 +479,42 @@ export default async function CaseDetailPage({
           historyTitle: t.booking.historyTitle,
           historyEmpty: t.booking.historyEmpty,
           dateError: t.booking.dateError,
+        }}
+      />
+
+      <CaseOfficeTasksSection
+        caseId={case_.id}
+        tasks={officeTasks}
+        labels={{
+          title: t.officeTask.title,
+          description: t.officeTask.description,
+          listEmpty: t.officeTask.listEmpty,
+          overdueLabel: t.officeTask.overdueLabel,
+          noDueAt: t.officeTask.noDueAt,
+          addTitle: t.officeTask.addTitle,
+          fieldTitle: t.officeTask.fieldTitle,
+          fieldKind: t.officeTask.fieldKind,
+          fieldPriority: t.officeTask.fieldPriority,
+          fieldDueAt: t.officeTask.fieldDueAt,
+          submitCreate: t.officeTask.submitCreate,
+          actionComplete: t.officeTask.actionComplete,
+          actionCancel: t.officeTask.actionCancel,
+          cancelReason: t.officeTask.cancelReason,
+          cancelReasonRequired: t.officeTask.cancelReasonRequired,
+          statusOpen: t.officeTask.statusOpen,
+          statusInProgress: t.officeTask.statusInProgress,
+          priorityLow: t.officeTask.priorityLow,
+          priorityNormal: t.officeTask.priorityNormal,
+          priorityHigh: t.officeTask.priorityHigh,
+          priorityUrgent: t.officeTask.priorityUrgent,
+          kindOrderParts: t.officeTask.kindOrderParts,
+          kindCustomerCall: t.officeTask.kindCustomerCall,
+          kindInsurerFollowup: t.officeTask.kindInsurerFollowup,
+          kindRentalBooking: t.officeTask.kindRentalBooking,
+          kindInvoicePrep: t.officeTask.kindInvoicePrep,
+          kindCustomerFollowup: t.officeTask.kindCustomerFollowup,
+          kindDocumentation: t.officeTask.kindDocumentation,
+          kindOther: t.officeTask.kindOther,
         }}
       />
 
