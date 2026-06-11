@@ -28,7 +28,23 @@ export {
 export {
   createEmployee,
   addEmployeeSkill,
+  type CreateEmployeeInput,
 } from '../application/services/employee-management';
+
+// Resource management (Sprint 22 Phase B/C)
+export {
+  createResource,
+  updateResource,
+  archiveResource,
+  ensurePersonResourceForEmployeeInTx,
+  type CreateResourceInput,
+} from '../application/services/resources';
+export {
+  findResourceById,
+  listResources,
+  type InsertResourceValues,
+  type UpdateResourceValues,
+} from '../infrastructure/repositories/resource-repository';
 
 // Reads
 export {

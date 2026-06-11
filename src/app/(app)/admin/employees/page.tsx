@@ -46,13 +46,22 @@ export default async function AdminEmployeesPage() {
           <CardTitle>New employee</CardTitle>
           <CardDescription>
             Not every employee logs in. Add skills as comma-separated codes
-            (e.g. body, paint, assembly).
+            (e.g. body, paint, assembly). A planning Resource is created
+            automatically — uncheck the box for HR-only roles.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={createEmployeeAction} className="space-y-3">
             <Input name="fullName" placeholder="Full name" required />
             <Input name="skills" placeholder="Skills (body, paint, ...)" />
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="excludeFromPlanning"
+                className="h-4 w-4"
+              />
+              <span>Exclude from production planning (no Resource)</span>
+            </label>
             <Button type="submit">Create employee</Button>
           </form>
         </CardContent>

@@ -9,22 +9,34 @@ import {
   addSkill,
   insertEmployee,
 } from '../../infrastructure/repositories/workforce-repository';
+import { ensurePersonResourceForEmployeeInTx } from './resources';
 
 /**
  * Employee management (Admin surface). Permission: `admin:config`. Employees are
  * separate from users; not every employee logs in.
+ *
+ * Every new employee automatically materialises a `person` Resource in the
+ * SAME transaction (doc 10 § Resource model, Sprint 22 Phase B) so the planner,
+ * capacity engine and assignment surfaces see the new hire immediately. Set
+ * `excludeFromPlanning: true` to opt out — useful for HR-only roles that
+ * never appear in production planning (e.g. accounting, board members).
+ * The auto-created resource is idempotent; existing employees keep working.
  */
+
+export interface CreateEmployeeInput {
+  fullName: string;
+  workshopId?: string | null;
+  employeeNumber?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  skills?: { skillCode: string; proficiency: EmployeeSkill['proficiency'] }[];
+  /** Opt out of automatic Resource creation. Default: false. */
+  excludeFromPlanning?: boolean;
+}
 
 export async function createEmployee(
   ctx: RequestContext,
-  input: {
-    fullName: string;
-    workshopId?: string | null;
-    employeeNumber?: string | null;
-    email?: string | null;
-    phone?: string | null;
-    skills?: { skillCode: string; proficiency: EmployeeSkill['proficiency'] }[];
-  },
+  input: CreateEmployeeInput,
 ): Promise<Employee> {
   await requirePermission(ctx, 'admin:config');
 
@@ -52,6 +64,14 @@ export async function createEmployee(
       eventType: 'workforce.employee.created',
       payload: { employeeId: employee.id },
     });
+
+    if (!input.excludeFromPlanning) {
+      await ensurePersonResourceForEmployeeInTx(tx, ctx, {
+        employeeId: employee.id,
+        name: employee.fullName,
+        workshopId: employee.workshopId ?? null,
+      });
+    }
 
     return employee;
   });

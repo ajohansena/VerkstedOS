@@ -54,7 +54,13 @@ export async function createEmployeeAction(formData: FormData): Promise<void> {
     .map((s) => s.trim())
     .filter(Boolean)
     .map((skillCode) => ({ skillCode, proficiency: 'qualified' as const }));
+  const excludeFromPlanning =
+    String(formData.get('excludeFromPlanning') ?? '') === 'on';
 
-  await createEmployee(session.context, { fullName, skills });
+  await createEmployee(session.context, {
+    fullName,
+    skills,
+    excludeFromPlanning,
+  });
   redirect('/admin/employees');
 }
