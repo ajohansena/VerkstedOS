@@ -27,26 +27,44 @@ import { seedDefaultWorkflow } from './seed-workflow';
  *     no rework needed because the machine already treats status as derived.
  */
 
-/** Ensure a 1:1 production order exists for a case (container). Idempotent. */
-export async function ensureProductionOrder(
+/**
+ * Tx-accepting variant of `ensureProductionOrder`. Used when the caller already
+ * owns a transaction (e.g. `createCase` makes the ProductionOrder intrinsic to
+ * Case in one atomic commit — doc 10 § ProductionOrder + CLAUDE.md § 4.4).
+ * Idempotent within the tx.
+ */
+export async function ensureProductionOrderInTx(
+  tx: TenantTransaction,
   ctx: RequestContext,
   caseId: string,
 ): Promise<ProductionOrder> {
-  return withTransaction(ctx, async (tx) => {
-    const existing = await tx
-      .select()
-      .from(productionOrders)
-      .where(
-        and(
-          eq(productionOrders.organizationId, ctx.organizationId),
-          eq(productionOrders.caseId, caseId),
-        ),
-      )
-      .limit(1);
-    if (existing[0]) return existing[0];
+  const existing = await tx
+    .select()
+    .from(productionOrders)
+    .where(
+      and(
+        eq(productionOrders.organizationId, ctx.organizationId),
+        eq(productionOrders.caseId, caseId),
+      ),
+    )
+    .limit(1);
+  if (existing[0]) return existing[0];
 
-    // Resolve the active workflow definition (seed if missing).
-    let defRows = await tx
+  // Resolve the active workflow definition (seed if missing). Note: the seeder
+  // opens its own admin connection (no RLS) so it is safe to call inside a tx.
+  let defRows = await tx
+    .select({ id: workflowDefinitions.id })
+    .from(workflowDefinitions)
+    .where(
+      and(
+        eq(workflowDefinitions.organizationId, ctx.organizationId),
+        eq(workflowDefinitions.isActive, true),
+      ),
+    )
+    .limit(1);
+  if (!defRows[0]) {
+    await seedDefaultWorkflow(ctx.organizationId);
+    defRows = await tx
       .select({ id: workflowDefinitions.id })
       .from(workflowDefinitions)
       .where(
@@ -56,69 +74,66 @@ export async function ensureProductionOrder(
         ),
       )
       .limit(1);
-    if (!defRows[0]) {
-      await seedDefaultWorkflow(ctx.organizationId);
-      defRows = await tx
-        .select({ id: workflowDefinitions.id })
-        .from(workflowDefinitions)
-        .where(
-          and(
-            eq(workflowDefinitions.organizationId, ctx.organizationId),
-            eq(workflowDefinitions.isActive, true),
-          ),
-        )
-        .limit(1);
-    }
-    const definitionId = defRows[0]!.id;
+  }
+  const definitionId = defRows[0]!.id;
 
-    // Initial state.
-    const initial = await tx
-      .select()
-      .from(workflowStates)
-      .where(
-        and(
-          eq(workflowStates.workflowDefinitionId, definitionId),
-          eq(workflowStates.isInitial, true),
-        ),
-      )
-      .limit(1);
-    const initialState = initial[0];
+  // Initial state.
+  const initial = await tx
+    .select()
+    .from(workflowStates)
+    .where(
+      and(
+        eq(workflowStates.workflowDefinitionId, definitionId),
+        eq(workflowStates.isInitial, true),
+      ),
+    )
+    .limit(1);
+  const initialState = initial[0];
 
-    const insertedOrder = await tx
-      .insert(productionOrders)
-      .values({
-        organizationId: ctx.organizationId,
-        caseId,
-        workflowDefinitionId: definitionId,
-        currentStateId: initialState?.id ?? null,
-        createdBy: ctx.userId,
-        updatedBy: ctx.userId,
-      })
-      .returning();
-    const order = insertedOrder[0];
-    if (!order) throw new Error('Failed to create production order');
+  const insertedOrder = await tx
+    .insert(productionOrders)
+    .values({
+      organizationId: ctx.organizationId,
+      caseId,
+      workflowDefinitionId: definitionId,
+      currentStateId: initialState?.id ?? null,
+      createdBy: ctx.userId,
+      updatedBy: ctx.userId,
+    })
+    .returning();
+  const order = insertedOrder[0];
+  if (!order) throw new Error('Failed to create production order');
 
-    if (initialState) {
-      // Append the initial state entry (authoritative log) + project onto case.
-      await tx.insert(productionStateHistory).values({
-        organizationId: ctx.organizationId,
-        caseId,
-        productionOrderId: order.id,
-        fromStateId: null,
-        toStateId: initialState.id,
-        trigger: 'manual',
-        actorUserId: ctx.userId,
-        correlationId: ctx.correlationId,
-      });
-      await projectCaseStatus(tx, ctx, caseId, initialState.code);
-    }
-
-    await emitEvent(tx, ctx, {
-      eventType: 'production.order.created',
-      payload: { caseId, productionOrderId: order.id },
+  if (initialState) {
+    // Append the initial state entry (authoritative log) + project onto case.
+    await tx.insert(productionStateHistory).values({
+      organizationId: ctx.organizationId,
+      caseId,
+      productionOrderId: order.id,
+      fromStateId: null,
+      toStateId: initialState.id,
+      trigger: 'manual',
+      actorUserId: ctx.userId,
+      correlationId: ctx.correlationId,
     });
+    await projectCaseStatus(tx, ctx, caseId, initialState.code);
+  }
 
-    return order;
+  await emitEvent(tx, ctx, {
+    eventType: 'production.order.created',
+    payload: { caseId, productionOrderId: order.id },
+  });
+
+  return order;
+}
+
+/** Ensure a 1:1 production order exists for a case (container). Idempotent. */
+export async function ensureProductionOrder(
+  ctx: RequestContext,
+  caseId: string,
+): Promise<ProductionOrder> {
+  return withTransaction(ctx, async (tx) => {
+    return ensureProductionOrderInTx(tx, ctx, caseId);
   });
 }
 

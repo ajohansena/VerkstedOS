@@ -23,6 +23,7 @@ export type {
 // Container + transition machine
 export {
   ensureProductionOrder,
+  ensureProductionOrderInTx,
   transitionState,
   ensureWorkflowSeeded,
   type TransitionInput,

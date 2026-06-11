@@ -4,6 +4,7 @@ import { emitEvent } from '@/lib/events/outbox';
 import type { Case } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 import { requirePermission } from '@/modules/identity/public';
+import { ensureProductionOrderInTx } from '@/modules/production/public';
 
 import {
   createCaseSchema,
@@ -24,6 +25,12 @@ import {
  * insurance claims, and all funding sources in ONE transaction — permission-
  * checked, fully audited, event-emitting. The multi-funding invariants are
  * validated up front (domain rules).
+ *
+ * A `ProductionOrder` is created in the SAME transaction (CLAUDE.md § 4.4,
+ * doc 10 § ProductionOrder, doc 13 § 20.4). The Case ↔ ProductionOrder
+ * relationship is intrinsically 1:1; the planner, Operations Center and every
+ * production read assumes the order exists. Lazy `ensureProductionOrder` calls
+ * remain valid for upgrade paths but no new code path should rely on them.
  */
 
 function toMoney(amount: number | undefined): string | null {
@@ -80,6 +87,11 @@ export async function createCase(
         fundingSourceCount: input.fundingSources.length,
       },
     });
+
+    // Intrinsic ProductionOrder: every Case has exactly one (doc 10, doc 13
+    // § 20.4). Done in the same tx so the planner / Ops Center / workflow
+    // reads see the case immediately.
+    await ensureProductionOrderInTx(tx, ctx, created.id);
 
     return created;
   });
