@@ -33,6 +33,13 @@ export {
   type ParsedEstimate,
 } from '../infrastructure/adapters/dbs-parser';
 
+// PDF extractor (operator's primary import path — DBS digital PDF → payload).
+export {
+  extractDbsEstimateFromPdf,
+  DbsPdfExtractionError,
+  type DbsPdfExtractionResult,
+} from '../infrastructure/adapters/dbs-pdf-extractor';
+
 // Reads
 export {
   listImportsForCase,

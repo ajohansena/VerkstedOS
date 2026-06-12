@@ -41,14 +41,18 @@ export async function receiveDbsPayload(input: {
   organizationId: string | null;
   externalRef?: string | null;
   payload: unknown;
+  /** Defaults to 'dbs'. Use 'pdf_upload' for operator-uploaded DBS PDFs. */
+  source?: string;
+  /** Defaults to 'sendOppdrag'. Use 'takst_pdf' for PDF-derived payloads. */
+  messageType?: string;
 }): Promise<{ inboxId: string }> {
   const db = getRawClient({ as: 'integration' });
   const rows = await db
     .insert(integrationInbox)
     .values({
       organizationId: input.organizationId,
-      source: 'dbs',
-      messageType: 'sendOppdrag',
+      source: input.source ?? 'dbs',
+      messageType: input.messageType ?? 'sendOppdrag',
       externalRef: input.externalRef ?? null,
       status: 'received',
       payload: input.payload as never,

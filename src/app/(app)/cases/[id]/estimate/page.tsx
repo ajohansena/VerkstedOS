@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import {
   importEstimateAction,
+  importEstimateFromPdfAction,
   lockEstimateAction,
 } from '@/app/actions/estimate';
 import { getSessionContext } from '@/lib/auth/session';
@@ -213,13 +214,41 @@ export default async function EstimatePage({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Import DBS estimate</CardTitle>
+          <CardTitle className="text-base">Last opp DBS-takstrapport</CardTitle>
           <CardDescription>
-            Paste a normalized DBS payload (JSON). A new version is created;
-            supplements supersede the prior version on lock.
+            Velg PDF-en fra DBS (f.eks. <code>EN64251.pdf</code>). Tall, parter
+            og identifikatorer leses ut automatisk og kan importeres som en ny
+            versjon. Rådata fra PDF-en lagres for revisjon og replay.
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <form
+            action={importEstimateFromPdfAction}
+            className="space-y-3"
+            encType="multipart/form-data"
+          >
+            <input type="hidden" name="caseId" value={case_.id} />
+            <input
+              type="file"
+              name="pdf"
+              accept="application/pdf,.pdf"
+              required
+              className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+            />
+            <Button type="submit">Importer fra PDF</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <details className="rounded-md border bg-card">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+          Avansert: lim inn normalisert DBS JSON
+        </summary>
+        <div className="space-y-3 border-t px-4 py-3">
+          <p className="text-xs text-muted-foreground">
+            Brukes når takst kommer fra integrasjon (SOAP/REST) eller når
+            PDF-uthenting feiler. Lim inn ferdig normalisert payload-JSON.
+          </p>
           <form action={importEstimateAction} className="space-y-3">
             <input type="hidden" name="caseId" value={case_.id} />
             <textarea
@@ -228,10 +257,12 @@ export default async function EstimatePage({
               defaultValue={SAMPLE}
               className="w-full rounded-md border border-input bg-background p-3 font-mono text-xs"
             />
-            <Button type="submit">Import estimate</Button>
+            <Button type="submit" variant="outline">
+              Importer JSON
+            </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </details>
     </main>
   );
 }
