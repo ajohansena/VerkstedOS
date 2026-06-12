@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 
+import { CaseDrawer } from '@/components/case-drawer';
 import type { RichBoardItem } from '@/modules/production/public';
 import { formatDate, type Locale } from '@/lib/i18n';
 import { classifyCaseRisk, NORMAL_REPAIR_DAYS } from '@/lib/operations/risk';
@@ -26,6 +26,8 @@ interface BoardLabels {
   cardRiskRed: string;
   boardEmpty: string;
   noOrder: string;
+  drawerTitle: string; // 'Sak {caseNumber}'
+  drawerOpenFull: string;
 }
 
 export interface BoardV2Props {
@@ -282,6 +284,87 @@ function BoardCard({
       ? labels.cardPartsOk
       : labels.cardPartsWaiting.replace('{count}', String(item.openPartsCount));
   const openedLine = labels.cardOpenedDays.replace('{days}', String(ageDays));
+  const cardBody = (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-2 w-2 shrink-0 rounded-full ${RISK_COLOR[risk]}`}
+          aria-label={
+            risk === 'red'
+              ? labels.cardRiskRed
+              : risk === 'yellow'
+                ? labels.cardRiskYellow
+                : labels.cardRiskGreen
+          }
+        />
+        <span className="font-semibold tracking-tight">{item.caseNumber}</span>
+        {item.registrationNumber ? (
+          <span className="ml-auto rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-wide">
+            {item.registrationNumber}
+          </span>
+        ) : null}
+      </div>
+      {vehicleLine ? (
+        <div className="truncate text-xs text-muted-foreground">
+          {vehicleLine}
+        </div>
+      ) : null}
+      {item.customerName ? (
+        <div className="truncate text-xs">{item.customerName}</div>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-muted-foreground">
+        <span>{openedLine}</span>
+        <span>
+          · {labels.cardEta}: {formatDate(etaDate, locale)}
+        </span>
+      </div>
+      {item.activeSegmentLabel ? (
+        <div className="space-y-1 rounded bg-muted/40 px-2 py-1">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="truncate">{item.activeSegmentLabel}</span>
+            <span className="font-mono">
+              {item.activeSegmentProgressPct ?? 0}%
+            </span>
+          </div>
+          <div className="h-1 overflow-hidden rounded bg-background">
+            <div
+              className="h-full bg-emerald-500"
+              style={{ width: `${item.activeSegmentProgressPct ?? 0}%` }}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="text-[11px] italic text-muted-foreground">
+          {labels.cardNoSegments}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-1">
+        {item.assignedTechName ? (
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px]">
+            {labels.cardTech}: {item.assignedTechName}
+          </span>
+        ) : null}
+        <span
+          className={
+            'rounded-full px-2 py-0.5 text-[11px] ' +
+            (item.openPartsCount === 0
+              ? 'bg-emerald-100 text-emerald-800'
+              : 'bg-amber-100 text-amber-800')
+          }
+        >
+          {labels.cardParts}: {partsBadge}
+        </span>
+        {item.onHold ? (
+          <span
+            className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] text-red-800"
+            title={item.holdReason ?? undefined}
+          >
+            {labels.cardHold}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
   return (
     <li
       draggable
@@ -297,87 +380,15 @@ function BoardCard({
       }}
       className="cursor-grab rounded-md border bg-background p-3 text-sm shadow-sm hover:shadow active:cursor-grabbing"
     >
-      <Link href={`/cases/${item.caseId}`} className="block space-y-2">
-        <div className="flex items-center gap-2">
-          <span
-            className={`h-2 w-2 shrink-0 rounded-full ${RISK_COLOR[risk]}`}
-            aria-label={
-              risk === 'red'
-                ? labels.cardRiskRed
-                : risk === 'yellow'
-                  ? labels.cardRiskYellow
-                  : labels.cardRiskGreen
-            }
-          />
-          <span className="font-semibold tracking-tight">
-            {item.caseNumber}
-          </span>
-          {item.registrationNumber ? (
-            <span className="ml-auto rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-wide">
-              {item.registrationNumber}
-            </span>
-          ) : null}
-        </div>
-        {vehicleLine ? (
-          <div className="truncate text-xs text-muted-foreground">
-            {vehicleLine}
-          </div>
-        ) : null}
-        {item.customerName ? (
-          <div className="truncate text-xs">{item.customerName}</div>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-muted-foreground">
-          <span>{openedLine}</span>
-          <span>
-            · {labels.cardEta}: {formatDate(etaDate, locale)}
-          </span>
-        </div>
-        {item.activeSegmentLabel ? (
-          <div className="space-y-1 rounded bg-muted/40 px-2 py-1">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="truncate">{item.activeSegmentLabel}</span>
-              <span className="font-mono">
-                {item.activeSegmentProgressPct ?? 0}%
-              </span>
-            </div>
-            <div className="h-1 overflow-hidden rounded bg-background">
-              <div
-                className="h-full bg-emerald-500"
-                style={{ width: `${item.activeSegmentProgressPct ?? 0}%` }}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="text-[11px] italic text-muted-foreground">
-            {labels.cardNoSegments}
-          </div>
-        )}
-        <div className="flex flex-wrap items-center gap-1">
-          {item.assignedTechName ? (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px]">
-              {labels.cardTech}: {item.assignedTechName}
-            </span>
-          ) : null}
-          <span
-            className={
-              'rounded-full px-2 py-0.5 text-[11px] ' +
-              (item.openPartsCount === 0
-                ? 'bg-emerald-100 text-emerald-800'
-                : 'bg-amber-100 text-amber-800')
-            }
-          >
-            {labels.cardParts}: {partsBadge}
-          </span>
-          {item.onHold ? (
-            <span
-              className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] text-red-800"
-              title={item.holdReason ?? undefined}
-            >
-              {labels.cardHold}
-            </span>
-          ) : null}
-        </div>
-      </Link>
+      <CaseDrawer
+        caseId={item.caseId}
+        caseHref={`/cases/${item.caseId}`}
+        trigger={cardBody}
+        labels={{
+          title: labels.drawerTitle.replace('{caseNumber}', item.caseNumber),
+          openFull: labels.drawerOpenFull,
+        }}
+      />
     </li>
   );
 }

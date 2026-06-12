@@ -143,6 +143,8 @@ export const en = {
     boardEmpty:
       'No cases in production yet. Open a case and start its production order.',
     noOrder: 'No production order',
+    drawerTitle: 'Case {caseNumber}',
+    drawerOpenFull: 'Open full case',
   },
   parts: {
     title: 'Parts',

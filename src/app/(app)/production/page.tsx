@@ -198,6 +198,8 @@ async function BoardSection({
         cardRiskRed: t.production.cardRiskRed,
         boardEmpty: t.production.boardEmpty,
         noOrder: t.production.noOrder,
+        drawerTitle: t.production.drawerTitle,
+        drawerOpenFull: t.production.drawerOpenFull,
       }}
     />
   );

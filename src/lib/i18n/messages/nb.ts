@@ -143,6 +143,8 @@ export const nb = {
     boardEmpty:
       'Ingen saker i produksjon ennå. Åpne en sak og start produksjonsordren.',
     noOrder: 'Uten produksjonsordre',
+    drawerTitle: 'Sak {caseNumber}',
+    drawerOpenFull: 'Åpne full sak',
   },
   parts: {
     title: 'Deler',
