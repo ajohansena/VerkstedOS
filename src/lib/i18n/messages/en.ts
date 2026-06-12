@@ -31,6 +31,19 @@ export const en = {
     of: 'of',
     showMore: 'Show more',
   },
+  login: {
+    title: 'Sign in to VerkstedOS',
+    subtitle: 'Use your workshop account.',
+    email: 'Email',
+    password: 'Password',
+    submit: 'Sign in',
+    submitting: 'Signing in …',
+    notYet: 'Not on VerkstedOS yet?',
+    requestDemo: 'Request demo',
+    contactSales: 'Contact sales',
+    noSelfService:
+      'VerkstedOS does not offer self-service signup. Accounts are created by your workshop administrator.',
+  },
   nav: {
     operations: 'Operations',
     cases: 'Cases',

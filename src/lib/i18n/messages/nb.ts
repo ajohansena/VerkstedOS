@@ -33,6 +33,19 @@ export const nb = {
     of: 'av',
     showMore: 'Vis flere',
   },
+  login: {
+    title: 'Logg inn på VerkstedOS',
+    subtitle: 'Bruk verkstedkontoen din.',
+    email: 'E-post',
+    password: 'Passord',
+    submit: 'Logg inn',
+    submitting: 'Logger inn …',
+    notYet: 'Ikke kunde av VerkstedOS enda?',
+    requestDemo: 'Be om demo',
+    contactSales: 'Kontakt salg',
+    noSelfService:
+      'VerkstedOS tilbyr ikke selvbetjent registrering. Kontoer opprettes av verkstedets administrator.',
+  },
   nav: {
     operations: 'Driftssenter',
     cases: 'Saker',

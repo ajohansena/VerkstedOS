@@ -12,9 +12,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import type { Messages } from '@/lib/i18n/messages/nb';
 import { createClient } from '@/lib/supabase/client';
 
-export default function LoginPageClient() {
+type Labels = Messages['login'];
+
+export default function LoginPageClient({ labels }: { labels: Labels }) {
   const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState('');
@@ -49,14 +52,14 @@ export default function LoginPageClient() {
     <main className="flex min-h-screen items-center justify-center bg-muted/30 p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign in to VerkstedOS</CardTitle>
-          <CardDescription>Use your workshop account.</CardDescription>
+          <CardTitle className="text-2xl">{labels.title}</CardTitle>
+          <CardDescription>{labels.subtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                {labels.email}
               </label>
               <Input
                 id="email"
@@ -70,7 +73,7 @@ export default function LoginPageClient() {
             </div>
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                {labels.password}
               </label>
               <Input
                 id="password"
@@ -84,31 +87,30 @@ export default function LoginPageClient() {
             </div>
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
             <Button type="submit" className="w-full" disabled={pending}>
-              {pending ? 'Signing in…' : 'Sign in'}
+              {pending ? labels.submitting : labels.submit}
             </Button>
           </form>
 
           <div className="mt-6 border-t pt-4">
             <p className="mb-3 text-center text-xs text-muted-foreground">
-              Not on VerkstedOS yet?
+              {labels.notYet}
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               <a
                 href="mailto:demo@verkstedos.no?subject=Demo%20request%20-%20VerkstedOS&body=Hei%2C%0A%0AJeg%20%C3%B8nsker%20en%20demo%20av%20VerkstedOS.%0A%0AVerksted%2Forganisasjon%3A%20%0AKontaktperson%3A%20%0ATelefon%3A%20%0A%0AMed%20vennlig%20hilsen"
                 className="rounded-md border border-input px-3 py-2 text-center text-sm hover:bg-accent"
               >
-                Request demo
+                {labels.requestDemo}
               </a>
               <a
                 href="mailto:sales@verkstedos.no?subject=Sales%20inquiry%20-%20VerkstedOS&body=Hei%2C%0A%0AJeg%20vil%20gjerne%20snakke%20med%20en%20selger.%0A%0AVerksted%2Forganisasjon%3A%20%0AKontaktperson%3A%20%0ATelefon%3A%20%0A%0AMed%20vennlig%20hilsen"
                 className="rounded-md border border-input px-3 py-2 text-center text-sm hover:bg-accent"
               >
-                Contact sales
+                {labels.contactSales}
               </a>
             </div>
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              VerkstedOS does not offer self-service signup. Accounts are
-              created by your workshop administrator.
+              {labels.noSelfService}
             </p>
           </div>
         </CardContent>
