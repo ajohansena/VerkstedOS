@@ -18,6 +18,7 @@ import {
 } from '@/modules/production/public';
 import {
   findEmployeeByUserId,
+  findOpenSession,
   listApprovedAbsenceWindowsForEmployees,
   listMyOpenOfficeTasks,
   listOpenOfficeTasksForOrg,
@@ -374,6 +375,7 @@ async function MyTasksSection({
     if (!p.plannedStartAt) continue;
     const row: MyTasksRow = {
       segmentId: p.segmentId,
+      segmentCode: p.segmentCode,
       segmentLabel: p.segmentLabel,
       caseId: p.caseId,
       caseNumber: p.caseNumber,
@@ -401,6 +403,14 @@ async function MyTasksSection({
     else officeTasksLater.push(row);
   }
 
+  // Clocking context for inline Start/Stop buttons (Batch 3): an employee can
+  // hold only one open clock session at a time — surface its segment id so
+  // the view renders Stop on that row and disables Start on the others.
+  const openSession = employee
+    ? await findOpenSession(session.context, employee.id)
+    : null;
+  const openSegmentId = openSession?.workSegmentId ?? null;
+
   return (
     <MyTasksView
       todays={todays}
@@ -408,6 +418,8 @@ async function MyTasksSection({
       officeTasksToday={officeTasksToday}
       officeTasksLater={officeTasksLater}
       hasResources={employee !== null && myResourceIds.size > 0}
+      employeeId={employee?.id ?? null}
+      openSegmentId={openSegmentId}
       t={t}
     />
   );

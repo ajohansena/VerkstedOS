@@ -147,6 +147,20 @@ describe('work segments & planning', () => {
         AND event_type = 'production.segment.started'
     `;
     expect(started.length).toBeGreaterThanOrEqual(1);
+
+    // Batch 3 — auto vehicle-move suggestion event accompanies segment start.
+    const moveSuggested = await h.admin`
+      SELECT payload FROM outbox_events
+      WHERE organization_id = ${orgId}
+        AND event_type = 'production.vehicle.move_suggested'
+    `;
+    expect(moveSuggested.length).toBeGreaterThanOrEqual(1);
+    const startPayload = moveSuggested[0]!['payload'] as Record<
+      string,
+      unknown
+    >;
+    expect(startPayload['trigger']).toBe('segment_started');
+    expect(startPayload['segmentId']).toBe(segmentId);
   });
 
   it('completing a segment recomputes actual_minutes from time entries', async () => {
@@ -167,6 +181,20 @@ describe('work segments & planning', () => {
         AND event_type = 'production.segment.completed'
     `;
     expect(completed.length).toBeGreaterThanOrEqual(1);
+
+    // Batch 3 — completion fires a second vehicle-move suggestion (next stage).
+    const moveSuggested = await h.admin`
+      SELECT payload FROM outbox_events
+      WHERE organization_id = ${orgId}
+        AND event_type = 'production.vehicle.move_suggested'
+      ORDER BY occurred_at
+    `;
+    expect(moveSuggested.length).toBeGreaterThanOrEqual(2);
+    const triggers = moveSuggested.map(
+      (r) => (r['payload'] as Record<string, unknown>)['trigger'],
+    );
+    expect(triggers).toContain('segment_started');
+    expect(triggers).toContain('segment_completed');
   });
 
   it('resource assignment surfaces conflicts instead of overwriting', async () => {

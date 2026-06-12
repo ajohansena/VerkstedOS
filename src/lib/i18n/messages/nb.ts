@@ -968,6 +968,9 @@ export const nb = {
     columnResource: 'Ressurs',
     openCase: 'Åpne sak',
     notAssigned: 'Du har ingen ressurser knyttet til brukeren din.',
+    clockIn: 'Start',
+    clockOut: 'Stopp',
+    clockActive: 'Pågår',
   },
   portalSignature: {
     sectionTitle: 'Godta og signer',

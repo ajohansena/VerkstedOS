@@ -522,6 +522,7 @@ export async function listWorkflowAdjacency(
 export interface PlannedSegmentRow {
   readonly assignmentId: string;
   readonly segmentId: string;
+  readonly segmentCode: string;
   readonly segmentLabel: string | null;
   readonly caseId: string;
   readonly caseNumber: string;
@@ -548,6 +549,7 @@ export async function listPlannedSegmentsForRange(
       .select({
         assignmentId: resourceAssignments.id,
         segmentId: workSegments.id,
+        segmentCode: workSegments.segmentCode,
         segmentLabel: workSegments.label,
         caseId: cases.id,
         caseNumber: cases.caseNumber,

@@ -960,6 +960,9 @@ export const en = {
     columnResource: 'Resource',
     openCase: 'Open case',
     notAssigned: 'You have no resources linked to your user.',
+    clockIn: 'Start',
+    clockOut: 'Stop',
+    clockActive: 'Active',
   },
   portalSignature: {
     sectionTitle: 'Accept and sign',

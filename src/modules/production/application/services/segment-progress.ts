@@ -68,6 +68,24 @@ export async function markSegmentActive(
       },
     });
 
+    // Auto vehicle-move suggestion (doc 13 §12 “progress reflects reality”):
+    // when a segment starts, broadcast a routing hint so the yard surface (or
+    // a notification subscriber) can move the vehicle into the right bay
+    // without the planner having to remember. Non-destructive — the actual
+    // physical move still requires a yard scan or explicit action.
+    await emitEvent(tx, ctx, {
+      eventType: 'production.vehicle.move_suggested',
+      payload: {
+        caseId: segment.caseId,
+        segmentId,
+        segmentCode: segment.segmentCode,
+        plannedWorkshopId: segment.plannedWorkshopId,
+        plannedDepartmentId: segment.plannedDepartmentId,
+        requiredEquipmentKinds: segment.requiredEquipmentKinds,
+        trigger: 'segment_started',
+      },
+    });
+
     return updated[0] ?? segment;
   });
 }
@@ -139,6 +157,22 @@ export async function completeSegment(
         segmentId,
         segmentCode: segment.segmentCode,
         actualMinutes,
+      },
+    });
+
+    // Auto vehicle-move suggestion on completion — the natural cue to move
+    // the car out of the just-finished bay into the staging area for the
+    // next stage (doc 13 §8 pipeline “recalculate” step extended to yard).
+    await emitEvent(tx, ctx, {
+      eventType: 'production.vehicle.move_suggested',
+      payload: {
+        caseId: segment.caseId,
+        segmentId,
+        segmentCode: segment.segmentCode,
+        plannedWorkshopId: segment.plannedWorkshopId,
+        plannedDepartmentId: segment.plannedDepartmentId,
+        requiredEquipmentKinds: segment.requiredEquipmentKinds,
+        trigger: 'segment_completed',
       },
     });
   });

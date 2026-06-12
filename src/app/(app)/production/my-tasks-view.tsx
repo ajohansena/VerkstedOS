@@ -1,9 +1,11 @@
 import Link from 'next/link';
 
+import { clockInAction, clockOutAction } from '@/app/actions/workforce';
 import type { getDictionary } from '@/lib/i18n';
 
 export type MyTasksRow = {
   segmentId: string;
+  segmentCode: string;
   segmentLabel: string | null;
   caseId: string;
   caseNumber: string;
@@ -28,6 +30,8 @@ interface Props {
   officeTasksToday: MyOfficeTaskRow[];
   officeTasksLater: MyOfficeTaskRow[];
   hasResources: boolean;
+  employeeId: string | null;
+  openSegmentId: string | null;
   t: ReturnType<typeof getDictionary>;
 }
 
@@ -43,6 +47,8 @@ export function MyTasksView({
   officeTasksToday,
   officeTasksLater,
   hasResources,
+  employeeId,
+  openSegmentId,
   t,
 }: Props) {
   const fmtTime = (d: Date | null): string =>
@@ -90,6 +96,8 @@ export function MyTasksView({
           rows={todays}
           t={t}
           fmtRange={fmtRange}
+          employeeId={employeeId}
+          openSegmentId={openSegmentId}
         />
       )}
       {officeTasksLater.length > 0 && (
@@ -107,6 +115,8 @@ export function MyTasksView({
           t={t}
           fmtRange={fmtRange}
           showDate
+          employeeId={employeeId}
+          openSegmentId={openSegmentId}
         />
       )}
     </div>
@@ -186,12 +196,16 @@ function TaskTable({
   t,
   fmtRange,
   showDate,
+  employeeId,
+  openSegmentId,
 }: {
   heading: string;
   rows: MyTasksRow[];
   t: ReturnType<typeof getDictionary>;
   fmtRange: (s: Date, e: Date | null) => string;
   showDate?: boolean;
+  employeeId: string | null;
+  openSegmentId: string | null;
 }) {
   const fmtDate = (d: Date): string =>
     new Intl.DateTimeFormat('nb-NO', {
@@ -218,26 +232,98 @@ function TaskTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.segmentId} className="border-b last:border-b-0">
-              <td className="p-3 tabular-nums">
-                {showDate && (
-                  <span className="mr-2 text-xs text-muted-foreground">
-                    {fmtDate(r.plannedStartAt)}
-                  </span>
-                )}
-                {fmtRange(r.plannedStartAt, r.plannedEndAt)}
-              </td>
-              <td className="p-3 font-medium">{r.caseNumber}</td>
-              <td className="p-3">{r.segmentLabel ?? '—'}</td>
-              <td className="p-3 text-muted-foreground">{r.resourceName}</td>
-              <td className="p-3 text-right">
-                <Link href={`/cases/${r.caseId}`} className="text-xs underline">
-                  {t.myTasks.openCase}
-                </Link>
-              </td>
-            </tr>
-          ))}
+          {rows.map((r) => {
+            const isActive = openSegmentId === r.segmentId;
+            const otherActive =
+              openSegmentId !== null && openSegmentId !== r.segmentId;
+            return (
+              <tr
+                key={r.segmentId}
+                className={
+                  'border-b last:border-b-0 ' +
+                  (isActive ? 'bg-green-50 dark:bg-green-950/30' : '')
+                }
+              >
+                <td className="p-3 tabular-nums">
+                  {showDate && (
+                    <span className="mr-2 text-xs text-muted-foreground">
+                      {fmtDate(r.plannedStartAt)}
+                    </span>
+                  )}
+                  {fmtRange(r.plannedStartAt, r.plannedEndAt)}
+                </td>
+                <td className="p-3 font-medium">{r.caseNumber}</td>
+                <td className="p-3">{r.segmentLabel ?? '—'}</td>
+                <td className="p-3 text-muted-foreground">{r.resourceName}</td>
+                <td className="p-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    {employeeId ? (
+                      isActive ? (
+                        <form action={clockOutAction}>
+                          <input
+                            type="hidden"
+                            name="employeeId"
+                            value={employeeId}
+                          />
+                          <input
+                            type="hidden"
+                            name="returnTo"
+                            value="/production?mode=mytasks"
+                          />
+                          <button
+                            type="submit"
+                            className="rounded-md bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground"
+                          >
+                            {t.myTasks.clockOut}
+                          </button>
+                        </form>
+                      ) : (
+                        <form action={clockInAction}>
+                          <input
+                            type="hidden"
+                            name="employeeId"
+                            value={employeeId}
+                          />
+                          <input type="hidden" name="caseId" value={r.caseId} />
+                          <input
+                            type="hidden"
+                            name="workSegmentId"
+                            value={r.segmentId}
+                          />
+                          <input
+                            type="hidden"
+                            name="segmentCode"
+                            value={r.segmentCode}
+                          />
+                          <input
+                            type="hidden"
+                            name="returnTo"
+                            value="/production?mode=mytasks"
+                          />
+                          <button
+                            type="submit"
+                            disabled={otherActive}
+                            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground disabled:opacity-40"
+                            title={
+                              otherActive ? t.myTasks.clockActive : undefined
+                            }
+                          >
+                            {t.myTasks.clockIn}
+                          </button>
+                        </form>
+                      )
+                    ) : null}
+                    <Link
+                      href={`/cases/${r.caseId}`}
+                      className="text-xs underline"
+                    >
+                      {t.myTasks.openCase}
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </section>

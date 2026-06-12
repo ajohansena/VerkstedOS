@@ -16,17 +16,24 @@ export async function clockInAction(formData: FormData): Promise<void> {
 
   const employeeId = String(formData.get('employeeId') ?? '');
   const segmentCode = String(formData.get('segmentCode') ?? '') || undefined;
+  const caseId = String(formData.get('caseId') ?? '') || undefined;
+  const workSegmentId =
+    String(formData.get('workSegmentId') ?? '') || undefined;
+  const returnToRaw = String(formData.get('returnTo') ?? '');
+  const returnTo = normaliseReturnTo(returnToRaw) ?? '/clock';
 
   try {
     await clockIn(session.context, {
       employeeId,
       ...(segmentCode ? { segmentCode } : {}),
+      ...(caseId ? { caseId } : {}),
+      ...(workSegmentId ? { workSegmentId } : {}),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Clock-in failed';
-    redirect(`/clock?error=${encodeURIComponent(message)}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(message)}`);
   }
-  redirect('/clock');
+  redirect(returnTo);
 }
 
 export async function clockOutAction(formData: FormData): Promise<void> {
@@ -34,13 +41,26 @@ export async function clockOutAction(formData: FormData): Promise<void> {
   if (!session) redirect('/login');
 
   const employeeId = String(formData.get('employeeId') ?? '');
+  const returnToRaw = String(formData.get('returnTo') ?? '');
+  const returnTo = normaliseReturnTo(returnToRaw) ?? '/clock';
   try {
     await clockOut(session.context, employeeId);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Clock-out failed';
-    redirect(`/clock?error=${encodeURIComponent(message)}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(message)}`);
   }
-  redirect('/clock');
+  redirect(returnTo);
+}
+
+/**
+ * Only allow same-origin relative paths so a malicious form cannot redirect
+ * the user off-site after a clock action (OWASP A01).
+ */
+function normaliseReturnTo(raw: string): string | null {
+  if (!raw) return null;
+  if (!raw.startsWith('/')) return null;
+  if (raw.startsWith('//')) return null;
+  return raw;
 }
 
 export async function createEmployeeAction(formData: FormData): Promise<void> {
