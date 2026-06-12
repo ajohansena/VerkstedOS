@@ -377,8 +377,30 @@ export async function createCaseFromWizardAction(
 
     return { ok: true, caseId: created.id, caseNumber: created.caseNumber };
   } catch (err) {
-    // Server-side log preserved (Next.js console); client gets a clean message.
-    console.error('createCaseFromWizardAction failed', err);
+    // Server-side log: enough non-PII context to triage in production if the
+    // operator reports an "An error occurred" digest screen (e.g. EF89842
+    // / digest 2870096578 in batch 1). Vehicle plate is an operational
+    // identifier (not PII); customer name / phone / email are PII and
+    // intentionally omitted. Client still gets a clean tagged-union error.
+    console.error(
+      '[intake] createCaseFromWizardAction failed',
+      JSON.stringify({
+        customerKind: input.customer.kind,
+        ...(input.customer.kind === 'new'
+          ? { newCustomerKind: input.customer.customerKind }
+          : {}),
+        vehicleKind: input.vehicle.kind,
+        ...(input.vehicle.kind === 'new' && input.vehicle.registrationNumber
+          ? { plate: input.vehicle.registrationNumber }
+          : {}),
+        fundingKinds: input.fundingSources.map((fs) => fs.kind),
+        hasBooking: Boolean(input.booking),
+        ...(input.incidentTag ? { incidentTag: input.incidentTag } : {}),
+        errorName: err instanceof Error ? err.name : typeof err,
+        errorMessage: err instanceof Error ? err.message : String(err),
+      }),
+      err instanceof Error ? err.stack : undefined,
+    );
     return { ok: false, message: normalizeError(err) };
   }
 }

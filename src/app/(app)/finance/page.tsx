@@ -28,10 +28,30 @@ export default async function FinancePage() {
   const locale = resolveLocale(organization?.settings);
   const t = getDictionary(locale);
 
-  const [approved, exports] = await Promise.all([
-    listApprovedBases(auth.session.context),
-    listAccountingExports(auth.session.context),
-  ]);
+  // Wrap the parallel reads in a structured-log envelope so future opaque
+  // "Server Components rendered an Error" digest screens (e.g. the
+  // 2870096578 digest reported in batch 1) leave enough triage context in
+  // the server log. Re-throw so Next.js still shows its standard error
+  // boundary — we only add observability, not new error UX.
+  let approved: Awaited<ReturnType<typeof listApprovedBases>>;
+  let exports: Awaited<ReturnType<typeof listAccountingExports>>;
+  try {
+    [approved, exports] = await Promise.all([
+      listApprovedBases(auth.session.context),
+      listAccountingExports(auth.session.context),
+    ]);
+  } catch (err) {
+    console.error(
+      '[finance] FinancePage load failed',
+      JSON.stringify({
+        organizationId: organization?.id ?? null,
+        errorName: err instanceof Error ? err.name : typeof err,
+        errorMessage: err instanceof Error ? err.message : String(err),
+      }),
+      err instanceof Error ? err.stack : undefined,
+    );
+    throw err;
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
