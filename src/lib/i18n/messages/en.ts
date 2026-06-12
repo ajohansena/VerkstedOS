@@ -181,6 +181,11 @@ export const en = {
     summaryMatched: 'Matched',
     summaryUnmatched: 'Unmatched',
     summaryCredited: 'Credited',
+    order: 'Order',
+    receive: 'Receive',
+    poNumber: 'PO no.',
+    receivedQty: 'Received qty',
+    noOpenPoLines: 'No open PO lines.',
   },
   finance: {
     title: 'Finance',

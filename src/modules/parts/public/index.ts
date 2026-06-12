@@ -76,8 +76,10 @@ export {
   reconcileCaseParts,
   listCaseLifecycle,
   listOpenRequirements,
+  listOpenPoLinesForRequirement,
   type ReconciledRequirement,
   type CoordinatorRequirement,
+  type OpenPoLineForRequirement,
 } from '../infrastructure/repositories/parts-read-repository';
 
 export {

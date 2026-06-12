@@ -181,6 +181,11 @@ export const nb = {
     summaryMatched: 'Avstemt',
     summaryUnmatched: 'Ikke avstemt',
     summaryCredited: 'Kreditert',
+    order: 'Bestill',
+    receive: 'Motta',
+    poNumber: 'Bestillingsnr.',
+    receivedQty: 'Mottatt antall',
+    noOpenPoLines: 'Ingen åpne bestillingslinjer.',
   },
   finance: {
     title: 'Økonomi',

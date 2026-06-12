@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 
 import { withTransaction } from '@/db/client';
 import { cases } from '@/db/schemas/case/cases';
@@ -8,6 +8,8 @@ import { partReceiptLines } from '@/db/schemas/parts/part-receipt-lines';
 import { partRequirements } from '@/db/schemas/parts/part-requirements';
 import { partReturnLines } from '@/db/schemas/parts/part-return-lines';
 import { purchaseOrderLines } from '@/db/schemas/parts/purchase-order-lines';
+import { purchaseOrders } from '@/db/schemas/parts/purchase-orders';
+import { suppliers } from '@/db/schemas/parts/suppliers';
 import type { PartLifecycleEvent, PartRequirement } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
 
@@ -165,5 +167,53 @@ export async function listOpenRequirements(
       requirement: r.requirement,
       caseNumber: r.caseNumber,
     }));
+  });
+}
+
+/**
+ * Open PO lines for a single requirement — the coordinator's receive surface
+ * (docs/03-data-model.md). Returns only lines that still have outstanding
+ * quantity (status != 'received'), with their PO header context.
+ */
+export interface OpenPoLineForRequirement {
+  poLineId: string;
+  purchaseOrderId: string;
+  poNumber: string;
+  supplierName: string | null;
+  description: string;
+  quantityOrdered: string;
+  quantityReceived: string;
+}
+
+export async function listOpenPoLinesForRequirement(
+  ctx: RequestContext,
+  requirementId: string,
+): Promise<OpenPoLineForRequirement[]> {
+  return withTransaction(ctx, async (tx) => {
+    const rows = await tx
+      .select({
+        poLineId: purchaseOrderLines.id,
+        purchaseOrderId: purchaseOrderLines.purchaseOrderId,
+        poNumber: purchaseOrders.poNumber,
+        supplierName: suppliers.name,
+        description: purchaseOrderLines.description,
+        quantityOrdered: purchaseOrderLines.quantityOrdered,
+        quantityReceived: purchaseOrderLines.quantityReceived,
+      })
+      .from(purchaseOrderLines)
+      .innerJoin(
+        purchaseOrders,
+        eq(purchaseOrders.id, purchaseOrderLines.purchaseOrderId),
+      )
+      .leftJoin(suppliers, eq(suppliers.id, purchaseOrders.supplierId))
+      .where(
+        and(
+          eq(purchaseOrderLines.organizationId, ctx.organizationId),
+          eq(purchaseOrderLines.partRequirementId, requirementId),
+          ne(purchaseOrderLines.status, 'received'),
+        ),
+      )
+      .orderBy(purchaseOrderLines.createdAt);
+    return rows;
   });
 }
