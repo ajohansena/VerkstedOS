@@ -8,6 +8,7 @@ import type { RequestContext } from '@/lib/tenancy/context';
 import {
   createCustomerSchema,
   updateCustomerSchema,
+  type BillingAddress,
   type CreateCustomerInput,
   type UpdateCustomerInput,
 } from '../../domain/customer';
@@ -27,6 +28,23 @@ import { requirePermission } from '@/modules/identity/public';
 function normalizeEmail(email?: string): string | null {
   const trimmed = email?.trim();
   return trimmed ? trimmed : null;
+}
+
+/**
+ * Drop an address object that contains only blank/undefined fields. The zod
+ * schema accepts the partial object (every field is optional), but we don't
+ * want to persist an empty `{}` blob into the JSONB column — store NULL.
+ */
+function normalizeBillingAddress(
+  input: BillingAddress | undefined,
+): BillingAddress | null {
+  if (!input) return null;
+  const cleaned: BillingAddress = {};
+  if (input.street?.trim()) cleaned.street = input.street.trim();
+  if (input.postalCode?.trim()) cleaned.postalCode = input.postalCode.trim();
+  if (input.city?.trim()) cleaned.city = input.city.trim();
+  if (input.countryCode?.trim()) cleaned.countryCode = input.countryCode.trim();
+  return Object.keys(cleaned).length === 0 ? null : cleaned;
 }
 
 /** Validate the identifier checksum when both identifier + kind are present. */
@@ -57,6 +75,7 @@ export async function createCustomer(
       identifierKind: input.identifierKind ?? null,
       primaryEmail: normalizeEmail(input.primaryEmail),
       primaryPhone: input.primaryPhone ?? null,
+      billingAddress: normalizeBillingAddress(input.billingAddress),
       notes: input.notes ?? null,
     });
 
@@ -96,6 +115,8 @@ export async function updateCustomer(
       changes.primaryEmail = normalizeEmail(input.primaryEmail);
     if (input.primaryPhone !== undefined)
       changes.primaryPhone = input.primaryPhone ?? null;
+    if (input.billingAddress !== undefined)
+      changes.billingAddress = normalizeBillingAddress(input.billingAddress);
     if (input.notes !== undefined) changes.notes = input.notes ?? null;
 
     const customer = await updateCustomerRow(tx, ctx, id, changes);

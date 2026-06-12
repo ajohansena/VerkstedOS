@@ -180,6 +180,19 @@ export interface CreateCaseFromWizardInput {
         name: string;
         primaryPhone?: string;
         primaryEmail?: string;
+        /**
+         * Optional structured billing address. Persisted into
+         * `customers.billing_address` (JSONB) via the canonical
+         * `billingAddressSchema`. Captured by the wizard's manual-entry form
+         * (street/postalCode/city). Country defaults to Norwegian context
+         * when unset.
+         */
+        billingAddress?: {
+          street?: string;
+          postalCode?: string;
+          city?: string;
+          countryCode?: string;
+        };
       }
     | {
         kind: 'none';
@@ -277,6 +290,9 @@ export async function createCaseFromWizardAction(
           : {}),
         ...(input.customer.primaryEmail
           ? { primaryEmail: input.customer.primaryEmail }
+          : {}),
+        ...(input.customer.billingAddress
+          ? { billingAddress: input.customer.billingAddress }
           : {}),
       });
       primaryCustomerId = customer.id;

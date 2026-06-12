@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,6 +86,9 @@ export interface WizardLabels {
   customerName: string;
   customerPhoneField: string;
   customerEmail: string;
+  customerAddressStreet: string;
+  customerAddressPostalCode: string;
+  customerAddressCity: string;
   incidentTitle: string;
   incidentHint: string;
   incidentPlaceholder: string;
@@ -166,6 +169,11 @@ type CustomerSelection =
       name: string;
       primaryPhone?: string;
       primaryEmail?: string;
+      billingAddress?: {
+        street?: string;
+        postalCode?: string;
+        city?: string;
+      };
     }
   | { kind: 'none' };
 
@@ -313,6 +321,12 @@ export function IntakeWizard({
                   : {}),
                 ...(customer.primaryEmail
                   ? { primaryEmail: customer.primaryEmail }
+                  : {}),
+                ...(customer.billingAddress &&
+                (customer.billingAddress.street ||
+                  customer.billingAddress.postalCode ||
+                  customer.billingAddress.city)
+                  ? { billingAddress: customer.billingAddress }
                   : {}),
               }
             : { kind: 'none' },
@@ -529,21 +543,46 @@ function VehicleStep({
   }>({ make: '', model: '', year: '', colour: '', vin: '' });
   const [manualOpen, setManualOpen] = useState(false);
 
-  const runLookup = () => {
-    const q = reg.trim();
-    if (!q) return;
+  /**
+   * Tracks the last input the user committed (Enter / button click) OR the
+   * last debounce-triggered auto-lookup. Used so the debounced effect skips
+   * inputs that are still being typed AND skips re-running the lookup the
+   * user already triggered explicitly.
+   */
+  const lastLookedUpRef = useRef<string>('');
+
+  const runLookup = (q: string) => {
+    const query = q.trim();
+    if (!query) return;
+    if (query === lastLookedUpRef.current) return;
+    lastLookedUpRef.current = query;
     setResults(null);
     setVegvesen(null);
     startSearch(async () => {
-      const local = await searchIntakeAction(q);
+      const local = await searchIntakeAction(query);
       setResults(local);
       // Only call Vegvesen if no local hit AND query looks like a plate
-      if (local.vehicles.length === 0 && /^[A-Za-z]{2}\s?\d{3,5}$/.test(q)) {
-        const v = await lookupVegvesenAction(q);
+      if (
+        local.vehicles.length === 0 &&
+        /^[A-Za-z]{2}\s?\d{3,5}$/.test(query)
+      ) {
+        const v = await lookupVegvesenAction(query);
         setVegvesen(v);
       }
     });
   };
+
+  // Debounced auto-lookup: 400ms after the user stops typing AND the input
+  // looks like a valid Norwegian plate (2 letters + 3-5 digits). Cheap calls
+  // — searchIntakeAction is local, Vegvesen is DB-cached for 7 days. Explicit
+  // button + Enter still fire instantly.
+  useEffect(() => {
+    const q = reg.trim();
+    if (!q || !/^[A-Za-z]{2}\s?\d{3,5}$/.test(q)) return;
+    if (q === lastLookedUpRef.current) return;
+    const handle = window.setTimeout(() => runLookup(q), 400);
+    return () => window.clearTimeout(handle);
+  }, [reg]);
 
   return (
     <section className="space-y-4">
@@ -559,14 +598,18 @@ function VehicleStep({
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              runLookup();
+              runLookup(reg);
             }
           }}
           placeholder={labels.vehicleRegPlaceholder}
           className="font-mono"
           autoFocus
         />
-        <Button type="button" onClick={runLookup} disabled={searching}>
+        <Button
+          type="button"
+          onClick={() => runLookup(reg)}
+          disabled={searching}
+        >
           {labels.vehicleLookup}
         </Button>
       </div>
@@ -759,7 +802,18 @@ function CustomerStep({
     name: string;
     phone: string;
     email: string;
-  }>({ kind: 'individual', name: '', phone: '', email: '' });
+    addressStreet: string;
+    addressPostalCode: string;
+    addressCity: string;
+  }>({
+    kind: 'individual',
+    name: '',
+    phone: '',
+    email: '',
+    addressStreet: '',
+    addressPostalCode: '',
+    addressCity: '',
+  });
 
   // Auto-select preset when vehicle already has an owner.
   if (
@@ -957,11 +1011,46 @@ function CustomerStep({
             type="email"
             onChange={(e) => setManual({ ...manual, email: e.target.value })}
           />
+          <Input
+            placeholder={labels.customerAddressStreet}
+            value={manual.addressStreet}
+            onChange={(e) =>
+              setManual({ ...manual, addressStreet: e.target.value })
+            }
+            className="sm:col-span-2"
+          />
+          <Input
+            placeholder={labels.customerAddressPostalCode}
+            value={manual.addressPostalCode}
+            onChange={(e) =>
+              setManual({ ...manual, addressPostalCode: e.target.value })
+            }
+            inputMode="numeric"
+          />
+          <Input
+            placeholder={labels.customerAddressCity}
+            value={manual.addressCity}
+            onChange={(e) =>
+              setManual({ ...manual, addressCity: e.target.value })
+            }
+          />
           <Button
             type="button"
             className="sm:col-span-2"
             disabled={!manual.name.trim()}
-            onClick={() =>
+            onClick={() => {
+              const address: {
+                street?: string;
+                postalCode?: string;
+                city?: string;
+              } = {};
+              if (manual.addressStreet.trim())
+                address.street = manual.addressStreet.trim();
+              if (manual.addressPostalCode.trim())
+                address.postalCode = manual.addressPostalCode.trim();
+              if (manual.addressCity.trim())
+                address.city = manual.addressCity.trim();
+              const hasAddress = Object.keys(address).length > 0;
               onSelect({
                 kind: 'new',
                 customerKind: manual.kind,
@@ -972,8 +1061,9 @@ function CustomerStep({
                 ...(manual.email.trim()
                   ? { primaryEmail: manual.email.trim() }
                   : {}),
-              })
-            }
+                ...(hasAddress ? { billingAddress: address } : {}),
+              });
+            }}
           >
             {manual.kind === 'company'
               ? labels.customerNewCompany

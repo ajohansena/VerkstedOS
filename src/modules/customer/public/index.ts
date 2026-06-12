@@ -16,8 +16,10 @@ export {
 export {
   type CreateCustomerInput,
   type UpdateCustomerInput,
+  type BillingAddress,
   createCustomerSchema,
   updateCustomerSchema,
+  billingAddressSchema,
 } from '../domain/customer';
 
 // Customer reads

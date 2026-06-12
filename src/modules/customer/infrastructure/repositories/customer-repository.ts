@@ -4,6 +4,7 @@ import { withTransaction, type TenantTransaction } from '@/db/client';
 import { customers } from '@/db/schemas/customer/customers';
 import type { Customer } from '@/db/types';
 import type { RequestContext } from '@/lib/tenancy/context';
+import type { BillingAddress } from '../../domain/customer';
 
 /**
  * Customer repository (org-scoped). Every query filters by `organization_id`
@@ -20,6 +21,7 @@ export async function insertCustomer(
     identifierKind?: Customer['identifierKind'];
     primaryEmail?: string | null;
     primaryPhone?: string | null;
+    billingAddress?: BillingAddress | null;
     notes?: string | null;
   },
 ): Promise<Customer> {
@@ -33,6 +35,7 @@ export async function insertCustomer(
       identifierKind: values.identifierKind ?? null,
       primaryEmail: values.primaryEmail ?? null,
       primaryPhone: values.primaryPhone ?? null,
+      billingAddress: values.billingAddress ?? null,
       notes: values.notes ?? null,
       createdBy: ctx.userId,
       updatedBy: ctx.userId,
@@ -101,6 +104,7 @@ export async function updateCustomerRow(
     identifierKind: Customer['identifierKind'];
     primaryEmail: string | null;
     primaryPhone: string | null;
+    billingAddress: BillingAddress | null;
     notes: string | null;
   }>,
 ): Promise<Customer> {
