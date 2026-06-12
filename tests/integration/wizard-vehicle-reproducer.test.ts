@@ -98,47 +98,38 @@ describe('wizard vehicle insert — reproducer for #10', () => {
   });
 
   // ──────────────────────────────────────────────────────────────────────
-  // FIXME P0 — cross-tenant FK reference hole.
+  // H3 — cross-tenant FK reference hole (CLAUDE.md §4.2 P0).
   //
-  // The reproducer below DEMONSTRATES that vehicles.owner_customer_id can be
-  // set to a customers.id from a DIFFERENT organisation without raising any
-  // error. The FK enforces "customer exists" but not "same org"; Postgres FK
-  // constraint validation runs with system privileges and bypasses RLS
-  // (documented Postgres behaviour). The application service createVehicle
-  // does not validate same-org either.
+  // Migration 0055 adds a composite FK
+  //   (organization_id, owner_customer_id) → customers(organization_id, id)
+  // on top of the existing single-column FK. Together they enforce:
+  //   • the customer exists (single-column FK)
+  //   • the customer belongs to the SAME organisation (composite FK)
   //
-  // Scope (every FK column targeting customers.id):
-  //   * vehicles: owner_customer_id, user_customer_id
-  //   * vehicle_ownership_history: owner_customer_id, user_customer_id
-  //   * cases: primary_customer_id
-  //   * case_parties: customer_id
-  //   * case_funding_sources: payer_customer_id, deductible_payer_customer_id
-  //   * case_acceptances: customer_id
-  //   * communication_threads: customer_id
-  //   * invoice_basis: payer_customer_id
-  //   * rental_reservations: customer_id
+  // Postgres FK validation runs with system privileges and bypasses RLS, so
+  // this enforcement is independent of the connecting role — both the
+  // tenant-aware client and any future admin path are caught.
   //
-  // This test asserts the CURRENT (broken) behaviour so CI stays green AND
-  // the regression is recorded. Once the architectural fix lands, INVERT the
-  // assertion to `.rejects.toThrow()` and the matching cross-tenant gap is
-  // closed by construction.
-  //
-  // Tracked as: Workflow Completion batch 1 issue #10 follow-up.
+  // This assertion is the canonical regression for the P0 leak. Same shape
+  // applies on every other customer-FK column (cases.primary_customer_id,
+  // case_funding_sources.payer_customer_id + deductible_payer_customer_id,
+  // case_parties.customer_id, communication_threads.customer_id,
+  // case_acceptances.customer_id, invoice_basis.payer_customer_id,
+  // rental_reservations.customer_id, vehicle_ownership_history.{owner,user}).
   // ──────────────────────────────────────────────────────────────────────
-  it('FIXME documents the cross-org owner_customer_id leak (P0, awaiting decision)', async () => {
+  it('H3 — cross-org owner_customer_id is rejected by composite FK (was P0 leak)', async () => {
     const orgBCustomer = await customer.createCustomer(ctx(orgBId), {
       kind: 'individual',
       name: 'Org B Customer',
     });
 
-    const leak = await customer.createVehicle(ctx(orgAId), {
-      registrationNumber: 'EF89844',
-      ownershipType: 'unknown',
-      ownerCustomerId: orgBCustomer.id,
-    });
-
-    expect(leak.organizationId).toBe(orgAId);
-    expect(leak.ownerCustomerId).toBe(orgBCustomer.id);
+    await expect(
+      customer.createVehicle(ctx(orgAId), {
+        registrationNumber: 'EF89844',
+        ownershipType: 'unknown',
+        ownerCustomerId: orgBCustomer.id,
+      }),
+    ).rejects.toThrow();
   });
 
   it('H4 — vehicle inserts cleanly even though created_by/updated_by are plain uuids (no FK)', async () => {
