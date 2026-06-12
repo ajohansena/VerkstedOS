@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react';
 
+import { formatDateTime, type Locale } from '@/lib/i18n';
+
 import {
   exportApprovedBasesAction,
   retryExportAction,
@@ -69,11 +71,13 @@ export function FinancePanel({
   approved,
   exports,
   tripletexConfigured,
+  locale,
   labels,
 }: {
   approved: ApprovedBasisRow[];
   exports: ExportRow[];
   tripletexConfigured: boolean;
+  locale: Locale;
   labels: Labels;
 }) {
   const [pending, startTransition] = useTransition();
@@ -224,7 +228,7 @@ export function FinancePanel({
                   {e.target}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(e.requestedAt).toLocaleString()}
+                  {formatDateTime(e.requestedAt, locale)}
                 </span>
                 {e.externalRef ? (
                   <span className="font-mono text-xs">{e.externalRef}</span>

@@ -11,6 +11,7 @@ import {
   markBookingArrivedAction,
 } from '@/app/actions/bookings';
 import type { CaseBooking } from '@/modules/case/public';
+import { formatDateTime, type Locale } from '@/lib/i18n';
 
 /**
  * Case-detail bookings section (D2). One card with:
@@ -50,11 +51,13 @@ export function CaseBookingsSection({
   caseId,
   workshops,
   bookings: initialBookings,
+  locale,
   labels,
 }: {
   caseId: string;
   workshops: Array<{ id: string; name: string }>;
   bookings: CaseBooking[];
+  locale: Locale;
   labels: BookingSectionLabels;
 }) {
   // The server re-fetches on revalidate, but optimistic-local update via
@@ -91,6 +94,7 @@ export function CaseBookingsSection({
         active={active}
         caseId={caseId}
         workshops={workshops}
+        locale={locale}
         labels={labels}
         pending={pending}
         onAction={(promise) =>
@@ -117,7 +121,12 @@ export function CaseBookingsSection({
         }
       />
 
-      <HistoryList bookings={bookings} workshops={workshops} labels={labels} />
+      <HistoryList
+        bookings={bookings}
+        workshops={workshops}
+        locale={locale}
+        labels={labels}
+      />
     </section>
   );
 }
@@ -140,16 +149,16 @@ function statusLabel(
   }
 }
 
-function fmtDate(d: Date | string | null): string {
+function fmtDate(d: Date | string | null, locale: Locale): string {
   if (!d) return '—';
-  const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleString();
+  return formatDateTime(d, locale);
 }
 
 function ActiveBookingPanel({
   active,
   caseId,
   workshops,
+  locale,
   labels,
   pending,
   onAction,
@@ -157,6 +166,7 @@ function ActiveBookingPanel({
   active: CaseBooking | null;
   caseId: string;
   workshops: Array<{ id: string; name: string }>;
+  locale: Locale;
   labels: BookingSectionLabels;
   pending: boolean;
   onAction: (
@@ -189,9 +199,9 @@ function ActiveBookingPanel({
       </div>
       <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
         <dt className="text-muted-foreground">{labels.arrival}</dt>
-        <dd>{fmtDate(active.expectedArrivalAt)}</dd>
+        <dd>{fmtDate(active.expectedArrivalAt, locale)}</dd>
         <dt className="text-muted-foreground">{labels.delivery}</dt>
-        <dd>{fmtDate(active.promisedDeliveryAt)}</dd>
+        <dd>{fmtDate(active.promisedDeliveryAt, locale)}</dd>
         {active.notes ? (
           <>
             <dt className="text-muted-foreground">{labels.notes}</dt>
@@ -402,10 +412,12 @@ function CreateBookingForm({
 function HistoryList({
   bookings,
   workshops,
+  locale,
   labels,
 }: {
   bookings: CaseBooking[];
   workshops: Array<{ id: string; name: string }>;
+  locale: Locale;
   labels: BookingSectionLabels;
 }) {
   if (bookings.length === 0) {
@@ -427,7 +439,8 @@ function HistoryList({
             <li key={b.id} className="flex items-center justify-between">
               <span>
                 {statusLabel(b.status, labels)} · {wn} ·{' '}
-                {fmtDate(b.expectedArrivalAt)} → {fmtDate(b.promisedDeliveryAt)}
+                {fmtDate(b.expectedArrivalAt, locale)} →{' '}
+                {fmtDate(b.promisedDeliveryAt, locale)}
               </span>
               {b.cancelledReason ? <span>({b.cancelledReason})</span> : null}
             </li>

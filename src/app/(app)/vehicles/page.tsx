@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { Plus } from 'lucide-react';
 
 import { getSessionContext } from '@/lib/auth/session';
-import { getDictionary, resolveLocale } from '@/lib/i18n';
+import { formatDate, getDictionary, resolveLocale } from '@/lib/i18n';
 import { getCurrentOrganization } from '@/modules/identity/public';
 import { listVehiclesWithCaseStats } from '@/modules/customer/public';
 
@@ -113,7 +113,7 @@ export default async function VehiclesPage({
                     {vehicle.ownershipType}
                   </td>
                   <td className="px-4 py-2.5 text-muted-foreground">
-                    {lastVisitAt ? lastVisitAt.toLocaleDateString() : '—'}
+                    {lastVisitAt ? formatDate(lastVisitAt, locale) : '—'}
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     {activeCaseCount > 0 ? (

@@ -139,7 +139,9 @@ export default async function ProductionBoardPage(props: {
         />
       ) : null}
 
-      {mode === 'board' && <BoardSection session={session} t={t} />}
+      {mode === 'board' && (
+        <BoardSection session={session} t={t} locale={locale} />
+      )}
       {mode === 'day' && <DaySection session={session} t={t} />}
       {mode === 'week' && <WeekSection session={session} t={t} />}
       {mode === 'resource' && <ResourceSection session={session} t={t} />}
@@ -151,9 +153,11 @@ export default async function ProductionBoardPage(props: {
 async function BoardSection({
   session,
   t,
+  locale,
 }: {
   session: Awaited<ReturnType<typeof getSessionContext>>;
   t: ReturnType<typeof getDictionary>;
+  locale: ReturnType<typeof resolveLocale>;
 }) {
   if (!session) return null;
   const [board, statesRaw, adjacency] = await Promise.all([
@@ -176,6 +180,7 @@ async function BoardSection({
       items={board}
       states={states}
       allowedTransitions={adjacency}
+      locale={locale}
       labels={{
         cardEta: t.production.cardEta,
         cardAssigned: t.production.cardAssigned,

@@ -54,7 +54,10 @@ import {
 } from '@/app/actions/quality';
 import { signCaseAction } from '@/app/actions/signatures';
 import { initiateTransferAction } from '@/app/actions/transfer';
-import { listWorkshops } from '@/modules/identity/public';
+import {
+  getCurrentOrganization,
+  listWorkshops,
+} from '@/modules/identity/public';
 import {
   latestAcceptance,
   listThreads,
@@ -67,7 +70,7 @@ import {
 } from '@/app/actions/acceptance';
 import { PhotoUploader } from '@/components/photo-uploader';
 import { PhotoGallery } from '@/components/photo-gallery';
-import { getDictionary } from '@/lib/i18n';
+import { formatDateTime, getDictionary, resolveLocale } from '@/lib/i18n';
 import { WORK_SEGMENT_CATALOG } from '@/lib/seed/work-segment-catalog';
 import { cn } from '@/lib/utils';
 import { findCustomerById, findVehicleById } from '@/modules/customer/public';
@@ -121,7 +124,9 @@ export default async function CaseDetailPage({
 
   const invoiceBases = await listInvoiceBasesForCase(session.context, id);
 
-  const t = getDictionary();
+  const organization = await getCurrentOrganization(session.context);
+  const locale = resolveLocale(organization?.settings);
+  const t = getDictionary(locale);
   const photos = await listCasePhotos(session.context, id);
   const storageReady = isStorageConfigured();
   const photoGroups = [
@@ -265,7 +270,7 @@ export default async function CaseDetailPage({
                 {t.acceptance.acceptedVia}{' '}
                 <span className="font-medium">{acceptance.method}</span>
                 {acceptance.respondedAt
-                  ? ` · ${acceptance.respondedAt.toISOString().slice(0, 16)}`
+                  ? ` · ${formatDateTime(acceptance.respondedAt, locale)}`
                   : ''}
               </p>
             ) : null}
@@ -329,7 +334,7 @@ export default async function CaseDetailPage({
                       <p>{m.body}</p>
                       <p className="mt-1 text-[10px] text-muted-foreground">
                         {m.direction} · {m.status} ·{' '}
-                        {m.occurredAt.toISOString().slice(0, 16)}
+                        {formatDateTime(m.occurredAt, locale)}
                       </p>
                     </li>
                   ))}
@@ -466,6 +471,7 @@ export default async function CaseDetailPage({
           caseId={case_.id}
           workshops={allWorkshops.map((w) => ({ id: w.id, name: w.name }))}
           bookings={bookings}
+          locale={locale}
           labels={{
             title: t.booking.title,
             description: t.booking.description,
@@ -947,7 +953,7 @@ export default async function CaseDetailPage({
                       className="flex items-center justify-between"
                     >
                       <span>{e.kind}</span>
-                      <span>{e.occurredAt.toISOString().slice(0, 16)}</span>
+                      <span>{formatDateTime(e.occurredAt, locale)}</span>
                     </li>
                   ))}
                 </ul>
@@ -1102,6 +1108,7 @@ export default async function CaseDetailPage({
           code: s.code,
           label: s.label,
         }))}
+        locale={locale}
         labels={{
           state: t.case.panelState,
           vehicle: t.case.panelVehicle,

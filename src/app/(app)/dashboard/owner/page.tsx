@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { KpiTile, type KpiTileData } from '@/components/dashboards/kpi-tile';
 import { getAuthorizedSession } from '@/lib/auth/authorize';
-import { getDictionary, resolveLocale } from '@/lib/i18n';
+import { formatMoney, getDictionary, resolveLocale } from '@/lib/i18n';
 import { getWorkshopOwnerDashboard } from '@/lib/dashboards/composers';
 import { getCurrentOrganization } from '@/modules/identity/public';
 
@@ -121,7 +121,7 @@ export default async function WorkshopOwnerDashboardPage() {
               </dt>
               <dd className="font-medium tabular-nums">
                 {dash.finance.approvedCount} ·{' '}
-                {dash.finance.approvedGross.toLocaleString()} kr
+                {formatMoney(dash.finance.approvedGross, locale)}
               </dd>
             </div>
             <div className="flex items-center justify-between">

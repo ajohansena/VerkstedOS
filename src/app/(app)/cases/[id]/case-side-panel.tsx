@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { formatDate, type Locale } from '@/lib/i18n';
+
 import { CaseStatusDrawer } from './case-status-drawer';
 
 interface FundingLite {
@@ -48,6 +50,7 @@ export function CaseSidePanel({
   etaDate,
   funding,
   availableTransitions,
+  locale,
   labels,
 }: {
   caseId: string;
@@ -61,6 +64,7 @@ export function CaseSidePanel({
   etaDate: Date | null;
   funding: FundingLite[];
   availableTransitions: { id: string; code: string; label: string }[];
+  locale: Locale;
   labels: SidePanelLabels;
 }) {
   const ageDays = Math.max(
@@ -85,7 +89,7 @@ export function CaseSidePanel({
       <SectionRow label={labels.openedDays.replace('{days}', String(ageDays))}>
         {etaDate ? (
           <div className="text-xs text-muted-foreground">
-            {labels.eta}: {etaDate.toLocaleDateString()}
+            {labels.eta}: {formatDate(etaDate, locale)}
           </div>
         ) : null}
       </SectionRow>

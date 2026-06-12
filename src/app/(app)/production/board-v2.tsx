@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 
 import type { RichBoardItem } from '@/modules/production/public';
+import { formatDate, type Locale } from '@/lib/i18n';
 import { classifyCaseRisk, NORMAL_REPAIR_DAYS } from '@/lib/operations/risk';
 
 import { transitionCaseAction } from './actions';
@@ -38,6 +39,7 @@ export interface BoardV2Props {
   }[];
   /** Map of state code → array of state codes the user may transition INTO. */
   allowedTransitions: Record<string, string[]>;
+  locale: Locale;
   labels: BoardLabels;
 }
 
@@ -60,6 +62,7 @@ export function BoardV2({
   items,
   states,
   allowedTransitions,
+  locale,
   labels,
 }: BoardV2Props) {
   const [pending, startTransition] = useTransition();
@@ -150,6 +153,7 @@ export function BoardV2({
             stateLabel={state.label}
             category={state.category}
             items={colItems}
+            locale={locale}
             labels={labels}
             onDrop={onDrop}
           />
@@ -160,6 +164,7 @@ export function BoardV2({
             stateLabel={labels.noOrder}
             category="waiting"
             items={columns.orphans}
+            locale={locale}
             labels={labels}
             onDrop={() => undefined}
           />
@@ -178,6 +183,7 @@ function Column({
   stateLabel,
   category,
   items,
+  locale,
   labels,
   onDrop,
 }: {
@@ -185,6 +191,7 @@ function Column({
   stateLabel: string;
   category: 'active' | 'waiting' | 'terminal';
   items: RichBoardItem[];
+  locale: Locale;
   labels: BoardLabels;
   onDrop: (toState: string, caseId: string, fromState: string | null) => void;
 }) {
@@ -227,7 +234,12 @@ function Column({
       </div>
       <ul className="flex-1 space-y-2 p-2">
         {items.map((item) => (
-          <BoardCard key={item.caseId} item={item} labels={labels} />
+          <BoardCard
+            key={item.caseId}
+            item={item}
+            locale={locale}
+            labels={labels}
+          />
         ))}
       </ul>
     </div>
@@ -236,9 +248,11 @@ function Column({
 
 function BoardCard({
   item,
+  locale,
   labels,
 }: {
   item: RichBoardItem;
+  locale: Locale;
   labels: BoardLabels;
 }) {
   const now = new Date();
@@ -315,7 +329,7 @@ function BoardCard({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-muted-foreground">
           <span>{openedLine}</span>
           <span>
-            · {labels.cardEta}: {etaDate.toLocaleDateString()}
+            · {labels.cardEta}: {formatDate(etaDate, locale)}
           </span>
         </div>
         {item.activeSegmentLabel ? (

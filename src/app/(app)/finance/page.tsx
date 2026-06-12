@@ -83,6 +83,7 @@ export default async function FinancePage() {
           errorMessage: e.errorMessage,
         }))}
         tripletexConfigured={tripletexConfigured()}
+        locale={locale}
         labels={{
           approvedTitle: t.finance.approvedTitle,
           approvedDescription: t.finance.approvedDescription,

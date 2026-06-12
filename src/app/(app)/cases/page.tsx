@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { Plus } from 'lucide-react';
 
 import { getSessionContext } from '@/lib/auth/session';
-import { getDictionary, resolveLocale } from '@/lib/i18n';
+import { formatDate, getDictionary, resolveLocale } from '@/lib/i18n';
 import { getCurrentOrganization } from '@/modules/identity/public';
 import { listRecentCases, searchCases } from '@/modules/case/public';
 import { NORMAL_REPAIR_DAYS } from '@/lib/operations/snapshot';
@@ -132,7 +132,7 @@ export default async function CasesPage({
                       {c.customerName ?? ''}
                     </span>
                     <span className="shrink-0 text-xs text-muted-foreground">
-                      {new Date(c.openedAt).toLocaleDateString()}
+                      {formatDate(c.openedAt, locale)}
                     </span>
                   </Link>
                 </li>
