@@ -242,8 +242,21 @@ export async function createCaseFromWizardAction(
     }
 
     // Validate funding sources up front (we don't want to create a customer
-    // and vehicle and THEN discover the funding is malformed).
-    const fundingProblems = validateFundingSet(input.fundingSources);
+    // and vehicle and THEN discover the funding is malformed). For `private_pay`
+    // the real payer isn't known yet — it's the new customer we're about to
+    // create in step 1 — so substitute a placeholder UUID for the up-front
+    // sanity check (same pattern the wizard's client uses in
+    // IntakeWizard.tsx). The canonical `validateFundingSet` runs again inside
+    // `createCase` with the real payer (defense-in-depth, single source of
+    // truth — no parallel validation logic).
+    const PRIVATE_PAY_PLACEHOLDER = '00000000-0000-0000-0000-000000000000';
+    const fundingProblems = validateFundingSet(
+      input.fundingSources.map((fs) =>
+        fs.kind === 'private_pay' && !fs.payerCustomerId
+          ? { ...fs, payerCustomerId: PRIVATE_PAY_PLACEHOLDER }
+          : fs,
+      ),
+    );
     if (fundingProblems.length > 0) {
       return {
         ok: false,
